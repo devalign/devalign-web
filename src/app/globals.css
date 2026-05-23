@@ -22,6 +22,8 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
@@ -77,6 +79,8 @@
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
+  --success: 142.1 76.2% 36.3%;
+  --success-foreground: 355.6 100% 97.3%;
 
   --border: 140 12% 86%;
   --input: 140 12% 86%;
@@ -120,6 +124,8 @@
 
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
+  --success: 142.1 70% 45%;
+  --success-foreground: 143 27% 15%;
 
   --border: 143 15% 14%;
   --input: 143 15% 14%;

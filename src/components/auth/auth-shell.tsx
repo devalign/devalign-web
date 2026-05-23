@@ -9,7 +9,7 @@ export default function AuthShell({ children }: AuthShellProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <div className="w-full bg-primary text-primary-foreground py-2 text-center text-xs font-bold tracking-wider">
-        CIERRA TU BRECHA TI CON IA — <span className="underline cursor-pointer">DESCUBRE TU CAMINO</span>
+        MVP DE AUTH ACTIVO - <span className="underline cursor-pointer">VER ALCANCE</span>
       </div>
 
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-30 flex items-center justify-center">
@@ -32,7 +32,8 @@ export default function AuthShell({ children }: AuthShellProps) {
           </h1>
 
           <p className="text-slate-600 text-base md:text-lg max-w-lg mx-auto">
-            Analiza tu perfil técnico y alinea tus habilidades profesionales con las demandas reales del mercado de software global.
+            Accede a infraestructura de aprendizaje y mentoría para potenciar tu perfil profesional
+            hoy mismo.
           </p>
         </div>
 

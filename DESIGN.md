@@ -23,6 +23,8 @@ colors:
   ring: '#8EAD9A'
   destructive: '#EF4444'
   destructive-foreground: '#F9FAFB'
+  success: '#10B981'
+  success-foreground: '#FFFFFF'
 
 typography:
   font-sans:
@@ -91,9 +93,12 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
 - **Flujo de Autenticación (`/` o ruta de login)**:
   - Implementado a través de [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/page.tsx) que renderiza el [AuthShell](file:///c:/Projects/Devalign/devalign-web/src/components/auth/auth-shell.tsx) envolviendo al [AuthCard](<file:///c:/Projects/Devalign/devalign-web/src/app/(auth)/login/auth-card.tsx>).
   - Ofrece un diseño tipo "banner publicitario + formulario centrado" con un efecto visual de fondo que simula una grilla circular tecnológica de color `{colors.border}`.
-- **Zona Protegida (`/dashboard`)**:
-  - Ubicada en [src/app/dashboard/page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/dashboard/page.tsx).
-  - Contiene un diseño limpio de cabecera con navegación, resumen del usuario actual de Supabase y diagnóstico de aprovisionamiento en tiempo real con el backend de FastAPI.
+- **Zona Protegida (`(protected)`)**:
+  - Implementa un sistema de layouts de 3 columnas compuesto por:
+    - **Columna 1: Sidebar de Navegación** ([app-sidebar.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/layout/app-sidebar.tsx)): Menú colapsable lateral con información del usuario autenticado, estado activo/bloqueado de vistas y botón de cierre de sesión.
+    - **Columna 2: Contenido Principal**: El espacio flexible central (`{children}`) que renderiza páginas específicas (como `/profile` o `/dashboard`).
+    - **Columna 3: Aside Contextual** (p.ej. [profile-aside.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/profile/profile-aside.tsx)): Barra lateral derecha para mostrar beneficios, social proof, guías informativas y políticas de seguridad ajustadas al contexto activo.
+  - La landing page post-login por defecto es `/profile` ([page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/profile/page.tsx)), que contiene el flujo de upload del CV para análisis inicial del desarrollador.
 
 ### 3.2. Middleware y Protección de Rutas
 

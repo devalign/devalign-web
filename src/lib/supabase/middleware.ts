@@ -67,9 +67,9 @@ export async function updateSession(request: NextRequest) {
   const hasResetMode = request.nextUrl.searchParams.get('mode') === 'reset-password';
 
   if (isAuthRoute && user && !hasResetMode) {
-    // Redirect logged-in users away from the home/login screen to dashboard
+    // Redirect logged-in users away from the home/login screen to profile (upload CV)
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/profile';
     return NextResponse.redirect(url);
   }
 

@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </h1>
 
           <p className="text-slate-600 text-base md:text-lg max-w-lg mx-auto">
-            Accede a infraestructura de aprendizaje y mentoría para potenciar tu carrera profesional
+            Accede a infraestructura de aprendizaje y mentoría para potenciar tu perfil profesional
             hoy mismo.
           </p>
         </div>
