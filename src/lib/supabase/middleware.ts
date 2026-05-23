@@ -39,25 +39,35 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Redirect old auth routes (/login and /register) to root (/)
+  if (
+    request.nextUrl.pathname === '/login' ||
+    request.nextUrl.pathname === '/register'
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
+
   const isDashboardRoute =
     request.nextUrl.pathname.startsWith('/dashboard') ||
     request.nextUrl.pathname.startsWith('/profile') ||
     request.nextUrl.pathname.startsWith('/analysis') ||
     request.nextUrl.pathname.startsWith('/roadmap');
 
-  const isAuthRoute =
-    request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/register');
+  const isAuthRoute = request.nextUrl.pathname === '/';
 
   if (isDashboardRoute && !user) {
-    // Redirect unauthenticated users to the login screen
+    // Redirect unauthenticated users to the home/login screen
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/';
     return NextResponse.redirect(url);
   }
 
-  if (isAuthRoute && user) {
-    // Redirect logged-in users away from login/register to dashboard
+  const hasResetMode = request.nextUrl.searchParams.get('mode') === 'reset-password';
+
+  if (isAuthRoute && user && !hasResetMode) {
+    // Redirect logged-in users away from the home/login screen to dashboard
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
