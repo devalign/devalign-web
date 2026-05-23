@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
   // Route protection fallback if middleware proxy didn't catch it
   if (!user) {
-    redirect('/login');
+    redirect('/');
   }
 
   let backendProfile = null;
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
     'use server';
     const supabaseClient = await createClient();
     await supabaseClient.auth.signOut();
-    redirect('/login');
+    redirect('/');
   };
 
   return (
