@@ -1,0 +1,169 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Font Family definitions */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular;
+
+  /* Theme mappings matching shadcn conventions */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* Custom rounding */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Animations for dynamic design */
+  --animate-accordion-down: accordion-down 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+  --animate-accordion-up: accordion-up 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+:root {
+  /* System layout & core */
+  --radius: 0.75rem;
+
+  /* HSL Color tokens for premium Light Theme (Centralized around #8EAD9A) */
+  --background: 140 12% 97%;
+  /* Soft sage background */
+  --foreground: 143 27% 15%;
+  /* Deep forest slate text */
+
+  --card: 0 0% 100%;
+  --card-foreground: 143 27% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 143 27% 15%;
+
+  --primary: 143 16% 62%;
+  /* Sage green (#8EAD9A) */
+  --primary-foreground: 143 27% 15%;
+  /* Deep forest green (#1D3224) */
+
+  --secondary: 140 12% 93%;
+  --secondary-foreground: 143 27% 15%;
+
+  --muted: 140 12% 93%;
+  --muted-foreground: 143 10% 45%;
+
+  --accent: 143 16% 62%;
+  --accent-foreground: 143 27% 15%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 140 12% 86%;
+  --input: 140 12% 86%;
+  --ring: 143 16% 62%;
+
+  /* Sidebar styling */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 143 27% 15%;
+  --sidebar-primary: 143 27% 15%;
+  --sidebar-primary-foreground: 140 12% 97%;
+  --sidebar-accent: 140 12% 93%;
+  --sidebar-accent-foreground: 143 27% 15%;
+  --sidebar-border: 140 12% 86%;
+  --sidebar-ring: 143 16% 62%;
+}
+
+.dark {
+  /* Premium Deep Forest Slate Dark Mode */
+  --background: 143 20% 6%;
+  --foreground: 140 12% 93%;
+
+  --card: 143 18% 10%;
+  --card-foreground: 140 12% 93%;
+
+  --popover: 143 18% 10%;
+  --popover-foreground: 140 12% 93%;
+
+  --primary: 143 16% 62%;
+  /* Sage green (#8EAD9A) */
+  --primary-foreground: 143 27% 15%;
+  /* Deep forest green (#1D3224) */
+
+  --secondary: 143 15% 14%;
+  --secondary-foreground: 140 12% 93%;
+
+  --muted: 143 15% 14%;
+  --muted-foreground: 143 8% 65%;
+
+  --accent: 143 16% 62%;
+  --accent-foreground: 143 27% 15%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 143 15% 14%;
+  --input: 143 15% 14%;
+  --ring: 143 16% 62%;
+
+  /* Sidebar in Dark Mode */
+  --sidebar-background: 143 18% 10%;
+  --sidebar-foreground: 140 12% 93%;
+  --sidebar-primary: 143 16% 62%;
+  --sidebar-primary-foreground: 143 27% 15%;
+  --sidebar-accent: 143 15% 14%;
+  --sidebar-accent-foreground: 140 12% 93%;
+  --sidebar-border: 143 15% 14%;
+  --sidebar-ring: 143 16% 62%;
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+button:hover {
+  cursor: pointer;
+}
