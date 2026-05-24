@@ -2,11 +2,15 @@
 
 import React from 'react';
 import { useUserCVs } from '@/hooks/use-user-cvs';
-import { FileText, HardDrive, Download, ArrowRight, ShieldCheck } from 'lucide-react';
+import { FileText, HardDrive, Download, ArrowRight, ShieldCheck, UploadCloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface CurrentDocumentProps {
+  onUpdateClick?: () => void;
+}
 
-export default function CurrentDocument() {
+
+export default function CurrentDocument({ onUpdateClick }: CurrentDocumentProps) {
   const { data: cvData, isLoading } = useUserCVs();
 
   if (isLoading) {
@@ -28,7 +32,7 @@ export default function CurrentDocument() {
   if (!currentCV) return null;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
+    <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
           CV Activo
@@ -59,24 +63,36 @@ export default function CurrentDocument() {
           </div>
         </div>
 
-        {currentCV.download_url && (
-          <a
-            href={currentCV.download_url}
-            download
-            target="_blank"
-            rel="noreferrer"
-            className="shrink-0 self-end sm:self-center"
-          >
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+          {currentCV.download_url && (
+            <a
+              href={currentCV.download_url}
+              download
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-xs text-foreground border-border hover:bg-muted cursor-pointer"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Descargar CV
+              </Button>
+            </a>
+          )}
+          {onUpdateClick && (
             <Button
               variant="outline"
               size="sm"
-              className="h-8 gap-1.5 text-xs text-foreground border-border hover:bg-muted"
+              onClick={onUpdateClick}
+              className="h-8 gap-1.5 text-xs text-foreground border-border hover:bg-muted cursor-pointer"
             >
-              <Download className="h-3.5 w-3.5" />
-              Descargar CV
+              <UploadCloud className="h-3.5 w-3.5 text-muted-foreground" />
+              Actualizar
             </Button>
-          </a>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="pt-2 flex items-center justify-between text-xs">

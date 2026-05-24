@@ -64,7 +64,7 @@ La atmósfera visual de Devalign debe evocar profesionalismo, mentoría técnica
 
 - **Seguridad**: Colores orgánicos que reducen la tensión y la fatiga visual.
 - **Precisión**: Alta legibilidad y contraste adecuado para herramientas de diagnóstico.
-- **Premium**: Acabado contemporáneo usando fondos sutiles con sombras suaves (`shadow-black/5`) y difuminado de fondo (`backdrop-blur-xl`).
+- **Premium**: Acabado contemporáneo y plano, usando fondos sutiles con bordes de contorno limpios y difuminado de fondo (`backdrop-blur-xl`).
 
 ---
 
@@ -115,7 +115,7 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
 Los componentes de interfaz se localizan en [src/components/ui](file:///c:/Projects/Devalign/devalign-web/src/components/ui). Todos ellos siguen el patrón de extender los elementos HTML estándar de React y aplicar estilos Tailwind mediante la utilidad `cn(...)` de [src/lib/utils.ts](file:///c:/Projects/Devalign/devalign-web/src/lib/utils.ts) para permitir personalizaciones locales sin perder los estilos base:
 
 1.  **Button**: Ofrece variantes estilizadas (`default`, `destructive`, `outline`, `secondary`, `ghost`, `link`) y tamaños preconfigurados. Utiliza transiciones de color suaves ante eventos hover.
-2.  **Card**: Componente estructurado en subcomponentes (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) para enmarcar secciones de contenido. Incorpora sombras sutiles (`shadow-lg shadow-black/5`) y bordes claros (`border-border`).
+2.  **Card**: Componente estructurado en subcomponentes (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) para enmarcar secciones de contenido. Se basa en un diseño plano sin sombreados, delimitado únicamente por bordes claros (`border-border`).
 3.  **Input**: Elemento de entrada de texto optimizado para formularios. Cuenta con estados deshabilitados con opacidad controlada y efectos de anillo (`focus-visible:ring-1`) al enfocarse.
 4.  **Form**: Componentes de formulario basados en `react-hook-form` y `zod` para validaciones completas en el cliente.
 5.  **Tabs**: Soporte para vistas tabulares dinámicas (utilizado para alternar entre Login y Signup).

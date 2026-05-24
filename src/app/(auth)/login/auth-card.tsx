@@ -118,7 +118,7 @@ export default function AuthCard() {
           password,
         });
         if (error) throw error;
-        window.location.href = '/dashboard';
+        window.location.href = '/profile';
       } else if (isSignup) {
         if (password !== confirmPassword) {
           toast.error('Las contraseñas no coinciden.');
@@ -170,7 +170,7 @@ export default function AuthCard() {
         });
         if (error) throw error;
         toast.success('Tu contraseña ha sido restablecida con éxito.');
-        window.location.href = '/dashboard';
+        window.location.href = '/profile';
       }
     } catch (err) {
       const rawMessage = err instanceof Error ? err.message : 'Ocurrió un error';

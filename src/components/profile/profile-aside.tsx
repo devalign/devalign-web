@@ -9,7 +9,8 @@ import {
   EyeOff, 
   Trash2, 
   TrendingUp,
-  Star
+  Star,
+  Sparkles
 } from 'lucide-react';
 
 export default function ProfileAside() {
@@ -42,7 +43,7 @@ export default function ProfileAside() {
   return (
     <div className="space-y-6">
       {/* Seccion 1: Que obtendras */}
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
             ¿Qué obtendrás?
@@ -60,7 +61,7 @@ export default function ProfileAside() {
       </div>
 
       {/* Seccion 2: Inteligencia de Mercado */}
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
         <div className="flex items-center gap-2 text-foreground font-bold">
           <Globe className="h-4 w-4 text-primary" />
           <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -73,7 +74,7 @@ export default function ProfileAside() {
       </div>
 
       {/* Seccion 3: Seguridad y Privacidad */}
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
             Seguridad y Privacidad
@@ -103,9 +104,10 @@ export default function ProfileAside() {
       </div>
 
       {/* Seccion 4: Social Proof */}
-      <div className="rounded-2xl bg-primary-foreground/95 p-5 shadow-sm space-y-4 border border-primary/20 text-primary">
+      <div className="rounded-2xl bg-primary-foreground/95 p-5 space-y-4 border border-primary/20 text-primary">
         <p className="text-xs font-medium leading-relaxed">
-          ⚡ Miles de desarrolladores ya están alineando su carrera con el mercado.
+          <Sparkles className="h-3.5 w-3.5 inline-block mr-1.5 align-text-bottom text-primary fill-primary/10 animate-pulse" />
+          Miles de desarrolladores ya están alineando su carrera con el mercado.
         </p>
         
         <div className="flex items-center justify-between pt-1">

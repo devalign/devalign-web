@@ -2,12 +2,16 @@
 
 import React, { useRef, useState } from 'react';
 import { useUploadCV } from '@/hooks/use-upload-cv';
-import { UploadCloud, FileText, Loader2 } from 'lucide-react';
+import { UploadCloud, FileText, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-export default function CVUploader() {
+interface CVUploaderProps {
+  onUploadSuccess?: () => void;
+}
+
+export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,6 +79,9 @@ export default function CVUploader() {
       await uploadMutation.mutateAsync(selectedFile);
       toast.success('¡Tu CV se ha subido y el diagnóstico inicial ha comenzado!');
       setSelectedFile(null);
+      if (onUploadSuccess) {
+        onUploadSuccess();
+      }
     } catch (error) {
       console.error(error);
       const errorMessage = error instanceof Error ? error.message : 'Error al subir el archivo';
@@ -185,7 +192,8 @@ export default function CVUploader() {
       
       {/* Nota Legal */}
       <p className="text-[10px] text-center text-muted-foreground leading-relaxed max-w-md mx-auto">
-        🔒 Al subir tu CV, aceptas nuestros <span className="underline hover:text-foreground cursor-pointer">términos de servicio</span> y protocolos de análisis profesional encriptado.
+        <Lock className="h-3 w-3 inline-block mr-1 align-text-bottom text-muted-foreground/80" />
+        Al subir tu CV, aceptas nuestros <span className="underline hover:text-foreground cursor-pointer">términos de servicio</span> y protocolos de análisis profesional encriptado.
       </p>
     </div>
   );

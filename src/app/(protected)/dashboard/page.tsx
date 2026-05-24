@@ -22,7 +22,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Card 1: Auth status */}
-        <Card className="shadow-sm border-border bg-card">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle className="text-lg font-bold flex items-center gap-2 text-emerald-600">
               <CheckCircle className="w-5 h-5" />
@@ -42,7 +42,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Card 2: Backend JIT status */}
-        <Card className="shadow-sm border-border bg-card">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle className="text-lg font-bold flex items-center gap-2">
               <User className="w-5 h-5 text-primary" />
