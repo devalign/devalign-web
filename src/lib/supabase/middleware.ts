@@ -40,10 +40,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Redirect old auth routes (/login and /register) to root (/)
-  if (
-    request.nextUrl.pathname === '/login' ||
-    request.nextUrl.pathname === '/register'
-  ) {
+  if (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);

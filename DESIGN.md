@@ -98,7 +98,7 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
     - **Columna 1: Sidebar de Navegación** ([app-sidebar.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/layout/app-sidebar.tsx)): Menú colapsable lateral con información del usuario autenticado, estado activo/bloqueado de vistas y botón de cierre de sesión.
     - **Columna 2: Contenido Principal**: El espacio flexible central (`{children}`) que renderiza páginas específicas (como `/profile` o `/dashboard`).
     - **Columna 3: Aside Contextual** (p.ej. [profile-aside.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/profile/profile-aside.tsx)): Barra lateral derecha para mostrar beneficios, social proof, guías informativas y políticas de seguridad ajustadas al contexto activo.
-  - La landing page post-login por defecto es `/profile` ([page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/profile/page.tsx)), que contiene el flujo de upload del CV para análisis inicial del desarrollador.
+  - La landing page post-login por defecto es `/profile` ([page.tsx](<file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/profile/page.tsx>)), que contiene el flujo de upload del CV para análisis inicial del desarrollador.
 
 ### 3.2. Middleware y Protección de Rutas
 

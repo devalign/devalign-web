@@ -21,9 +21,9 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
+    if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
-    } else if (e.type === "dragleave") {
+    } else if (e.type === 'dragleave') {
       setDragActive(false);
     }
   };
@@ -49,10 +49,14 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
     const validTypes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword'
+      'application/msword',
     ];
     const extension = file.name.split('.').pop()?.toLowerCase();
-    const isValidType = validTypes.includes(file.type) || extension === 'pdf' || extension === 'docx' || extension === 'doc';
+    const isValidType =
+      validTypes.includes(file.type) ||
+      extension === 'pdf' ||
+      extension === 'docx' ||
+      extension === 'doc';
 
     if (!isValidType) {
       toast.error('Tipo de archivo no soportado. Sube un PDF o DOCX.');
@@ -101,11 +105,11 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         onDrop={handleDrop}
         onClick={onButtonClick}
         className={cn(
-          "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 md:p-12 text-center transition-all duration-300 cursor-pointer bg-card",
+          'relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 md:p-12 text-center transition-all duration-300 cursor-pointer bg-card',
           dragActive
-            ? "border-primary bg-primary/5 scale-[1.01] shadow-lg shadow-primary/5"
-            : "border-border hover:border-primary/50 hover:bg-secondary/20",
-          isUploading ? "pointer-events-none opacity-60" : ""
+            ? 'border-primary bg-primary/5 scale-[1.01] shadow-lg shadow-primary/5'
+            : 'border-border hover:border-primary/50 hover:bg-secondary/20',
+          isUploading ? 'pointer-events-none opacity-60' : '',
         )}
       >
         <input
@@ -133,9 +137,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
           <div className="space-y-1">
             {selectedFile ? (
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">
-                  Archivo listo para análisis
-                </p>
+                <p className="text-sm font-semibold text-foreground">Archivo listo para análisis</p>
                 <p className="text-xs text-muted-foreground font-mono truncate max-w-xs md:max-w-md mx-auto">
                   {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                 </p>
@@ -145,9 +147,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
                 <p className="text-sm font-semibold text-foreground">
                   Arrastra y suelta tu CV aquí
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  o selecciona un archivo PDF o Word
-                </p>
+                <p className="text-xs text-muted-foreground">o selecciona un archivo PDF o Word</p>
               </div>
             )}
           </div>
@@ -189,11 +189,15 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
           </Button>
         </div>
       )}
-      
+
       {/* Nota Legal */}
       <p className="text-[10px] text-center text-muted-foreground leading-relaxed max-w-md mx-auto">
         <Lock className="h-3 w-3 inline-block mr-1 align-text-bottom text-muted-foreground/80" />
-        Al subir tu CV, aceptas nuestros <span className="underline hover:text-foreground cursor-pointer">términos de servicio</span> y protocolos de análisis profesional encriptado.
+        Al subir tu CV, aceptas nuestros{' '}
+        <span className="underline hover:text-foreground cursor-pointer">
+          términos de servicio
+        </span>{' '}
+        y protocolos de análisis profesional encriptado.
       </p>
     </div>
   );

@@ -74,7 +74,7 @@ export default function AppSidebar() {
   };
 
   const navItems = [
-    { name: 'Diagnóstico', href: '/analysis', icon: Activity, disabled: true },
+    { name: 'Diagnóstico', href: '/diagnosis', icon: Activity },
     { name: 'Roadmap', href: '/roadmap', icon: Map, disabled: true },
   ];
 
@@ -375,7 +375,8 @@ export default function AppSidebar() {
                   <div className="space-y-0.5">
                     <span className="text-xs font-semibold text-foreground">Perfil Visible</span>
                     <p className="text-[10px] text-muted-foreground leading-normal">
-                      Permite que reclutadores vean tu afinidad de perfil con las vacantes del mercado.
+                      Permite que reclutadores vean tu afinidad de perfil con las vacantes del
+                      mercado.
                     </p>
                   </div>
                   <input
@@ -387,9 +388,12 @@ export default function AppSidebar() {
                 <div className="border-t border-border/50 my-2" />
                 <label className="flex items-start justify-between gap-4 cursor-pointer">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-semibold text-foreground">Análisis Automatizado</span>
+                    <span className="text-xs font-semibold text-foreground">
+                      Análisis Automatizado
+                    </span>
                     <p className="text-[10px] text-muted-foreground leading-normal">
-                      Analizar automáticamente tu CV con nuevos modelos de IA cuando estén disponibles.
+                      Analizar automáticamente tu CV con nuevos modelos de IA cuando estén
+                      disponibles.
                     </p>
                   </div>
                   <input
@@ -409,9 +413,12 @@ export default function AppSidebar() {
               <div className="space-y-3 rounded-lg border border-border p-3.5 bg-secondary/10">
                 <label className="flex items-start justify-between gap-4 cursor-pointer">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-semibold text-foreground">Reportes Semanales</span>
+                    <span className="text-xs font-semibold text-foreground">
+                      Reportes Semanales
+                    </span>
                     <p className="text-[10px] text-muted-foreground leading-normal">
-                      Recibe correos con el estado actualizado del mercado de desarrollo de software.
+                      Recibe correos con el estado actualizado del mercado de desarrollo de
+                      software.
                     </p>
                   </div>
                   <input

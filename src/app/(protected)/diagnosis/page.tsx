@@ -5,7 +5,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, AlertTriangle, User, LayoutDashboard } from 'lucide-react';
 
-export default function DashboardPage() {
+export default function DiagnosisPage() {
   const { data: user, isLoading: isUserLoading, error: userError } = useCurrentUser();
 
   return (
@@ -13,10 +13,11 @@ export default function DashboardPage() {
       <div className="space-y-2">
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl flex items-center gap-2">
           <LayoutDashboard className="h-7 w-7 text-primary" />
-          Dashboard de Diagnóstico
+          Diagnóstico de Sistema
         </h1>
         <p className="text-sm text-muted-foreground">
-          Panel de control para verificar el estado de integración del sistema y base de datos local.
+          Panel de control para verificar el estado de integración del sistema y base de datos
+          local.
         </p>
       </div>
 
@@ -36,7 +37,8 @@ export default function DashboardPage() {
               {isUserLoading ? 'Cargando...' : user?.id}
             </div>
             <div className="text-xs text-muted-foreground leading-relaxed">
-              El middleware y la capa de servicios están sincronizando tus datos de sesión de manera segura.
+              El middleware y la capa de servicios están sincronizando tus datos de sesión de manera
+              segura.
             </div>
           </CardContent>
         </Card>
@@ -48,9 +50,7 @@ export default function DashboardPage() {
               <User className="w-5 h-5 text-primary" />
               Aprovisionamiento JIT (FastAPI)
             </CardTitle>
-            <CardDescription>
-              Conexión en tiempo real con el backend de FastAPI
-            </CardDescription>
+            <CardDescription>Conexión en tiempo real con el backend de FastAPI</CardDescription>
           </CardHeader>
           <CardContent>
             {isUserLoading ? (
@@ -71,9 +71,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <span className="text-muted-foreground block mb-1">NOMBRE:</span>
-                    <span className="text-foreground">
-                      {user.full_name || 'Sin especificar'}
-                    </span>
+                    <span className="text-foreground">{user.full_name || 'Sin especificar'}</span>
                   </div>
                 </div>
               </div>
@@ -84,7 +82,9 @@ export default function DashboardPage() {
                   Error de conexión
                 </div>
                 <div className="p-4 bg-amber-50 rounded-lg text-xs font-mono text-amber-800">
-                  {userError instanceof Error ? userError.message : 'No se pudo obtener el perfil del backend.'}
+                  {userError instanceof Error
+                    ? userError.message
+                    : 'No se pudo obtener el perfil del backend.'}
                 </div>
               </div>
             )}

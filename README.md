@@ -13,7 +13,6 @@ Este es el frontend web de Devalign, desarrollado en **Next.js 16 (App Router)**
    - **Columna 1**: Sidebar colapsable con accesos de navegación, datos del usuario activo y documento cargado actual.
    - **Columna 2**: Contenedor de contenido central (p.ej. subida de CV, diagnóstico).
    - **Columna 3**: Aside contextual dinámico que muestra beneficios, social proof e información de seguridad.
-   
 3. **Módulo de Perfil y Subida de CV (`/profile`)**:
    - Landing page post-login por defecto.
    - Zona interactiva de **Drag & Drop** con click fallback.

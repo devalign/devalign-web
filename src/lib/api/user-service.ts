@@ -1,5 +1,5 @@
 import { apiClient } from './api-client';
-import { UserProfile, CVUploadResult, CVList } from './types';
+import { UserProfile, CVUploadResult, CVList, UserProfileData, SkillItem } from './types';
 
 /**
  * Gets the currently logged-in user profile, provisioning JIT if needed.
@@ -26,4 +26,37 @@ export async function uploadCV(file: File): Promise<CVUploadResult> {
  */
 export async function listUserCVs(): Promise<CVList> {
   return apiClient<CVList>('/users/me/cvs');
+}
+
+/**
+ * Gets the detailed computed user profile and analysis.
+ */
+export async function getUserProfile(): Promise<UserProfileData> {
+  return apiClient<UserProfileData>('/profile/me');
+}
+
+/**
+ * Manually updates personal and experience details on the profile.
+ */
+export async function updateUserProfile(data: Partial<UserProfileData>): Promise<UserProfileData> {
+  return apiClient<UserProfileData>('/profile/me', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Updates skills manually for the developer profile.
+ */
+export async function updateUserProfileSkills(skills: SkillItem[]): Promise<UserProfileData> {
+  return apiClient<UserProfileData>('/profile/skills', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ skills }),
+  });
 }

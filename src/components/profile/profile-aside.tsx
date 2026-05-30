@@ -1,43 +1,43 @@
 'use client';
 
 import React from 'react';
-import { 
-  CheckCircle2, 
-  Globe, 
-  ShieldCheck, 
-  Lock, 
-  EyeOff, 
-  Trash2, 
+import {
+  CheckCircle2,
+  Globe,
+  ShieldCheck,
+  Lock,
+  EyeOff,
+  Trash2,
   TrendingUp,
   Star,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 
 export default function ProfileAside() {
   const benefits = [
-    "Especialidad técnica detectada",
-    "Skills fuertes y nivel estimado",
-    "Brechas críticas del mercado",
-    "Roles compatibles con tu perfil",
-    "Tu afinidad con el mercado actual"
+    'Especialidad técnica detectada',
+    'Skills fuertes y nivel estimado',
+    'Brechas críticas del mercado',
+    'Roles compatibles con tu perfil',
+    'Tu afinidad con el mercado actual',
   ];
 
   const securityItems = [
     {
       icon: Lock,
-      title: "Cifrado de grado militar",
-      desc: "Encriptación AES-256 para resguardar todos tus documentos."
+      title: 'Cifrado de grado militar',
+      desc: 'Encriptación AES-256 para resguardar todos tus documentos.',
     },
     {
       icon: EyeOff,
-      title: "Privacidad absoluta",
-      desc: "Tu CV es privado y nunca se comparte con terceros."
+      title: 'Privacidad absoluta',
+      desc: 'Tu CV es privado y nunca se comparte con terceros.',
     },
     {
       icon: Trash2,
-      title: "Control total",
-      desc: "Eliminamos tus datos cuando tú lo decidas."
-    }
+      title: 'Control total',
+      desc: 'Eliminamos tus datos cuando tú lo decidas.',
+    },
   ];
 
   return (
@@ -69,7 +69,8 @@ export default function ProfileAside() {
           </h4>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Nuestro motor de IA analiza continuamente miles de ofertas laborales en Perú para mantener los diagnósticos actualizados con las tendencias reales del sector IT.
+          Nuestro motor de IA analiza continuamente miles de ofertas laborales en Perú para mantener
+          los diagnósticos actualizados con las tendencias reales del sector IT.
         </p>
       </div>
 
@@ -90,12 +91,8 @@ export default function ProfileAside() {
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <h5 className="text-xs font-semibold text-foreground">
-                    {item.title}
-                  </h5>
-                  <p className="text-[10px] text-muted-foreground leading-normal">
-                    {item.desc}
-                  </p>
+                  <h5 className="text-xs font-semibold text-foreground">{item.title}</h5>
+                  <p className="text-[10px] text-muted-foreground leading-normal">{item.desc}</p>
                 </div>
               </div>
             );
@@ -109,17 +106,17 @@ export default function ProfileAside() {
           <Sparkles className="h-3.5 w-3.5 inline-block mr-1.5 align-text-bottom text-primary fill-primary/10 animate-pulse" />
           Miles de desarrolladores ya están alineando su carrera con el mercado.
         </p>
-        
+
         <div className="flex items-center justify-between pt-1">
           {/* Faux Avatar Group */}
           <div className="flex -space-x-2">
             {[
-              { color: "bg-emerald-600", text: "JD" },
-              { color: "bg-blue-600", text: "AM" },
-              { color: "bg-purple-600", text: "RC" }
+              { color: 'bg-emerald-600', text: 'JD' },
+              { color: 'bg-blue-600', text: 'AM' },
+              { color: 'bg-purple-600', text: 'RC' },
             ].map((av, idx) => (
-              <div 
-                key={idx} 
+              <div
+                key={idx}
                 className={`flex h-7 w-7 items-center justify-center rounded-full ${av.color} text-[8px] font-bold text-white border-2 border-primary-foreground shrink-0`}
               >
                 {av.text}
