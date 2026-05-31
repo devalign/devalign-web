@@ -40,10 +40,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Redirect old auth routes (/login and /register) to root (/)
-  if (
-    request.nextUrl.pathname === '/login' ||
-    request.nextUrl.pathname === '/register'
-  ) {
+  if (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
@@ -52,6 +49,7 @@ export async function updateSession(request: NextRequest) {
   const isDashboardRoute =
     request.nextUrl.pathname.startsWith('/dashboard') ||
     request.nextUrl.pathname.startsWith('/profile') ||
+    request.nextUrl.pathname.startsWith('/upload') ||
     request.nextUrl.pathname.startsWith('/analysis') ||
     request.nextUrl.pathname.startsWith('/roadmap');
 
@@ -67,9 +65,9 @@ export async function updateSession(request: NextRequest) {
   const hasResetMode = request.nextUrl.searchParams.get('mode') === 'reset-password';
 
   if (isAuthRoute && user && !hasResetMode) {
-    // Redirect logged-in users away from the home/login screen to dashboard
+    // Redirect logged-in users away from the home/login screen to profile
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/profile';
     return NextResponse.redirect(url);
   }
 
