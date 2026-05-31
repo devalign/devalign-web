@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Font Family definitions */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui;
@@ -68,8 +70,9 @@
   --primary-foreground: 143 27% 15%;
   /* Deep forest green (#1D3224) */
 
-  --secondary: 140 12% 93%;
-  --secondary-foreground: 143 27% 15%;
+  --secondary: 215 30% 92%;
+  /* Soft blue-slate */
+  --secondary-foreground: 215 35% 20%;
 
   --muted: 140 12% 93%;
   --muted-foreground: 143 10% 45%;
@@ -113,8 +116,9 @@
   --primary-foreground: 143 27% 15%;
   /* Deep forest green (#1D3224) */
 
-  --secondary: 143 15% 14%;
-  --secondary-foreground: 140 12% 93%;
+  --secondary: 215 25% 14%;
+  /* Deep blue-slate */
+  --secondary-foreground: 215 30% 92%;
 
   --muted: 143 15% 14%;
   --muted-foreground: 143 8% 65%;
@@ -173,3 +177,29 @@ body {
 button:hover {
   cursor: pointer;
 }
+
+/* Custom scrollbars globally for a premium, clean layout */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.6);
+}
+
+/* Firefox scrollbars support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+

@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 
 interface CurrentDocumentProps {
   onUpdateClick?: () => void;
+  onGenerateCVClick?: () => void;
 }
 
-export default function CurrentDocument({ onUpdateClick }: CurrentDocumentProps) {
+export default function CurrentDocument({ onUpdateClick, onGenerateCVClick }: CurrentDocumentProps) {
   const { data: cvData, isLoading } = useUserCVs();
 
   if (isLoading) {
@@ -36,8 +37,8 @@ export default function CurrentDocument({ onUpdateClick }: CurrentDocumentProps)
         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
           CV Activo
         </h4>
-        <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/10 px-2 py-0.5 rounded-full">
-          <ShieldCheck className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-1.5 text-xs text-primary-foreground dark:text-primary font-bold bg-primary/5 border border-primary/20 px-2.5 py-0.5 rounded-full">
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
           Analizado
         </div>
       </div>
@@ -60,30 +61,39 @@ export default function CurrentDocument({ onUpdateClick }: CurrentDocumentProps)
                 {(currentCV.size_bytes / 1024 / 1024).toFixed(2)} MB
               </span>
               <span>&bull;</span>
-              <span>PDF</span>
+              {currentCV.download_url && (
+                <a
+                  href={currentCV.download_url}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:underline text-primary"
+                >
+                  Original
+                </a>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="flex gap-2 shrink-0">
-          {currentCV.download_url && (
-            <a href={currentCV.download_url} download target="_blank" rel="noreferrer">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5 text-xs text-foreground border-border hover:bg-muted cursor-pointer"
-              >
-                <Download className="h-3.5 w-3.5" />
-                Descargar CV
-              </Button>
-            </a>
+        <div className="flex gap-2 shrink-0 w-full sm:w-auto">
+          {onGenerateCVClick && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onGenerateCVClick}
+              className="h-8 gap-1.5 text-xs font-semibold cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 flex-1 sm:flex-initial"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Generar CV ATS
+            </Button>
           )}
           {onUpdateClick && (
             <Button
               variant="outline"
               size="sm"
               onClick={onUpdateClick}
-              className="h-8 gap-1.5 text-xs text-foreground border-border hover:bg-muted cursor-pointer"
+              className="h-8 gap-1.5 text-xs text-foreground border-border hover:bg-muted cursor-pointer flex-1 sm:flex-initial"
             >
               <UploadCloud className="h-3.5 w-3.5 text-muted-foreground" />
               Actualizar

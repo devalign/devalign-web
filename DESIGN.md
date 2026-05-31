@@ -99,6 +99,10 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
     - **Columna 2: Contenido Principal**: El espacio flexible central (`{children}`) que renderiza páginas específicas (como `/profile` o `/dashboard`).
     - **Columna 3: Aside Contextual** (p.ej. [profile-aside.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/profile/profile-aside.tsx)): Barra lateral derecha para mostrar beneficios, social proof, guías informativas y políticas de seguridad ajustadas al contexto activo.
   - La landing page post-login por defecto es `/profile` ([page.tsx](<file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/profile/page.tsx>)), que contiene el flujo de upload del CV para análisis inicial del desarrollador.
+  - **Diagnóstico Inteligente (`/diagnosis`)**:
+    - Implementado a través de [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/diagnosis/page.tsx) que renderiza el [DiagnosisDashboard](file:///c:/Projects/Devalign/devalign-web/src/components/diagnosis/diagnosis-dashboard.tsx).
+    - Orquesta un bento-grid responsivo de 3 columnas en desktop para mostrar las fortalezas, brechas, afinidad por dominio, roles compatibles, insights y tendencias del mercado.
+    - Utiliza `recharts` para las visualizaciones de datos, estilizadas de forma dinámica usando las variables HSL de los temas del sistema de diseño.
 
 ### 3.2. Middleware y Protección de Rutas
 
@@ -119,6 +123,7 @@ Los componentes de interfaz se localizan en [src/components/ui](file:///c:/Proje
 3.  **Input**: Elemento de entrada de texto optimizado para formularios. Cuenta con estados deshabilitados con opacidad controlada y efectos de anillo (`focus-visible:ring-1`) al enfocarse.
 4.  **Form**: Componentes de formulario basados en `react-hook-form` y `zod` para validaciones completas en el cliente.
 5.  **Tabs**: Soporte para vistas tabulares dinámicas (utilizado para alternar entre Login y Signup).
+6.  **Diagnosis Components**: Tarjetas del panel de diagnóstico (`StrengthsCard`, `PriorityGapsCard`, `AffinityRadarChartCard`, etc.) que siguen las pautas de diseño atómico del perfil (utilizando `Card` con bordes planos y cajas de habilidades redondeadas) y exponen gráficos interactivos con `recharts` controlados por temas.
 
 ---
 

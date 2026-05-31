@@ -9,12 +9,14 @@ interface AffinityCardProps {
   primarySpecialty: string;
   alignmentScore: number;
   secondaryAffinities: ClusterAffinityItem[];
+  isPlaceholder?: boolean;
 }
 
 export default function AffinityCard({
   primarySpecialty,
   alignmentScore,
   secondaryAffinities,
+  isPlaceholder = false,
 }: AffinityCardProps) {
   const allAffinities = [
     { cluster_name: primarySpecialty, affinity_score: alignmentScore, is_primary: true },
@@ -54,17 +56,19 @@ export default function AffinityCard({
       const matched = allAffinities.find((a) =>
         a.cluster_name.toLowerCase().includes(name.toLowerCase()),
       );
-      const score = matched
-        ? matched.affinity_score
-        : name === 'Backend'
-          ? 0.92
-          : name === 'Cloud'
-            ? 0.78
-            : name === 'DevOps'
-              ? 0.64
-              : name === 'Frontend'
-                ? 0.42
-                : 0.28;
+      const score = isPlaceholder
+        ? 0
+        : matched
+          ? matched.affinity_score
+          : name === 'Backend'
+            ? 0.92
+            : name === 'Cloud'
+              ? 0.78
+              : name === 'DevOps'
+                ? 0.64
+                : name === 'Frontend'
+                  ? 0.42
+                  : 0.28;
       return {
         name,
         score,
@@ -83,10 +87,12 @@ export default function AffinityCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {renderedDomains.map((domain) => {
-          const style = domainStyles[domain.name] || {
-            barClass: 'bg-primary',
-            textClass: 'text-primary',
-          };
+          const style = isPlaceholder
+            ? { barClass: 'bg-muted-foreground/30', textClass: 'text-muted-foreground' }
+            : domainStyles[domain.name] || {
+                barClass: 'bg-primary',
+                textClass: 'text-primary',
+              };
           return (
             <div key={domain.name} className="space-y-1.5 animate-in fade-in duration-300">
               <div className="flex items-center justify-between text-xs font-semibold">
@@ -103,9 +109,17 @@ export default function AffinityCard({
           );
         })}
 
-        <div className="pt-2 border-t border-border flex items-center justify-between text-xs font-bold text-primary hover:underline cursor-pointer group">
+        <div className={`pt-2 border-t border-border flex items-center justify-between text-xs font-bold ${
+          isPlaceholder
+            ? 'text-muted-foreground/50 cursor-not-allowed select-none'
+            : 'text-primary hover:underline cursor-pointer group'
+        }`}>
           <span>Ver detalle de afinidad</span>
-          <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          <ArrowUpRight className={`h-4 w-4 ${
+            isPlaceholder
+              ? 'opacity-40'
+              : 'transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5'
+          }`} />
         </div>
       </CardContent>
     </Card>

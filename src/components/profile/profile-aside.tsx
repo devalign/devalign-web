@@ -53,7 +53,7 @@ export default function ProfileAside() {
         <ul className="space-y-3">
           {benefits.map((benefit, idx) => (
             <li key={idx} className="flex items-start gap-2.5 text-xs text-foreground font-medium">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+              <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <span>{benefit}</span>
             </li>
           ))}
@@ -111,13 +111,13 @@ export default function ProfileAside() {
           {/* Faux Avatar Group */}
           <div className="flex -space-x-2">
             {[
-              { color: 'bg-emerald-600', text: 'JD' },
-              { color: 'bg-blue-600', text: 'AM' },
-              { color: 'bg-purple-600', text: 'RC' },
+              { color: 'bg-primary text-primary-foreground', text: 'JD' },
+              { color: 'bg-slate-700 text-slate-100', text: 'AM' },
+              { color: 'bg-slate-600 text-slate-100', text: 'RC' },
             ].map((av, idx) => (
               <div
                 key={idx}
-                className={`flex h-7 w-7 items-center justify-center rounded-full ${av.color} text-[8px] font-bold text-white border-2 border-primary-foreground shrink-0`}
+                className={`flex h-7 w-7 items-center justify-center rounded-full ${av.color} text-[8px] font-bold border-2 border-primary-foreground shrink-0`}
               >
                 {av.text}
               </div>

@@ -11,8 +11,6 @@ import {
   Lock,
   ShieldCheck,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
   FileText,
   Sun,
   Moon,
@@ -73,9 +71,9 @@ export default function AppSidebar() {
     router.refresh();
   };
 
-  const navItems = [
+  const navItems: { name: string; href: string; icon: any; disabled?: boolean }[] = [
     { name: 'Diagnóstico', href: '/diagnosis', icon: Activity },
-    { name: 'Roadmap', href: '/roadmap', icon: Map, disabled: true },
+    { name: 'Roadmap', href: '/roadmap', icon: Map },
   ];
 
   const currentCV = cvData?.cvs?.[0];
@@ -99,18 +97,6 @@ export default function AppSidebar() {
           </div>
         )}
         {isCollapsed && <Hexagon className="mx-auto h-6 w-6 text-primary fill-primary/20" />}
-
-        {/* Toggle Collapse Button */}
-        {!isCollapsed && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsCollapsed(true)}
-            className="h-7 w-7 rounded-md hover:bg-muted text-muted-foreground hidden md:flex"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        )}
       </div>
 
       {/* Navigation Links */}
@@ -148,16 +134,16 @@ export default function AppSidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200',
+                'flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm font-semibold'
-                  : 'text-foreground hover:bg-secondary/60 hover:text-foreground',
+                  ? 'bg-secondary text-foreground font-extrabold shadow-xs'
+                  : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
               )}
             >
               <Icon
                 className={cn(
                   'h-4 w-4 shrink-0',
-                  isActive ? 'text-primary-foreground' : 'text-muted-foreground',
+                  isActive ? 'text-primary' : 'text-muted-foreground/70',
                 )}
               />
               {!isCollapsed && <span>{item.name}</span>}
@@ -205,28 +191,17 @@ export default function AppSidebar() {
 
       {/* Security Info */}
       {!isCollapsed && (
-        <div className="m-3 rounded-lg bg-emerald-50/50 p-2.5 text-[10px] text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-400 flex items-start gap-2">
-          <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
+        <div className="m-3 p-2.5 text-[10px] text-muted-foreground flex items-start gap-2 border border-border/50 rounded-lg bg-transparent">
+          <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
           <p className="leading-tight">Tus datos están seguros. No compartimos tu información.</p>
         </div>
       )}
 
       {/* Sidebar Footer */}
       <div className="p-3 border-t border-border bg-card space-y-2">
-        {/* Expand Toggle & Collapsed User Info Trigger for Collapsed View */}
+        {/* Collapsed User Info Trigger for Collapsed View */}
         {isCollapsed && (
           <div className="flex flex-col gap-2.5 items-center pt-1">
-            {/* Expand Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsCollapsed(false)}
-              className="h-8 w-8 rounded-md hover:bg-muted text-muted-foreground hidden md:flex"
-              title="Expandir sidebar"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-
             {/* Collapsed Settings Button (Opens Settings Modal Directly) */}
             <Button
               variant="ghost"
@@ -260,14 +235,11 @@ export default function AppSidebar() {
 
         {/* User Information with Options Button (Expanded View) */}
         {!isCollapsed && (
-          <div className="px-3 flex items-center justify-between gap-2.5 overflow-hidden mt-1 bg-secondary/10 rounded-lg relative">
+          <div className="px-3 py-2 flex items-center justify-between gap-2.5 overflow-hidden mt-1 bg-secondary/10 rounded-lg relative">
             {isUserLoading ? (
-              <div className="flex items-center gap-2 animate-pulse w-full">
+              <div className="flex items-center gap-2 animate-pulse w-full py-0.5">
                 <div className="h-8 w-8 rounded-full bg-muted" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3 w-20 rounded bg-muted" />
-                  <div className="h-2.5 w-28 rounded bg-muted" />
-                </div>
+                <div className="h-3 w-16 rounded bg-muted" />
               </div>
             ) : (
               <>
@@ -286,20 +258,15 @@ export default function AppSidebar() {
                       </div>
                     )}
                   </Link>
-                  <div className="flex flex-col min-w-0">
-                    <Link
-                      href="/profile"
-                      className="text-xs font-bold text-foreground hover:text-primary transition-colors flex items-center gap-1 group"
-                    >
-                      <span>Mi Perfil</span>
-                      <span className="inline-block transition-transform group-hover:translate-x-0.5">
-                        &rarr;
-                      </span>
-                    </Link>
-                    <span className="text-[10px] text-muted-foreground font-mono truncate">
-                      {user?.email || 'example@devalign.com'}
+                  <Link
+                    href="/profile"
+                    className="text-xs font-bold text-foreground hover:text-primary transition-colors flex items-center gap-1 group truncate min-w-0"
+                  >
+                    <span>Mi Perfil</span>
+                    <span className="inline-block transition-transform group-hover:translate-x-0.5 shrink-0">
+                      &rarr;
                     </span>
-                  </div>
+                  </Link>
                 </div>
 
                 {/* Options Button (Settings icon) */}

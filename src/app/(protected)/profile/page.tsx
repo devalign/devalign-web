@@ -37,6 +37,7 @@ import SkillsCard from '@/components/profile/skills-card';
 import ExperienceCard from '@/components/profile/experience-card';
 import InsightCard from '@/components/profile/insight-card';
 import ProfileEditModal from '@/components/profile/profile-edit-modal';
+import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
 
 export default function ProfilePage() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
@@ -45,6 +46,7 @@ export default function ProfilePage() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isCVPreviewOpen, setIsCVPreviewOpen] = useState(false);
 
   const hasCV = cvData && cvData.cvs && cvData.cvs.length > 0;
   const hasProfile = !!profile;
@@ -75,44 +77,6 @@ export default function ProfilePage() {
     );
   }
 
-  // 1. ESTADO ONBOARDING (Si el usuario no tiene CV subido)
-  if (!hasCV) {
-    return (
-      <div className="flex min-h-full w-full flex-col lg:flex-row animate-in fade-in duration-500">
-        <div className="flex-1 p-6 sm:p-8 md:p-10">
-          <div className="mx-auto max-w-4xl space-y-8">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl flex items-center gap-2">
-                Completa tu Perfil Profesional
-                <Sparkles className="h-6 w-6 text-primary fill-primary/10 shrink-0" />
-              </h1>
-              <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-                Sube tu currículum para comenzar. Analizaremos tu experiencia con Inteligencia
-                Artificial para sincronizar tu perfil y recomendarte oportunidades de crecimiento
-                profesional.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <CVUploader
-                onUploadSuccess={() => {
-                  refetchCVs();
-                  refetchProfile();
-                }}
-              />
-            </div>
-
-            <AIPipelineSteps />
-          </div>
-        </div>
-
-        <aside className="w-full border-t border-border bg-card/30 p-6 sm:p-8 lg:w-[350px] lg:min-w-[350px] lg:border-t-0 lg:border-l xl:w-[380px] xl:min-w-[380px]">
-          <ProfileAside />
-        </aside>
-      </div>
-    );
-  }
-
   // 2. ESTADO ANALIZANDO (CV subido pero perfil procesándose en background)
   if (isAnalyzing) {
     return (
@@ -138,7 +102,7 @@ export default function ProfilePage() {
             <div className="text-xs">
               <p className="font-bold text-foreground">CV Subido Correctamente</p>
               <p className="text-muted-foreground truncate max-w-xs">
-                {cvData.cvs[0].original_filename}
+                {cvData?.cvs?.[0]?.original_filename}
               </p>
             </div>
           </CardContent>
@@ -156,13 +120,42 @@ export default function ProfilePage() {
         .join('')
         .slice(0, 2)
         .toUpperCase()
-    : user?.full_name?.charAt(0).toUpperCase() || 'U';
+    : user?.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U';
 
-  const defaultDescription = `Desarrollador técnico con experiencia en el diseño e implementación de soluciones de software. Especializado en optimización de flujos de trabajo y alineación de tecnologías a los estándares del mercado de desarrollo.`;
+  const defaultDescription = profile
+    ? `Desarrollador técnico con experiencia en el diseño e implementación de soluciones de software. Especializado en optimización de flujos de trabajo y alineación de tecnologías a los estándares del mercado de desarrollo.`
+    : `Completa tu perfil subiendo tu currículum. La IA de Devalign analizará tu experiencia de forma automática para rellenar este perfil, calcular tu afinidad con el mercado y detectar tus brechas.`;
 
-  // 3. ESTADO COMPLETO (CV subido y perfil procesado)
+  // 3. RENDERIZADO GLOBAL (Soporta estado activo y Zero-State)
   return (
     <div className="p-6 sm:p-8 md:p-10 mx-auto max-w-7xl space-y-6 animate-in fade-in duration-500">
+      
+      {/* Banner Prominente de Carga de CV (Solo si no tiene CV subido) */}
+      {!hasCV && (
+        <Card className="border border-dashed border-primary/45 bg-primary/5 overflow-hidden shadow-xs">
+          <CardContent className="p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 text-left w-full md:max-w-2xl">
+              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+                Completa tu Perfil Profesional
+                <Sparkles className="h-5.5 w-5.5 text-primary fill-primary/10 shrink-0" />
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Sube tu currículum para comenzar. Analizaremos tu experiencia con Inteligencia
+                Artificial para sincronizar tu perfil, detectar tus brechas de habilidades y recomendarte oportunidades de crecimiento.
+              </p>
+            </div>
+            <div className="w-full md:w-[320px] shrink-0">
+              <CVUploader
+                onUploadSuccess={() => {
+                  refetchCVs();
+                  refetchProfile();
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Columna Izquierda: Información Profesional y Historiales */}
         <div className="lg:col-span-2 space-y-6">
@@ -179,8 +172,8 @@ export default function ProfilePage() {
                       <h3 className="font-extrabold text-xl text-foreground">
                         {profile?.full_name || 'Desarrollador'}
                       </h3>
-                      <Badge className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/30 flex items-center gap-1 font-bold text-[10px] py-0.5 px-2.5 rounded-full">
-                        <Shield className="h-3 w-3" />
+                      <Badge className="bg-primary/5 text-primary-foreground dark:text-primary border border-primary/20 flex items-center gap-1 font-bold text-[10px] py-0.5 px-2.5 rounded-full">
+                        <Shield className="h-3 w-3 text-primary" />
                         Verificado
                       </Badge>
                     </div>
@@ -195,6 +188,7 @@ export default function ProfilePage() {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsEditModalOpen(true)}
+                  disabled={!profile}
                   className="h-8 gap-1.5 text-xs text-foreground border-border hover:bg-muted cursor-pointer shrink-0"
                 >
                   <Edit3 className="h-3.5 w-3.5" />
@@ -253,34 +247,40 @@ export default function ProfilePage() {
           <SkillsCard
             detectedSkills={profile?.detected_skills || []}
             skillGaps={profile?.skill_gaps || []}
+            isPlaceholder={!profile}
           />
 
           {/* Experiencia Laboral */}
-          <ExperienceCard type="experience" items={profile?.work_experience || []} />
+          <ExperienceCard type="experience" items={profile?.work_experience || []} isPlaceholder={!profile} />
 
           {/* Educación y Certificaciones */}
           <div className="grid gap-6 md:grid-cols-2">
-            <ExperienceCard type="education" items={profile?.education || []} />
-            <ExperienceCard type="certifications" items={profile?.certifications || []} />
+            <ExperienceCard type="education" items={profile?.education || []} isPlaceholder={!profile} />
+            <ExperienceCard type="certifications" items={profile?.certifications || []} isPlaceholder={!profile} />
           </div>
         </div>
 
         {/* Columna Derecha: CV Activo, Afinidad con Dominios, Insight de IA */}
         <div className="lg:col-span-1 space-y-6">
           {/* CV Actual */}
-          <CurrentDocument onUpdateClick={() => setIsUpdateModalOpen(true)} />
+          <CurrentDocument
+            onUpdateClick={() => setIsUpdateModalOpen(true)}
+            onGenerateCVClick={() => setIsCVPreviewOpen(true)}
+          />
 
           {/* Afinidad con Dominios */}
           <AffinityCard
             primarySpecialty={profile?.primary_specialty || 'Backend'}
             alignmentScore={profile?.alignment_score || 0.0}
             secondaryAffinities={profile?.secondary_affinities || []}
+            isPlaceholder={!profile}
           />
 
           {/* Insight IA */}
           <InsightCard
             primarySpecialty={profile?.primary_specialty || 'Backend'}
             skillGaps={profile?.skill_gaps || []}
+            isPlaceholder={!profile}
           />
         </div>
       </div>
@@ -291,6 +291,16 @@ export default function ProfilePage() {
           profile={profile}
           isOpen={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
+        />
+      )}
+
+      {/* CV ATS Preview Modal */}
+      {profile && (
+        <CVAtsPreviewModal
+          isOpen={isCVPreviewOpen}
+          onOpenChange={setIsCVPreviewOpen}
+          profile={profile}
+          userEmail={user?.email}
         />
       )}
 

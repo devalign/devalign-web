@@ -21,9 +21,10 @@ import {
 interface SkillsCardProps {
   detectedSkills: SkillItem[];
   skillGaps: SkillItem[];
+  isPlaceholder?: boolean;
 }
 
-export default function SkillsCard({ detectedSkills, skillGaps }: SkillsCardProps) {
+export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = false }: SkillsCardProps) {
   const [activeTab, setActiveTab] = useState<'tecnicas' | 'blandas' | 'herramientas'>('tecnicas');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editSkillsList, setEditSkillsList] = useState<SkillItem[]>([]);
@@ -94,14 +95,7 @@ export default function SkillsCard({ detectedSkills, skillGaps }: SkillsCardProp
   // Filter skills for active tab view
   const tabSkills = allSkills.filter((s) => getSkillCategory(s.name, s.skill_type) === activeTab);
 
-  // Generate levels and dot counts based on name length or static logic to match aesthetic
-  const getSkillLevel = (name: string) => {
-    const sum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const score = (sum % 3) + 3; // returns 3, 4, or 5
-    if (score === 5) return { dots: 5, label: 'Avanzado' };
-    if (score === 4) return { dots: 4, label: 'Intermedio' };
-    return { dots: 3, label: 'Intermedio' }; // fallback
-  };
+
 
   const handleOpenEdit = () => {
     setEditSkillsList(allSkills.map((s) => ({ ...s })));
@@ -172,6 +166,7 @@ export default function SkillsCard({ detectedSkills, skillGaps }: SkillsCardProp
           variant="outline"
           size="sm"
           onClick={handleOpenEdit}
+          disabled={isPlaceholder}
           className="h-8 gap-1.5 text-xs text-foreground border-border hover:bg-muted cursor-pointer"
         >
           <Edit3 className="h-3.5 w-3.5" />
@@ -185,11 +180,12 @@ export default function SkillsCard({ detectedSkills, skillGaps }: SkillsCardProp
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
+              disabled={isPlaceholder}
               className={`py-2 px-4 text-xs font-bold transition-all border-b-2 capitalize cursor-pointer -mb-px ${
-                activeTab === tab
+                activeTab === tab && !isPlaceholder
                   ? 'border-primary text-primary font-extrabold'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              } ${isPlaceholder ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {tab === 'tecnicas' ? 'Técnicas' : tab === 'blandas' ? 'Blandas' : 'Herramientas'}
             </button>
@@ -197,50 +193,45 @@ export default function SkillsCard({ detectedSkills, skillGaps }: SkillsCardProp
         </div>
 
         {/* Skills Grid */}
-        {tabSkills.length === 0 ? (
+        {isPlaceholder ? (
+          <div className="space-y-4 py-2">
+            <p className="text-xs text-muted-foreground italic mb-2">
+              Sube tu currículum para que la IA extraiga automáticamente tus habilidades técnicas, blandas e identifique brechas.
+            </p>
+            <div className="flex flex-wrap gap-2 opacity-50">
+              {['React', 'TypeScript', 'Node.js', 'Spring Boot', 'Docker', 'AWS'].map((skill, index) => (
+                <div
+                  key={index}
+                  className="px-3 py-1.5 rounded-full border border-border/60 bg-secondary/40 text-muted-foreground text-xs font-medium cursor-not-allowed select-none"
+                >
+                  {skill}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : tabSkills.length === 0 ? (
           <p className="text-xs text-muted-foreground py-6 text-center">
             No se han detectado habilidades en esta pestaña.
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="flex flex-wrap gap-2">
             {tabSkills.map((skill) => {
-              const level = getSkillLevel(skill.name);
               const isGap = skill.market_importance !== 'consolidated';
 
               return (
                 <div
                   key={skill.name}
-                  className={`p-3 rounded-xl border flex items-center justify-between gap-2 transition-all ${
+                  className={`px-3 py-1.5 rounded-full border text-xs font-medium flex items-center gap-1.5 transition-all ${
                     isGap
-                      ? 'border-dashed border-amber-300 bg-amber-50/10 dark:border-amber-950/20'
-                      : 'border-border bg-card'
+                      ? 'border-dashed border-amber-300 bg-amber-50/10 text-amber-700 dark:text-amber-500 dark:border-amber-900/30'
+                      : 'border-border bg-secondary/40 text-foreground hover:bg-secondary/60'
                   }`}
                 >
-                  <div className="space-y-0.5 min-w-0">
-                    <p
-                      className="text-xs font-semibold text-foreground truncate"
-                      title={skill.name}
-                    >
-                      {skill.name}
-                    </p>
-                    <p
-                      className={`text-[10px] ${isGap ? 'text-amber-600 font-semibold' : 'text-muted-foreground'}`}
-                    >
-                      {isGap ? 'Brecha (Gap)' : level.label}
-                    </p>
-                  </div>
-
-                  {!isGap && (
-                    <div className="flex items-center gap-1 shrink-0">
-                      {[1, 2, 3, 4, 5].map((dot) => (
-                        <div
-                          key={dot}
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            dot <= level.dots ? 'bg-primary' : 'bg-secondary'
-                          }`}
-                        />
-                      ))}
-                    </div>
+                  <span>{skill.name}</span>
+                  {isGap && (
+                    <span className="text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                      Brecha
+                    </span>
                   )}
                 </div>
               );
@@ -331,8 +322,8 @@ export default function SkillsCard({ detectedSkills, skillGaps }: SkillsCardProp
                           onClick={() => handleToggleStatus(index)}
                           className={`text-[10px] font-bold px-2 py-1 rounded-md transition-all cursor-pointer ${
                             isConsolidated
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
-                              : 'bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400'
+                              ? 'bg-primary/15 text-primary-foreground dark:text-primary'
+                              : 'bg-secondary text-muted-foreground border border-border/50'
                           }`}
                         >
                           {isConsolidated ? 'Consolidada' : 'Brecha (Gap)'}
