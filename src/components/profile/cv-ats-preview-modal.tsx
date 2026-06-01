@@ -370,7 +370,13 @@ export default function CVAtsPreviewModal({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-6xl h-[90vh] md:h-[85vh] max-h-[900px] flex flex-col md:flex-row border-border bg-card p-0 overflow-hidden gap-0">
-        
+        <DialogHeader className="sr-only">
+          <DialogTitle>Vista previa de tu CV ATS</DialogTitle>
+          <DialogDescription>
+            Visualiza tu currículum optimizado para sistemas de seguimiento de candidatos.
+          </DialogDescription>
+        </DialogHeader>
+
         {/* Left Side: Paper CV Preview Sheet */}
         <div className="flex-1 bg-zinc-100 dark:bg-zinc-950/70 p-6 overflow-y-auto flex justify-center items-start scrollbar-thin">
           <div

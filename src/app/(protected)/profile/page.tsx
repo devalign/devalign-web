@@ -47,10 +47,21 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isCVPreviewOpen, setIsCVPreviewOpen] = useState(false);
+  // Immediately set after CV upload to force the analyzing state,
+  // avoids the race condition between async refetchCVs / refetchProfile.
+  const [pendingUpload, setPendingUpload] = useState(false);
 
   const hasCV = cvData && cvData.cvs && cvData.cvs.length > 0;
   const hasProfile = !!profile;
-  const isAnalyzing = hasCV && !hasProfile;
+  const cvMismatch = hasCV && hasProfile && profile.cv_id !== cvData.cvs[0].cv_id;
+  const isAnalyzing = pendingUpload || (hasCV && (!hasProfile || cvMismatch));
+
+  // Clear pendingUpload once the profile's cv_id catches up with the latest CV
+  useEffect(() => {
+    if (pendingUpload && hasCV && hasProfile && profile.cv_id === cvData.cvs[0].cv_id) {
+      setPendingUpload(false);
+    }
+  }, [pendingUpload, hasCV, hasProfile, profile, cvData]);
 
   // Real-time polling for background AI analysis
   useEffect(() => {
@@ -58,10 +69,11 @@ export default function ProfilePage() {
     if (isAnalyzing) {
       interval = setInterval(() => {
         refetchProfile();
+        refetchCVs();
       }, 3000);
     }
     return () => clearInterval(interval);
-  }, [isAnalyzing, refetchProfile]);
+  }, [isAnalyzing, refetchProfile, refetchCVs]);
 
   const isLoading = isUserLoading || isCVLoading;
 
@@ -147,6 +159,7 @@ export default function ProfilePage() {
             <div className="w-full md:w-[320px] shrink-0">
               <CVUploader
                 onUploadSuccess={() => {
+                  setPendingUpload(true);
                   refetchCVs();
                   refetchProfile();
                 }}
@@ -320,6 +333,7 @@ export default function ProfilePage() {
           <div className="py-4">
             <CVUploader
               onUploadSuccess={() => {
+                setPendingUpload(true);
                 refetchCVs();
                 refetchProfile();
                 setIsUpdateModalOpen(false);
