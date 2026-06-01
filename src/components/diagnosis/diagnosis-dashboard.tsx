@@ -31,7 +31,7 @@ import {
 
 export function DiagnosisDashboard() {
   const router = useRouter();
-  const { data: profile, isLoading: isProfileLoading } = useUserProfile();
+  const { data: profile, isLoading: isProfileLoading, refetch: refetchProfile } = useUserProfile();
   const { data: cvData, isLoading: isCVLoading } = useUserCVs();
 
   // Local state for interactive generation simulation
@@ -51,7 +51,18 @@ export function DiagnosisDashboard() {
 
   const hasCV = cvData && cvData.cvs && cvData.cvs.length > 0;
   const hasProfile = !!profile;
-  const isAnalyzing = hasCV && !hasProfile;
+  const isAnalyzing = hasCV && (!hasProfile || (profile.cv_id !== cvData.cvs[0].cv_id));
+
+  // Real-time polling for background AI analysis
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isAnalyzing) {
+      interval = setInterval(() => {
+        refetchProfile();
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [isAnalyzing, refetchProfile]);
 
   // Simulate AI generation steps
   const startGeneration = () => {

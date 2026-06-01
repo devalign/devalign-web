@@ -7,8 +7,10 @@ export function useUploadCV() {
   return useMutation({
     mutationFn: (file: File) => uploadCV(file),
     onSuccess: () => {
-      // Invalidate the CVs query cache to trigger a reload of CV status
+      // Invalidate both caches so the page detects the cv_id mismatch
+      // and transitions to the "Analyzing" loading state
       queryClient.invalidateQueries({ queryKey: ['userCVs'] });
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
     },
   });
 }
