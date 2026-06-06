@@ -50,29 +50,50 @@ export default function ProfilePage() {
   // Immediately set after CV upload to force the analyzing state,
   // avoids the race condition between async refetchCVs / refetchProfile.
   const [pendingUpload, setPendingUpload] = useState(false);
+  const [ignoredCVId, setIgnoredCVId] = useState<string | null>(null);
+  const [showCancel, setShowCancel] = useState(false);
+
+  useEffect(() => {
+    const ignored = localStorage.getItem('ignored_cv_id');
+    if (ignored) setIgnoredCVId(ignored);
+  }, []);
 
   const hasCV = cvData && cvData.cvs && cvData.cvs.length > 0;
   const hasProfile = !!profile;
-  const cvMismatch = hasCV && hasProfile && profile.cv_id !== cvData.cvs[0].cv_id;
-  const isAnalyzing = pendingUpload || (hasCV && (!hasProfile || cvMismatch));
+  const currentCvId = hasCV ? cvData.cvs[0].cv_id : null;
+  const isIgnored = currentCvId && currentCvId === ignoredCVId;
+  const cvMismatch = hasCV && hasProfile && profile.cv_id !== currentCvId && !isIgnored;
+  const isAnalyzing = !isIgnored && (pendingUpload || (hasCV && (!hasProfile || cvMismatch)));
 
   // Clear pendingUpload once the profile's cv_id catches up with the latest CV
   useEffect(() => {
-    if (pendingUpload && hasCV && hasProfile && profile.cv_id === cvData.cvs[0].cv_id) {
+    if (pendingUpload && hasCV && hasProfile && profile.cv_id === currentCvId) {
       setPendingUpload(false);
     }
-  }, [pendingUpload, hasCV, hasProfile, profile, cvData]);
+  }, [pendingUpload, hasCV, hasProfile, profile, currentCvId]);
 
   // Real-time polling for background AI analysis
   useEffect(() => {
     let interval: NodeJS.Timeout;
+    let timeout: NodeJS.Timeout;
+    
     if (isAnalyzing) {
       interval = setInterval(() => {
         refetchProfile();
         refetchCVs();
       }, 3000);
+      
+      timeout = setTimeout(() => {
+        setShowCancel(true);
+      }, 10000); // Mostrar opciones de cancelación después de 10 segundos
+    } else {
+      setShowCancel(false);
     }
-    return () => clearInterval(interval);
+    
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [isAnalyzing, refetchProfile, refetchCVs]);
 
   const isLoading = isUserLoading || isCVLoading;
@@ -108,7 +129,7 @@ export default function ProfilePage() {
             de desarrollo.
           </p>
         </div>
-        <Card className="max-w-md border-border bg-card p-4">
+        <Card className="max-w-md border-border bg-card p-4 w-full">
           <CardContent className="p-0 flex items-center gap-3 text-left">
             <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
             <div className="text-xs">
@@ -119,6 +140,60 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+
+        {showCancel && (
+          <div className="mt-4 flex flex-col items-center gap-4 animate-in fade-in duration-500">
+            <p className="text-xs text-muted-foreground">¿Está demorando demasiado o hubo un error?</p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsUpdateModalOpen(true)}
+              >
+                Subir otro CV
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  if (currentCvId) {
+                    localStorage.setItem('ignored_cv_id', currentCvId);
+                    setIgnoredCVId(currentCvId);
+                    setPendingUpload(false);
+                  }
+                }}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de actualización accesible desde la vista de procesando */}
+        <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
+          <DialogContent className="sm:max-w-xl border-border bg-card">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Actualizar Currículum Vitae
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Sube una versión más reciente de tu CV. Sincronizaremos tus datos profesionales
+                automáticamente y recalcularemos tu alineación técnica.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <CVUploader
+                onUploadSuccess={() => {
+                  setPendingUpload(true);
+                  refetchCVs();
+                  refetchProfile();
+                  setIsUpdateModalOpen(false);
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
