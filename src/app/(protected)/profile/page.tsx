@@ -30,8 +30,6 @@ import {
 // Custom Profile Components
 import CVUploader from '@/components/profile/cv-uploader';
 import CurrentDocument from '@/components/profile/current-document';
-import AIPipelineSteps from '@/components/profile/ai-pipeline-steps';
-import ProfileAside from '@/components/profile/profile-aside';
 import AffinityCard from '@/components/profile/affinity-card';
 import SkillsCard from '@/components/profile/skills-card';
 import ExperienceCard from '@/components/profile/experience-card';
