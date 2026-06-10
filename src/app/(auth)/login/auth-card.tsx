@@ -74,6 +74,19 @@ export default function AuthCard() {
     }
   }, []);
 
+  // Fix bfcache (back-forward cache) lock issues when returning from OAuth provider
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setIsLoading(false);
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, []);
+
   const handleModeChange = (newMode: AuthMode) => {
     setMode(newMode);
     setPassword('');
@@ -98,12 +111,19 @@ export default function AuthCard() {
 
   const handleOAuthLogin = async () => {
     setIsLoading(true);
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback`,
+        },
+      });
+      if (error) throw error;
+    } catch (err) {
+      const rawMessage = err instanceof Error ? err.message : 'Ocurrió un error';
+      toast.error(translateError(rawMessage));
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
