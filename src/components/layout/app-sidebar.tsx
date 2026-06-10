@@ -14,6 +14,8 @@ import {
   FileText,
   Sun,
   Moon,
+  ChevronLeft,
+  ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
 import { useSidebar } from './sidebar-context';
@@ -35,7 +37,7 @@ import { toast } from 'sonner';
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, setIsCollapsed } = useSidebar();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: cvData } = useUserCVs();
 
@@ -86,6 +88,18 @@ export default function AppSidebar() {
         isCollapsed ? 'w-16' : 'w-64',
       )}
     >
+      {/* Toggle Collapse Button */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute top-5 -right-3.5 z-40 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-xs hover:bg-secondary hover:text-foreground transition-all duration-200 cursor-pointer focus:outline-hidden"
+        title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+      >
+        {isCollapsed ? (
+          <ChevronRight className="h-3.5 w-3.5" />
+        ) : (
+          <ChevronLeft className="h-3.5 w-3.5" />
+        )}
+      </button>
       {/* Header / Logo */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-border">
         {!isCollapsed && (
@@ -139,6 +153,7 @@ export default function AppSidebar() {
                 isActive
                   ? 'bg-secondary text-foreground font-extrabold shadow-xs'
                   : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
+                isCollapsed ? 'justify-center' : '',
               )}
             >
               <Icon
