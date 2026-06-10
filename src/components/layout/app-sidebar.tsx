@@ -14,6 +14,7 @@ import {
   FileText,
   Sun,
   Moon,
+  type LucideIcon,
 } from 'lucide-react';
 import { useSidebar } from './sidebar-context';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -34,7 +35,7 @@ import { toast } from 'sonner';
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { isCollapsed, setIsCollapsed } = useSidebar();
+  const { isCollapsed } = useSidebar();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: cvData } = useUserCVs();
 
@@ -71,9 +72,9 @@ export default function AppSidebar() {
     router.refresh();
   };
 
-  const navItems: { name: string; href: string; icon: any; disabled?: boolean }[] = [
-    { name: 'Diagnóstico', href: '/diagnosis', icon: Activity },
-    { name: 'Roadmap', href: '/roadmap', icon: Map },
+  const navItems: { name: string; href: string; icon: LucideIcon; disabled?: boolean }[] = [
+    { name: 'Diagnóstico', href: '/dashboard', icon: Activity },
+    { name: 'Roadmap', href: '/dashboard/roadmap', icon: Map },
   ];
 
   const currentCV = cvData?.cvs?.[0];
@@ -175,15 +176,26 @@ export default function AppSidebar() {
                 </div>
               </div>
 
-              <Link href="/profile?action=update-cv" className="mt-3 block">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-[10px] h-7 border-primary/30 text-primary-foreground hover:bg-primary/10 hover:text-primary-foreground"
-                >
-                  Actualizar CV
-                </Button>
-              </Link>
+              <div className="mt-3 space-y-2">
+                <Link href="/profile?action=update-cv" className="block">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-[10px] h-7 border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
+                  >
+                    Actualizar CV
+                  </Button>
+                </Link>
+                <Link href="/profile?action=preview-ats" className="block">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="w-full text-[10px] h-7 cursor-pointer"
+                  >
+                    Generar CV ATS
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         )}

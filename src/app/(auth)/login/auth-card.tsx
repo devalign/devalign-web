@@ -69,7 +69,9 @@ export default function AuthCard() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('mode') === 'reset-password') {
-        setMode('reset-password');
+        setTimeout(() => {
+          setMode('reset-password');
+        }, 0);
       }
     }
   }, []);
