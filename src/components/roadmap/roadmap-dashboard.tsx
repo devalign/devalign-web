@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { useUserCVs } from '@/hooks/use-user-cvs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -21,8 +21,7 @@ import {
   ArrowRight,
   ExternalLink,
   BookOpen,
-  CheckSquare,
-  Bookmark
+  CheckSquare
 } from 'lucide-react';
 
 interface TopicItem {
@@ -62,29 +61,6 @@ export function RoadmapDashboard() {
   const [expandedPhase, setExpandedPhase] = useState<string | null>('docker');
 
   const hasCV = cvData && cvData.cvs && cvData.cvs.length > 0;
-  const hasProfile = !!profile;
-
-  // Retrieve states from localStorage on load
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedRoadmap = localStorage.getItem('devalign_roadmap_generated');
-      const savedChecked = localStorage.getItem('devalign_roadmap_checked');
-      
-      // Auto-trigger generation if query param '?generate=true' is present and diagnosis exists
-      const shouldAutoGenerate = searchParams.get('generate') === 'true';
-      const isDiagnosisGenerated = localStorage.getItem('devalign_diagnosis_generated') === 'true';
-
-      if (savedRoadmap === 'true') {
-        setIsGenerated(true);
-      } else if (shouldAutoGenerate && isDiagnosisGenerated) {
-        startGeneration();
-      }
-
-      if (savedChecked) {
-        setCheckedTopics(JSON.parse(savedChecked));
-      }
-    }
-  }, [searchParams]);
 
   // Simulate Roadmap generation steps
   const startGeneration = () => {
@@ -104,6 +80,28 @@ export function RoadmapDashboard() {
 
     return () => timers.forEach(t => clearTimeout(t));
   };
+
+  // Retrieve states from localStorage on load
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedRoadmap = localStorage.getItem('devalign_roadmap_generated');
+      const savedChecked = localStorage.getItem('devalign_roadmap_checked');
+      
+      // Auto-trigger generation if query param '?generate=true' is present and diagnosis exists
+      const shouldAutoGenerate = searchParams.get('generate') === 'true';
+      const isDiagnosisGenerated = localStorage.getItem('devalign_diagnosis_generated') === 'true';
+
+      if (savedRoadmap === 'true') {
+        setTimeout(() => setIsGenerated(true), 0);
+      } else if (shouldAutoGenerate && isDiagnosisGenerated) {
+        setTimeout(() => startGeneration(), 0);
+      }
+
+      if (savedChecked) {
+        setTimeout(() => setCheckedTopics(JSON.parse(savedChecked)), 0);
+      }
+    }
+  }, [searchParams]);
 
   // Toggle checkbox topic selection
   const handleToggleTopic = (topicId: string) => {

@@ -2,73 +2,161 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts';
-import { DomainAffinity } from './types';
-import { Target } from 'lucide-react';
+import { Target, Loader2 } from 'lucide-react';
 
-interface Props {
-  data: DomainAffinity[];
-  isEmpty?: boolean;
+interface AffinityRadarChartProps {
+  techSkills: string[];
+  isLoading?: boolean;
 }
 
-export function AffinityRadarChartCard({ data, isEmpty = false }: Props) {
+export function AffinityRadarChart({ techSkills, isLoading = false }: AffinityRadarChartProps) {
+  // DYNAMIC RADAR CHART COORDINATES CALCULATION
+  const getRadarPoints = () => {
+    const dataVal = Math.min(
+      35 +
+        techSkills.filter((s) => ['Databricks', 'Spark', 'Hadoop', 'SQL Server'].includes(s))
+          .length *
+          15,
+      95,
+    );
+    const backendVal = Math.min(
+      35 +
+        techSkills.filter((s) => ['Python', 'PostgreSQL', 'Microservicios'].includes(s)).length *
+          20,
+      95,
+    );
+    const cloudVal = Math.min(
+      20 + techSkills.filter((s) => ['AWS', 'Docker'].includes(s)).length * 35,
+      95,
+    );
+    const devopsVal = Math.min(
+      20 + techSkills.filter((s) => ['Kubernetes', 'CI/CD'].includes(s)).length * 35,
+      95,
+    );
+    const frontendVal = Math.min(
+      20 + techSkills.filter((s) => ['React', 'HTML', 'CSS', 'Power BI'].includes(s)).length * 20,
+      85,
+    );
+
+    const convert = (val: number, angleDeg: number) => {
+      const angleRad = (angleDeg - 90) * (Math.PI / 180);
+      const r = (val / 100) * 70; // Map 100% to 70px radius
+      const x = 100 + r * Math.cos(angleRad);
+      const y = 100 + r * Math.sin(angleRad);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    };
+
+    return {
+      user: [
+        convert(backendVal, 0), // Backend
+        convert(frontendVal, 72), // Frontend
+        convert(cloudVal, 144), // Cloud
+        convert(devopsVal, 216), // DevOps
+        convert(dataVal, 288), // Data
+      ].join(' '),
+      market: [
+        convert(92, 0), // Backend market demand
+        convert(42, 72), // Frontend market demand
+        convert(78, 144), // Cloud market demand
+        convert(64, 216), // DevOps market demand
+        convert(64, 288), // Data market demand
+      ].join(' '),
+    };
+  };
+
+  const radarPoints = getRadarPoints();
+
   return (
-    <Card className="border-border bg-card h-full flex flex-col justify-between">
-      <div>
-        <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-2 tracking-wider uppercase">
-            <Target className="h-4 w-4 text-primary" />
-            Afinidad Técnica (Por dominio)
+    <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden">
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
+          <Loader2 className="h-6 w-6 text-primary animate-spin" />
+          <p className="text-[9px] font-bold font-mono text-muted-foreground animate-pulse">
+            Recalculando afinidad...
+          </p>
+        </div>
+      )}
+
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-2">
+          <Target className="w-4 h-4 text-primary" />
+          <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+            Afinidad Técnica por Dominio
           </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full h-[240px] mt-2">
-            {isEmpty ? (
-              <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-border/80 bg-secondary/5 rounded-2xl">
-                <div className="w-24 h-24 rounded-full border border-dashed border-muted-foreground/20 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full border border-dashed border-muted-foreground/20 flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full border border-dashed border-muted-foreground/20" />
-                  </div>
-                </div>
-                <p className="text-[10px] text-muted-foreground/60 mt-4 uppercase tracking-wider font-bold">
-                  Esperando Diagnóstico
-                </p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
-                  <PolarGrid stroke="#e2e8f0" className="dark:stroke-slate-800" />
-                  <PolarAngleAxis 
-                    dataKey="domain" 
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 600 }} 
-                  />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar
-                    name="Tu perfil"
-                    dataKey="profileScore"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fill="hsl(var(--primary))"
-                    fillOpacity={0.2}
-                  />
-                  <Radar
-                    name="Demanda del mercado"
-                    dataKey="marketDemand"
-                    stroke="hsl(var(--muted-foreground))"
-                    strokeWidth={1.5}
-                    fill="transparent"
-                    strokeDasharray="4 4"
-                  />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} 
-                    iconType="circle"
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            )}
+        </div>
+      </CardHeader>
+      <CardContent className="flex justify-center py-4">
+        <div className="relative w-full max-w-[200px] aspect-square">
+          <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
+            {/* Background rings */}
+            {[20, 40, 60, 80, 100].map((r) => {
+              const rad = (r / 100) * 70;
+              const points = [0, 72, 144, 216, 288]
+                .map((angle) => {
+                  const a = (angle - 90) * (Math.PI / 180);
+                  return `${100 + rad * Math.cos(a)},${100 + rad * Math.sin(a)}`;
+                })
+                .join(' ');
+              return (
+                <polygon
+                  key={r}
+                  points={points}
+                  className="fill-none stroke-border/40 stroke-1"
+                />
+              );
+            })}
+
+            {/* Axis lines */}
+            {[0, 72, 144, 216, 288].map((angle) => {
+              const a = (angle - 90) * (Math.PI / 180);
+              return (
+                <line
+                  key={angle}
+                  x1={100}
+                  y1={100}
+                  x2={100 + 70 * Math.cos(a)}
+                  y2={100 + 70 * Math.sin(a)}
+                  className="stroke-border/40 stroke-1"
+                />
+              );
+            })}
+
+            {/* Labels */}
+            <text x={100} y={15} textAnchor="middle" className="fill-muted-foreground text-[8px] font-bold font-mono">BACKEND</text>
+            <text x={178} y={75} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">FRONTEND</text>
+            <text x={155} y={185} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">CLOUD</text>
+            <text x={45} y={185} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DEVOPS</text>
+            <text x={22} y={75} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DATA</text>
+
+            {/* Market and User polygons */}
+            <polygon points={radarPoints.market} className="fill-slate-800/10 stroke-slate-500/50 stroke-1.5" />
+            <polygon points={radarPoints.user} className="fill-primary/25 stroke-primary stroke-2 transition-all duration-300" />
+
+            {/* Market dots */}
+            {radarPoints.market.split(' ').map((p, idx) => {
+              const [x, y] = p.split(',');
+              return <circle key={idx} cx={x} cy={y} r={2.5} className="fill-slate-500" />;
+            })}
+
+            {/* User dots */}
+            {radarPoints.user.split(' ').map((p, idx) => {
+              const [x, y] = p.split(',');
+              return <circle key={idx} cx={x} cy={y} r={3} className="fill-primary stroke-card stroke-1" />;
+            })}
+          </svg>
+
+          <div className="absolute -bottom-6 left-0 right-0 flex justify-center gap-4 text-[9px] font-mono text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
+              <span>Mercado</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <span>Tu Perfil</span>
+            </div>
           </div>
-        </CardContent>
-      </div>
+        </div>
+      </CardContent>
     </Card>
   );
 }

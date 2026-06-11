@@ -1,89 +1,86 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, ArrowRight } from 'lucide-react';
-import { SkillGap } from './types';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
-interface Props {
-  gaps: SkillGap[];
-  total: number;
-  isEmpty?: boolean;
+interface PriorityGapsCardProps {
+  marketGaps: string[];
+  isLoading?: boolean;
 }
 
-export function PriorityGapsCard({ gaps, total, isEmpty = false }: Props) {
+export function PriorityGapsCard({ marketGaps, isLoading = false }: PriorityGapsCardProps) {
   return (
-    <Card className="border-border bg-card h-full flex flex-col justify-between">
-      <div>
-        <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-2 tracking-wider uppercase">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-            Brechas Prioritarias
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-col gap-3">
-            {isEmpty ? null : (
-              gaps.map((gap) => {
-                const isCritica = gap.criticality === 'Crítica';
+    <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col h-full relative overflow-hidden">
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
+          <Loader2 className="h-6 w-6 text-primary animate-spin" />
+          <p className="text-[9px] font-bold font-mono text-muted-foreground animate-pulse">
+            Buscando brechas...
+          </p>
+        </div>
+      )}
+
+      <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+            Brechas prioritarias
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col justify-between pt-0 space-y-3">
+        {marketGaps.length === 0 ? (
+          <div className="p-4 rounded-lg bg-emerald-500/5 border border-dashed border-emerald-500/30 text-center text-xs text-muted-foreground my-auto">
+            🎉 ¡Felicidades! Has cubierto todas las brechas detectadas.
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1 scrollbar-none">
+              {marketGaps.slice(0, 4).map((bg, idx) => {
+                const criticalities = ['Crítica', 'Crítica', 'Alta', 'Alta'];
+                const demands = [74, 68, 61, 54];
+                const crit = criticalities[idx] || 'Media';
+                const demand = demands[idx] || 42;
+
+                const borderClass =
+                  crit === 'Crítica'
+                    ? 'border-red-500/30 bg-red-500/5 hover:border-red-500/50'
+                    : 'border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50';
+                const textClass =
+                  crit === 'Crítica'
+                    ? 'text-red-600 dark:text-red-400'
+                    : 'text-amber-600 dark:text-amber-400';
+
                 return (
                   <div
-                    key={gap.name}
-                    className={`p-3 rounded-xl border border-dashed flex items-center justify-between gap-2 transition-all hover:bg-muted/5 ${
-                      isCritica
-                        ? 'border-destructive/40 bg-destructive/5 dark:border-destructive/20'
-                        : 'border-amber-500/40 bg-amber-500/5 dark:border-amber-950/20'
-                    }`}
+                    key={bg}
+                    className={`flex flex-col justify-between p-2.5 rounded-lg border border-dashed transition-colors ${borderClass}`}
                   >
-                    <div className="space-y-0.5 min-w-0">
-                      <p
-                        className="text-xs font-semibold text-foreground truncate"
-                        title={gap.name}
-                      >
-                        {gap.name}
-                      </p>
-                      <p
-                        className={`text-[10px] font-bold ${
-                          isCritica 
-                            ? 'text-destructive' 
-                            : 'text-amber-600 dark:text-amber-400'
-                        }`}
-                      >
-                        Brecha ({gap.criticality})
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className={`text-xs font-bold ${
-                        isCritica ? 'text-destructive' : 'text-amber-600 dark:text-amber-400'
-                      }`}>
-                        {gap.demandPercentage ?? (isCritica ? 80 : 60)}%
-                      </span>
-                      <span className="text-[9px] text-muted-foreground block uppercase tracking-wider font-semibold">
-                        Demanda
+                    <div className="flex justify-between items-start gap-1">
+                      <span className="font-bold text-foreground truncate">{bg}</span>
+                      <span className={`text-[9px] font-bold shrink-0 ${textClass}`}>
+                        {demand}% DEMANDA
                       </span>
                     </div>
+                    <span className="text-[10px] text-muted-foreground mt-1">
+                      Brecha ({crit})
+                    </span>
                   </div>
                 );
-              })
-            )}
-          </div>
-        </CardContent>
-      </div>
-      <div className="px-6 pb-6 pt-2">
-        <button 
-          disabled={isEmpty}
-          className={cn(
-            "flex items-center gap-2 text-xs font-bold transition-colors",
-            isEmpty 
-              ? "text-muted-foreground/45 cursor-not-allowed select-none" 
-              : "text-muted-foreground hover:text-foreground cursor-pointer"
-          )}
-        >
-          Ver todas las brechas ({isEmpty ? 0 : total})
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
+              })}
+            </div>
+            <div className="pt-2 text-right">
+              <Link
+                href="/dashboard/roadmap"
+                className="text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                Ver todas ({marketGaps.length}) <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </>
+        )}
+      </CardContent>
     </Card>
   );
 }

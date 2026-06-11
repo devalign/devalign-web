@@ -1,74 +1,66 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowRight } from 'lucide-react';
-import { SkillStrength } from './types';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
-interface Props {
-  strengths: SkillStrength[];
-  total: number;
-  isEmpty?: boolean;
+interface StrengthsCardProps {
+  techSkills: string[];
+  onViewAll: () => void;
+  isLoading?: boolean;
 }
 
-export function StrengthsCard({ strengths, total, isEmpty = false }: Props) {
+export function StrengthsCard({ techSkills, onViewAll, isLoading = false }: StrengthsCardProps) {
   return (
-    <Card className="border-border bg-card h-full flex flex-col justify-between">
-      <div>
-        <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-2 tracking-wider uppercase">
-            <Check className="h-4 w-4 text-primary" />
-            Fortalezas Detectadas
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-col gap-3">
-            {isEmpty ? null : (
-              strengths.map((skill) => (
-                <div
-                  key={skill.name}
-                  className="p-3 rounded-xl border border-border bg-card flex items-center justify-between gap-2 transition-all hover:bg-muted/5"
-                >
-                  <div className="space-y-0.5 min-w-0">
-                    <p
-                      className="text-xs font-semibold text-foreground truncate"
-                      title={skill.name}
-                    >
-                      {skill.name}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {skill.level}
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="text-xs font-bold text-primary">
-                      {skill.demandPercentage ?? (skill.score * 20)}%
-                    </span>
-                    <span className="text-[9px] text-muted-foreground block uppercase tracking-wider font-semibold">
-                      Demanda
-                    </span>
-                  </div>
+    <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col h-full relative overflow-hidden">
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
+          <Loader2 className="h-6 w-6 text-primary animate-spin" />
+          <p className="text-[9px] font-bold font-mono text-muted-foreground animate-pulse">
+            Identificando fortalezas...
+          </p>
+        </div>
+      )}
+
+      <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+            Fortalezas principales
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col justify-between pt-0 space-y-3">
+        <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1 scrollbar-none">
+          {techSkills.slice(0, 4).map((f, idx) => {
+            const levels = ['Avanzado', 'Intermedio - Avanzado', 'Intermedio', 'Intermedio'];
+            const demands = [92, 85, 78, 71];
+            const level = levels[idx] || 'Intermedio';
+            const demand = demands[idx] || 65;
+            return (
+              <div
+                key={f}
+                className="flex flex-col justify-between p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10"
+              >
+                <div className="flex justify-between items-start gap-1">
+                  <span className="font-bold text-foreground truncate">{f}</span>
+                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+                    {demand}% DEMANDA
+                  </span>
                 </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </div>
-      <div className="px-6 pb-6 pt-2">
-        <button 
-          disabled={isEmpty} 
-          className={cn(
-            "flex items-center gap-2 text-xs font-bold transition-colors",
-            isEmpty 
-              ? "text-muted-foreground/45 cursor-not-allowed select-none" 
-              : "text-muted-foreground hover:text-foreground cursor-pointer"
-          )}
-        >
-          Ver todas las skills ({isEmpty ? 0 : total})
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
+                <span className="text-[10px] text-muted-foreground mt-1">{level}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="pt-2 text-right">
+          <button
+            onClick={onViewAll}
+            className="text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer bg-transparent border-0"
+          >
+            Ver todas ({techSkills.length}) <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      </CardContent>
     </Card>
   );
 }

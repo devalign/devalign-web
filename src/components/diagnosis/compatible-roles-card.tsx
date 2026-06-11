@@ -1,60 +1,83 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, ArrowRight } from 'lucide-react';
-import { CompatibleRole } from './types';
-import { cn } from '@/lib/utils';
+'use client';
 
-interface Props {
-  roles: CompatibleRole[];
-  isEmpty?: boolean;
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { TrendingUp, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+
+interface CompatibleRoleItem {
+  title: string;
+  match: 'Alta' | 'Media' | 'Baja';
 }
 
-export function CompatibleRolesCard({ roles, isEmpty = false }: Props) {
+interface CompatibleRolesCardProps {
+  roles?: CompatibleRoleItem[];
+  isLoading?: boolean;
+}
+
+export function CompatibleRolesCard({
+  roles = [
+    { title: 'Backend Java Developer', match: 'Alta' },
+    { title: 'Java Cloud Engineer', match: 'Alta' },
+    { title: 'Data Engineer Junior', match: 'Media' },
+  ],
+  isLoading = false,
+}: CompatibleRolesCardProps) {
+  const [rolesExpanded, setRolesExpanded] = useState(false);
+
   return (
-    <Card className="border-border bg-card h-full flex flex-col justify-between shadow-sm">
-      <div>
-        <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-2 tracking-wider uppercase">
-            <Briefcase className="h-4 w-4 text-primary" />
-            Roles Compatibles
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-col gap-3">
-            {isEmpty ? null : (
-              roles.map((role) => (
-                <div 
-                  key={role.title} 
-                  className="p-3 rounded-xl border border-border bg-card flex items-center justify-between gap-2 transition-all hover:bg-muted/5"
+    <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden">
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
+          <Loader2 className="h-4 w-4 text-primary animate-spin" />
+          <p className="text-[9px] font-bold font-mono text-muted-foreground animate-pulse">
+            Buscando roles...
+          </p>
+        </div>
+      )}
+
+      <button
+        onClick={() => !isLoading && setRolesExpanded(!rolesExpanded)}
+        className="w-full text-left px-6 py-4 flex items-center justify-between cursor-pointer"
+        disabled={isLoading}
+      >
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-primary" />
+          <span className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+            Roles compatibles en el mercado
+          </span>
+        </div>
+        {rolesExpanded ? (
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        )}
+      </button>
+      
+      {rolesExpanded && !isLoading && (
+        <CardContent className="pt-0 pb-4 border-t border-border/50">
+          <div className="space-y-2 pt-4">
+            {roles.map((role, idx) => {
+              const badgeClass =
+                role.match === 'Alta'
+                  ? 'bg-emerald-500/10 text-emerald-600'
+                  : role.match === 'Media'
+                    ? 'bg-amber-500/10 text-amber-600'
+                    : 'bg-red-500/10 text-red-600';
+              return (
+                <div
+                  key={idx}
+                  className="flex justify-between items-center p-2 rounded-lg bg-secondary/35 text-xs"
                 >
-                  <span className="font-semibold text-xs text-foreground truncate">{role.title}</span>
-                  <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${
-                    role.match === 'Alta' 
-                      ? 'text-primary-foreground dark:text-primary bg-primary/5 border-primary/20' 
-                      : 'text-muted-foreground bg-secondary/50 border-border'
-                  }`}>
+                  <span className="font-bold text-foreground">{role.title}</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}`}>
                     Afinidad {role.match}
                   </span>
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
         </CardContent>
-      </div>
-      <div className="px-6 pb-6 pt-2">
-        <button 
-          disabled={isEmpty}
-          className={cn(
-            "flex items-center justify-between text-xs font-bold w-full transition-colors",
-            isEmpty 
-              ? "text-muted-foreground/45 cursor-not-allowed select-none" 
-              : "text-muted-foreground hover:text-foreground cursor-pointer"
-          )}
-        >
-          Ver más roles
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
+      )}
     </Card>
   );
 }

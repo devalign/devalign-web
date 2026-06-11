@@ -15,7 +15,7 @@ export default function AuthShell({ children }: AuthShellProps) {
     const isDark =
       localStorage.theme === 'dark' ||
       (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    setTheme(isDark ? 'dark' : 'light');
+    setTimeout(() => setTheme(isDark ? 'dark' : 'light'), 0);
   }, []);
 
   const toggleTheme = () => {

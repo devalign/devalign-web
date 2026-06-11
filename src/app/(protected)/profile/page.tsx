@@ -7,7 +7,6 @@ import { useUserProfile, useUpdateUserProfile } from '@/hooks/use-user-profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
@@ -126,12 +125,40 @@ function ProfileContent() {
     }
   };
 
+  // Check backend connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        await fetch(API_BASE_URL, {
+          method: 'GET',
+          signal: controller.signal,
+          mode: 'no-cors',
+        });
+        clearTimeout(timeoutId);
+      } catch {
+        toast.warning(
+          'El servidor de análisis (backend) está fuera de línea. Operando en modo de simulación local.',
+          {
+            duration: 8000,
+            id: 'backend-offline-warning',
+          },
+        );
+      }
+    };
+    checkConnection();
+  }, []);
+
   // Load profile data into state once loaded
   useEffect(() => {
     const loadProfileData = () => {
       if (profile) {
         setFullName(profile.full_name || user?.full_name || 'Willy Anderson Samata Ccoya');
-        setRoleTitle(profile.current_job_role || 'Practicante en Gestión de Información Financiera');
+        setRoleTitle(
+          profile.current_job_role || 'Practicante en Gestión de Información Financiera',
+        );
         setSeniority(profile.seniority || 'mid');
 
         if (profile.education && profile.education.length > 0) {
@@ -141,7 +168,7 @@ function ProfileContent() {
               institution: edu.institution,
               start_date: edu.start_date || '2021',
               end_date: edu.end_date || '2026',
-            }))
+            })),
           );
         } else {
           setEducationList([
@@ -161,7 +188,7 @@ function ProfileContent() {
               company: exp.company,
               period: `${exp.start_date} — ${exp.current ? 'Presente' : exp.end_date || ''}`,
               description: exp.description || '',
-            }))
+            })),
           );
         } else {
           setExperiences([
@@ -188,13 +215,17 @@ function ProfileContent() {
               name: c.name,
               issuer: c.issuer || '',
               date: c.date || '',
-            }))
+            })),
           );
         } else {
           setCertifications([
             { name: 'Data Analysis with Python', issuer: 'IBM', date: 'Octubre 2025' },
             { name: 'Data Visualization with Python', issuer: 'IBM', date: 'Octubre 2025' },
-            { name: 'Python para ciencia de datos, IA y desarrollo', issuer: 'IBM', date: 'Febrero 2025' },
+            {
+              name: 'Python para ciencia de datos, IA y desarrollo',
+              issuer: 'IBM',
+              date: 'Febrero 2025',
+            },
           ]);
         }
 
@@ -209,11 +240,37 @@ function ProfileContent() {
             .filter((s) => s.skill_type === 'tool' || s.skill_type === 'methodology')
             .map((s) => s.name);
 
-          setTechSkills(tech.length > 0 ? tech : ['SQL Server', 'Python', 'Databricks', 'Power BI', 'Power Apps', 'Power Automate', 'MS Excel', 'Jupyter Notebooks']);
-          setSoftSkills(soft.length > 0 ? soft : ['Trabajo en equipo', 'Comunicación efectiva', 'Resolución de problemas']);
+          setTechSkills(
+            tech.length > 0
+              ? tech
+              : [
+                  'SQL Server',
+                  'Python',
+                  'Databricks',
+                  'Power BI',
+                  'Power Apps',
+                  'Power Automate',
+                  'MS Excel',
+                  'Jupyter Notebooks',
+                ],
+          );
+          setSoftSkills(
+            soft.length > 0
+              ? soft
+              : ['Trabajo en equipo', 'Comunicación efectiva', 'Resolución de problemas'],
+          );
           setToolsSkills(tools.length > 0 ? tools : ['Git', 'PostgreSQL', 'VS Code']);
         } else {
-          setTechSkills(['SQL Server', 'Python', 'Databricks', 'Power BI', 'Power Apps', 'Power Automate', 'MS Excel', 'Jupyter Notebooks']);
+          setTechSkills([
+            'SQL Server',
+            'Python',
+            'Databricks',
+            'Power BI',
+            'Power Apps',
+            'Power Automate',
+            'MS Excel',
+            'Jupyter Notebooks',
+          ]);
           setSoftSkills(['Trabajo en equipo', 'Comunicación efectiva', 'Resolución de problemas']);
           setToolsSkills(['Git', 'PostgreSQL', 'VS Code']);
         }
@@ -241,7 +298,16 @@ function ProfileContent() {
         setCertifications([
           { name: 'Data Analysis with Python', issuer: 'IBM', date: 'Octubre 2025' },
         ]);
-        setTechSkills(['SQL Server', 'Python', 'Databricks', 'Power BI', 'Power Apps', 'Power Automate', 'MS Excel', 'Jupyter Notebooks']);
+        setTechSkills([
+          'SQL Server',
+          'Python',
+          'Databricks',
+          'Power BI',
+          'Power Apps',
+          'Power Automate',
+          'MS Excel',
+          'Jupyter Notebooks',
+        ]);
         setSoftSkills(['Trabajo en equipo', 'Comunicación efectiva', 'Resolución de problemas']);
         setToolsSkills(['Git', 'PostgreSQL', 'VS Code']);
       }
@@ -282,10 +348,7 @@ function ProfileContent() {
   // List Modification Actions
   const handleAddExperience = () => {
     const newIdx = experiences.length;
-    setExperiences([
-      ...experiences,
-      { role: '', company: '', period: '', description: '' },
-    ]);
+    setExperiences([...experiences, { role: '', company: '', period: '', description: '' }]);
     setEditingExperienceIdx(newIdx);
   };
 
@@ -318,10 +381,7 @@ function ProfileContent() {
 
   const handleAddCertification = () => {
     const newIdx = certifications.length;
-    setCertifications([
-      ...certifications,
-      { name: '', issuer: '', date: '' },
-    ]);
+    setCertifications([...certifications, { name: '', issuer: '', date: '' }]);
     setEditingCertIdx(newIdx);
   };
 
@@ -411,15 +471,14 @@ function ProfileContent() {
         toast.success('¡Perfil guardado! Motor ML recalculó el diagnóstico con éxito.');
         router.push('/dashboard?recalculate=true');
       }, 1500);
-
     } catch (error) {
       console.warn('API error updating profile, falling back to local simulation:', error);
-      
+
       // Fallback local simulation if backend API is not responding/stubbed
       setTimeout(() => {
         toast.dismiss(toastId);
         toast.success('¡Perfil guardado localmente! Redirigiendo a vista Diagnóstico...');
-        
+
         // Save to localStorage so that page.tsx can read it in MVP if backend is mocked
         const localData = {
           fullName,
@@ -450,41 +509,26 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen bg-background pb-12">
-      {/* Header */}
-      <header className="border-b border-border bg-card/65 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/dashboard')}
-              className="text-muted-foreground hover:text-foreground hover:bg-secondary/40 text-xs gap-1 h-8 cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Volver al Diagnóstico
-            </Button>
-            <Separator orientation="vertical" className="h-4 bg-border" />
-            <h1 className="text-sm font-bold tracking-tight text-foreground flex items-center gap-1.5">
-              Ajustes de Perfil Profesional
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            Motor ML: Calibración
-          </div>
-        </div>
-      </header>
-
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Back Button */}
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+            className="text-muted-foreground hover:text-foreground hover:bg-secondary/40 text-xs gap-1 h-8 cursor-pointer pl-2 pr-3"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Volver al Diagnóstico
+          </Button>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
           {/* Left Column (Info Principal, Habilidades, Educación) - Width 5/12 */}
           <div className="lg:col-span-5 space-y-6">
-            
             {/* 1. Información Principal */}
             <Card className="shadow-lg shadow-black/5 border-border bg-card">
-              <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
                   Información Profesional
                 </CardTitle>
@@ -514,12 +558,20 @@ function ProfileContent() {
                 {!isEditingInfo ? (
                   <div className="space-y-3">
                     <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nombre Completo</p>
-                      <p className="text-sm font-semibold text-foreground mt-0.5">{fullName || 'Sin nombre registrado'}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Nombre Completo
+                      </p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">
+                        {fullName || 'Sin nombre registrado'}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Cargo / Rol de Interés</p>
-                      <p className="text-sm font-semibold text-foreground mt-0.5">{roleTitle || 'Sin cargo registrado'}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Cargo / Rol de Interés
+                      </p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">
+                        {roleTitle || 'Sin cargo registrado'}
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -554,7 +606,7 @@ function ProfileContent() {
 
             {/* 2. Habilidades e Idiomas */}
             <Card className="shadow-lg shadow-black/5 border-border bg-card">
-              <CardHeader className="pb-4">
+              <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
                     Habilidades e Idiomas
@@ -588,7 +640,9 @@ function ProfileContent() {
                       ? softSkills
                       : toolsSkills
                   ).length === 0 ? (
-                    <p className="text-[10px] text-muted-foreground m-auto">No hay habilidades en esta categoría.</p>
+                    <p className="text-[10px] text-muted-foreground m-auto">
+                      No hay habilidades en esta categoría.
+                    </p>
                   ) : (
                     (activeTab === 'tech'
                       ? techSkills
@@ -635,7 +689,7 @@ function ProfileContent() {
 
             {/* 3. Educación Académica (Movido aquí para balancear el scroll) */}
             <Card className="shadow-lg shadow-black/5 border-border bg-card">
-              <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-4.5 h-4.5 text-primary" />
                   <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
@@ -654,7 +708,9 @@ function ProfileContent() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {educationList.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">No has registrado educación académica.</p>
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No has registrado educación académica.
+                  </p>
                 ) : (
                   educationList.map((edu, idx) => {
                     const isEditing = editingEducationIdx === idx;
@@ -704,7 +760,9 @@ function ProfileContent() {
                         ) : (
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Editando Educación</span>
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                                Editando Educación
+                              </span>
                               <div className="flex items-center gap-1">
                                 <Button
                                   type="button"
@@ -728,10 +786,12 @@ function ProfileContent() {
                                 </Button>
                               </div>
                             </div>
-                            
+
                             <div className="space-y-2 pr-6">
                               <div className="space-y-0.5">
-                                <label className="text-[9px] font-bold text-muted-foreground uppercase">Título / Carrera</label>
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Título / Carrera
+                                </label>
                                 <Input
                                   value={edu.degree}
                                   onChange={(e) => {
@@ -745,7 +805,9 @@ function ProfileContent() {
                               </div>
 
                               <div className="space-y-0.5">
-                                <label className="text-[9px] font-bold text-muted-foreground uppercase">Institución</label>
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Institución
+                                </label>
                                 <Input
                                   value={edu.institution}
                                   onChange={(e) => {
@@ -757,10 +819,12 @@ function ProfileContent() {
                                   className="h-8 text-xs bg-card"
                                 />
                               </div>
-                              
+
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="space-y-0.5">
-                                  <label className="text-[9px] font-bold text-muted-foreground uppercase">Año Inicio</label>
+                                  <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                    Año Inicio
+                                  </label>
                                   <Input
                                     value={edu.start_date || ''}
                                     onChange={(e) => {
@@ -773,7 +837,9 @@ function ProfileContent() {
                                   />
                                 </div>
                                 <div className="space-y-0.5">
-                                  <label className="text-[9px] font-bold text-muted-foreground uppercase">Año Fin</label>
+                                  <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                    Año Fin
+                                  </label>
                                   <Input
                                     value={edu.end_date || ''}
                                     onChange={(e) => {
@@ -799,10 +865,9 @@ function ProfileContent() {
 
           {/* Right Column (Experience & Certifications) - Width 7/12 */}
           <div className="lg:col-span-7 space-y-6">
-            
             {/* 1. Experiencia Laboral (Diseño Minimalista y Compacto) */}
             <Card className="shadow-lg shadow-black/5 border-border bg-card">
-              <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-primary" />
                   <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
@@ -821,7 +886,9 @@ function ProfileContent() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {experiences.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">No has registrado puestos laborales.</p>
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No has registrado puestos laborales.
+                  </p>
                 ) : (
                   experiences.map((exp, idx) => {
                     const isEditing = editingExperienceIdx === idx;
@@ -837,7 +904,10 @@ function ProfileContent() {
                                 {exp.role || 'Sin cargo registrado'}
                               </h4>
                               <p className="text-[11px] text-muted-foreground font-medium">
-                                {exp.company || 'Sin empresa registrada'} &bull; <span className="text-[10px] text-muted-foreground/85 font-normal">{exp.period || 'Sin periodo'}</span>
+                                {exp.company || 'Sin empresa registrada'} &bull;{' '}
+                                <span className="text-[10px] text-muted-foreground/85 font-normal">
+                                  {exp.period || 'Sin periodo'}
+                                </span>
                               </p>
                               {exp.description && (
                                 <p className="text-[11px] text-muted-foreground/80 leading-normal line-clamp-2 mt-1 whitespace-pre-line">
@@ -871,7 +941,9 @@ function ProfileContent() {
                         ) : (
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Editando Experiencia</span>
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                                Editando Experiencia
+                              </span>
                               <div className="flex items-center gap-1">
                                 <Button
                                   type="button"
@@ -898,7 +970,9 @@ function ProfileContent() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pr-6">
                               <div className="space-y-0.5">
-                                <label className="text-[9px] font-bold text-muted-foreground uppercase">Cargo</label>
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Cargo
+                                </label>
                                 <Input
                                   value={exp.role}
                                   onChange={(e) => {
@@ -912,7 +986,9 @@ function ProfileContent() {
                               </div>
 
                               <div className="space-y-0.5">
-                                <label className="text-[9px] font-bold text-muted-foreground uppercase">Empresa</label>
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Empresa
+                                </label>
                                 <Input
                                   value={exp.company}
                                   onChange={(e) => {
@@ -926,7 +1002,9 @@ function ProfileContent() {
                               </div>
 
                               <div className="space-y-0.5">
-                                <label className="text-[9px] font-bold text-muted-foreground uppercase">Periodo</label>
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Periodo
+                                </label>
                                 <Input
                                   value={exp.period}
                                   onChange={(e) => {
@@ -941,7 +1019,9 @@ function ProfileContent() {
                             </div>
 
                             <div className="space-y-0.5 pr-6">
-                              <label className="text-[9px] font-bold text-muted-foreground uppercase">Descripción del Cargo</label>
+                              <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                Descripción del Cargo
+                              </label>
                               <textarea
                                 value={exp.description}
                                 onChange={(e) => {
@@ -964,7 +1044,7 @@ function ProfileContent() {
 
             {/* 2. Certificaciones (Diseño Minimalista y Compacto) */}
             <Card className="shadow-lg shadow-black/5 border-border bg-card">
-              <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-primary" />
                   <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
@@ -983,7 +1063,9 @@ function ProfileContent() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {certifications.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">No has registrado certificaciones.</p>
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No has registrado certificaciones.
+                  </p>
                 ) : (
                   certifications.map((c, idx) => {
                     const isEditing = editingCertIdx === idx;
@@ -999,7 +1081,10 @@ function ProfileContent() {
                                 {c.name || 'Sin nombre de certificación'}
                               </h4>
                               <p className="text-[11px] text-muted-foreground font-medium">
-                                {c.issuer || 'Sin emisor registrado'} &bull; <span className="text-[10px] text-muted-foreground/85 font-normal">{c.date || 'Sin fecha'}</span>
+                                {c.issuer || 'Sin emisor registrado'} &bull;{' '}
+                                <span className="text-[10px] text-muted-foreground/85 font-normal">
+                                  {c.date || 'Sin fecha'}
+                                </span>
                               </p>
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
@@ -1028,7 +1113,9 @@ function ProfileContent() {
                         ) : (
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Editando Certificación</span>
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                                Editando Certificación
+                              </span>
                               <div className="flex items-center gap-1">
                                 <Button
                                   type="button"
@@ -1055,7 +1142,9 @@ function ProfileContent() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pr-6">
                               <div className="space-y-0.5">
-                                <label className="text-[9px] font-bold text-muted-foreground uppercase">Nombre de Certificación</label>
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Nombre de Certificación
+                                </label>
                                 <Input
                                   value={c.name}
                                   onChange={(e) => {
@@ -1069,7 +1158,9 @@ function ProfileContent() {
                               </div>
 
                               <div className="space-y-0.5">
-                                <label className="text-[9px] font-bold text-muted-foreground uppercase">Emisor</label>
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Emisor
+                                </label>
                                 <Input
                                   value={c.issuer}
                                   onChange={(e) => {
@@ -1083,7 +1174,9 @@ function ProfileContent() {
                               </div>
 
                               <div className="space-y-0.5">
-                                <label className="text-[9px] font-bold text-muted-foreground uppercase">Fecha</label>
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Fecha
+                                </label>
                                 <Input
                                   value={c.date}
                                   onChange={(e) => {
@@ -1148,9 +1241,7 @@ function ProfileContent() {
                 </div>
               </CardContent>
             </Card>
-
           </div>
-
         </div>
       </div>
 
