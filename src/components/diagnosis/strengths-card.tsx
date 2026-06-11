@@ -42,7 +42,7 @@ export function StrengthsCard({ techSkills, onViewAll, isLoading = false }: Stre
                 className="flex flex-col justify-between p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10"
               >
                 <div className="flex justify-between items-start gap-1">
-                  <span className="font-bold text-foreground truncate">{f}</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{f}</span>
                   <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
                     {demand}% DEMANDA
                   </span>

@@ -26,10 +26,16 @@ import {
   Trash2,
   Pencil,
   Check,
+  FileText,
+  HardDrive,
+  Download,
+  ShieldCheck,
+  Upload,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import CVUploader from '@/components/profile/cv-uploader';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
+import CVUploader from '@/components/profile/cv-uploader';
+import { useUserCVs } from '@/hooks/use-user-cvs';
 import { UserProfileData } from '@/lib/api/types';
 
 interface Experience {
@@ -54,7 +60,9 @@ interface Education {
 
 function ProfileContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const { data: profile, isLoading: isProfileLoading } = useUserProfile();
+  const { data: profile, isLoading: isProfileLoading, refetch: refetchProfile } = useUserProfile();
+  const { data: cvData, isLoading: isCvLoading, refetch: refetchCVs } = useUserCVs();
+  const currentCV = cvData?.cvs?.[0];
   const updateProfileMutation = useUpdateUserProfile();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -92,35 +100,23 @@ function ProfileContent() {
 
   // Modal actions from query parameters
   const action = searchParams.get('action');
-  const [isAtsOpen, setIsAtsOpen] = useState(false);
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isCVManagerOpen, setIsCVManagerOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (action === 'preview-ats') {
-        setIsAtsOpen(true);
-        setIsUploadOpen(false);
-      } else if (action === 'update-cv') {
-        setIsUploadOpen(true);
-        setIsAtsOpen(false);
+        setIsCVManagerOpen(true);
       } else {
-        setIsAtsOpen(false);
-        setIsUploadOpen(false);
+        setIsCVManagerOpen(false);
       }
     }, 0);
     return () => clearTimeout(timeoutId);
   }, [action]);
 
-  const handleCloseAts = (open: boolean) => {
-    setIsAtsOpen(open);
+  const handleCloseCVManager = (open: boolean) => {
+    setIsCVManagerOpen(open);
     if (!open && action === 'preview-ats') {
-      router.push('/profile');
-    }
-  };
-
-  const handleCloseUpload = (open: boolean) => {
-    setIsUploadOpen(open);
-    if (!open && action === 'update-cv') {
       router.push('/profile');
     }
   };
@@ -511,7 +507,7 @@ function ProfileContent() {
     <div className="min-h-screen bg-background pb-12">
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-6 py-6">
-        {/* Back Button */}
+        {/* Back Button & CV Export Action */}
         <div className="flex items-center justify-between mb-6">
           <Button
             variant="ghost"
@@ -521,6 +517,16 @@ function ProfileContent() {
           >
             <ChevronLeft className="w-4 h-4" />
             Volver al Diagnóstico
+          </Button>
+
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => router.push('/profile?action=preview-ats')}
+            className="text-xs font-semibold gap-1.5 h-8 cursor-pointer pl-3 pr-4"
+          >
+            <FileText className="w-4 h-4" />
+            Exportar CV ATS
           </Button>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -604,6 +610,90 @@ function ProfileContent() {
               </CardContent>
             </Card>
 
+            {/* Currículum Base Card */}
+            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+                  Currículum Base
+                </CardTitle>
+                {currentCV && (
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/5 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                    Analizado
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isCvLoading ? (
+                  <div className="space-y-2 py-2">
+                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                  </div>
+                ) : currentCV ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border/40">
+                      <div className="rounded-xl bg-red-50 p-2 text-red-500 shrink-0 dark:bg-red-950/30">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <p
+                          className="text-xs font-semibold text-foreground truncate max-w-[180px] sm:max-w-[220px]"
+                          title={currentCV.original_filename}
+                        >
+                          {currentCV.original_filename}
+                        </p>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
+                          <span className="flex items-center gap-0.5 shrink-0">
+                            <HardDrive className="h-3 w-3 text-muted-foreground/60" />
+                            {(currentCV.size_bytes / 1024 / 1024).toFixed(2)} MB
+                          </span>
+                          {currentCV.uploaded_at && (
+                            <>
+                              <span>&bull;</span>
+                              <span>{new Date(currentCV.uploaded_at).toLocaleDateString()}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {currentCV.download_url && (
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg shrink-0"
+                          title="Descargar PDF original"
+                        >
+                          <a href={currentCV.download_url} download target="_blank" rel="noreferrer">
+                            <Download className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border bg-secondary/5 p-4 text-center">
+                    <FileText className="h-6 w-6 text-muted-foreground/50 mx-auto mb-2" />
+                    <p className="text-xs font-semibold text-foreground">No tienes ningún currículum activo</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                      Sube tu CV en PDF o Word para calcular tu diagnóstico técnico de forma automática.
+                    </p>
+                  </div>
+                )}
+
+                <div className="pt-2 border-t border-border/50">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="w-full text-xs font-semibold gap-1.5 h-9 cursor-pointer border-dashed border-primary/30 hover:border-primary/50 text-primary hover:bg-primary/5 transition-colors"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Actualizar CV
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* 2. Habilidades e Idiomas */}
             <Card className="shadow-lg shadow-black/5 border-border bg-card">
               <CardHeader>
@@ -633,7 +723,7 @@ function ProfileContent() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Chips Grid */}
-                <div className="flex flex-wrap gap-1.5 min-h-24 p-3 rounded-lg border border-dashed border-border bg-secondary/5">
+                <div className="flex flex-wrap items-start content-start gap-1.5 min-h-24 p-3 rounded-lg border border-dashed border-border bg-secondary/5">
                   {(activeTab === 'tech'
                     ? techSkills
                     : activeTab === 'soft'
@@ -1199,7 +1289,7 @@ function ProfileContent() {
             </Card>
 
             {/* Global Actions Card */}
-            <Card className="border-primary/20 bg-primary/5 shadow-md">
+            <Card className="sticky bottom-6 z-10 border-primary/20 bg-primary/5 shadow-lg shadow-primary/10 backdrop-blur-xl">
               <CardContent className="py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-center sm:text-left">
                   <h4 className="text-xs font-bold text-foreground flex items-center justify-center sm:justify-start gap-1">
@@ -1245,39 +1335,39 @@ function ProfileContent() {
         </div>
       </div>
 
+      {/* Unified CV Manager Modal */}
+      {isCVManagerOpen && (
+        <CVAtsPreviewModal
+          isOpen={isCVManagerOpen}
+          onOpenChange={handleCloseCVManager}
+          profile={dynamicProfile}
+          userEmail={user?.email || undefined}
+        />
+      )}
+
       {/* Actualizar CV Modal */}
-      <Dialog open={isUploadOpen} onOpenChange={handleCloseUpload}>
-        <DialogContent className="sm:max-w-md border-border bg-card">
+      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-bold text-foreground text-emerald-600 dark:text-emerald-500">
-              <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
-              Actualizar Currículum Vitae
+            <DialogTitle className="text-sm font-extrabold uppercase tracking-wider text-foreground">
+              Actualizar Currículum
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Sube una versión más reciente de tu CV. Sincronizaremos tus datos profesionales
-              automáticamente y recalcularemos tu alineación técnica.
+              Carga tu CV más reciente (PDF o Word) para actualizar tu diagnóstico técnico de forma automática.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-2">
+          <div className="pt-4">
             <CVUploader
               onUploadSuccess={() => {
-                handleCloseUpload(false);
-                toast.success('CV cargado y analizado exitosamente.');
+                refetchCVs();
+                refetchProfile();
+                setIsUploadModalOpen(false);
+                toast.success('CV cargado y analizado exitosamente. Tu perfil ha sido actualizado.');
               }}
             />
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* CV ATS Generator / Export preview modal */}
-      {isAtsOpen && (
-        <CVAtsPreviewModal
-          isOpen={isAtsOpen}
-          onOpenChange={handleCloseAts}
-          profile={dynamicProfile}
-          userEmail={user?.email || undefined}
-        />
-      )}
     </div>
   );
 }

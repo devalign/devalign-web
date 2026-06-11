@@ -1,16 +1,16 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
 interface PriorityGapsCardProps {
   marketGaps: string[];
+  onViewAll: () => void;
   isLoading?: boolean;
 }
 
-export function PriorityGapsCard({ marketGaps, isLoading = false }: PriorityGapsCardProps) {
+export function PriorityGapsCard({ marketGaps, onViewAll, isLoading = false }: PriorityGapsCardProps) {
   return (
     <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col h-full relative overflow-hidden">
       {isLoading && (
@@ -58,7 +58,7 @@ export function PriorityGapsCard({ marketGaps, isLoading = false }: PriorityGaps
                     className={`flex flex-col justify-between p-2.5 rounded-lg border border-dashed transition-colors ${borderClass}`}
                   >
                     <div className="flex justify-between items-start gap-1">
-                      <span className="font-bold text-foreground truncate">{bg}</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{bg}</span>
                       <span className={`text-[9px] font-bold shrink-0 ${textClass}`}>
                         {demand}% DEMANDA
                       </span>
@@ -71,12 +71,12 @@ export function PriorityGapsCard({ marketGaps, isLoading = false }: PriorityGaps
               })}
             </div>
             <div className="pt-2 text-right">
-              <Link
-                href="/dashboard/roadmap"
-                className="text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer"
+              <button
+                onClick={onViewAll}
+                className="text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer bg-transparent border-0"
               >
                 Ver todas ({marketGaps.length}) <ArrowRight className="w-3 h-3" />
-              </Link>
+              </button>
             </div>
           </>
         )}

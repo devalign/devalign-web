@@ -42,7 +42,7 @@ export function MarketScoreCard({
   const scoreState = getScoreState(currentScore);
 
   return (
-    <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden">
+    <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden h-full flex flex-col justify-center">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -52,7 +52,7 @@ export function MarketScoreCard({
         </div>
       )}
 
-      <CardContent className="pt-6">
+      <CardContent className="py-6 flex-1 flex flex-col justify-center">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           {/* Score */}
           <div className="text-center sm:text-left space-y-1">

@@ -16,7 +16,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Sparkles } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+import { Sparkles, Search, CheckCircle2, AlertCircle } from 'lucide-react';
 
 // Refactored modular subcomponents
 import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
@@ -27,6 +34,8 @@ import { StrengthsCard } from '@/components/diagnosis/strengths-card';
 import { PriorityGapsCard } from '@/components/diagnosis/priority-gaps-card';
 import { CompatibleRolesCard } from '@/components/diagnosis/compatible-roles-card';
 import { AiInsightCard } from '@/components/diagnosis/ai-insight-card';
+import { ClusterDemandCard } from '@/components/diagnosis/cluster-demand-card';
+import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
 
 function DashboardContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
@@ -38,8 +47,13 @@ function DashboardContent() {
   // Onboarding & CV Upload Simulation State
   const [hasCV, setHasCV] = useState(true);
 
-  // Active Tab for Habilidades (shared state to support switching via StrengthsCard View All)
-  const [activeTab, setActiveTab] = useState<'tech' | 'soft' | 'tools'>('tech');
+  // Drawers states
+  const [isStrengthsDrawerOpen, setIsStrengthsDrawerOpen] = useState(false);
+  const [isGapsDrawerOpen, setIsGapsDrawerOpen] = useState(false);
+
+  // Search states for drawers
+  const [strengthsSearch, setStrengthsSearch] = useState('');
+  const [gapsSearch, setGapsSearch] = useState('');
 
   // Profile Data States
   const [fullName, setFullName] = useState('Willy Anderson Samata Ccoya');
@@ -327,70 +341,82 @@ function DashboardContent() {
     <div className="min-h-screen bg-background">
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-6 py-8 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* COLUMNA IZQUIERDA: RESUMEN DE PERFIL Y AFINIDAD (41.6% span-5) */}
-          <div className="lg:col-span-5 space-y-6">
-            
-            {/* 1. Cabecera de Perfil y Habilidades Detectadas (FUSIONADOS) */}
+          {/* Fila 1: Perfil (1 col) y Score de Mercado (2 cols) */}
+          <div className="lg:col-span-1">
             <ProfileSkillsCard
               fullName={fullName}
               roleTitle={roleTitle}
               seniority={seniority}
-              techSkills={techSkills}
-              softSkills={softSkills}
-              toolsSkills={toolsSkills}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
               isLoading={isRecalculating}
             />
-
-            {/* 2. Radar Chart (Movido a columna izquierda) */}
-            <AffinityRadarChart
-              techSkills={techSkills}
-              isLoading={isRecalculating}
-            />
-
           </div>
 
-          {/* COLUMNA DERECHA: RESULTADOS DEL DIAGNÓSTICO (58.3% span-7) */}
-          <div className="lg:col-span-7 space-y-6 relative">
-            
-            {/* 1. Score & Especialidad */}
+          <div className="lg:col-span-2">
             <MarketScoreCard
               currentScore={currentScore}
               isLoading={isRecalculating}
             />
+          </div>
 
-            {/* 2. Fortalezas & Brechas (Side-by-side) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
-              {/* Fortalezas Card */}
-              <StrengthsCard
-                techSkills={techSkills}
-                onViewAll={() => setActiveTab('tech')}
-                isLoading={isRecalculating}
-              />
+          {/* Fila 2: Diagnóstico (1 col cada uno: Radar, Fortalezas, Brechas) */}
+          <div className="lg:col-span-1">
+            <AffinityRadarChart
+              techSkills={techSkills}
+              isLoading={isRecalculating}
+            />
+          </div>
 
-              {/* Brechas Card */}
-              <PriorityGapsCard
-                marketGaps={marketGaps}
-                isLoading={isRecalculating}
-              />
+          <div className="lg:col-span-1">
+            <StrengthsCard
+              techSkills={techSkills}
+              onViewAll={() => {
+                setStrengthsSearch('');
+                setIsStrengthsDrawerOpen(true);
+              }}
+              isLoading={isRecalculating}
+            />
+          </div>
 
-            </div>
+          <div className="lg:col-span-1">
+            <PriorityGapsCard
+              marketGaps={marketGaps}
+              onViewAll={() => {
+                setGapsSearch('');
+                setIsGapsDrawerOpen(true);
+              }}
+              isLoading={isRecalculating}
+            />
+          </div>
 
-            {/* Insight IA Box (Fuera de los cards y abajo) */}
+          {/* Fila 3: Análisis de Mercado (Roles, Demanda de Cluster, Impacto de Mercado) */}
+          <div className="lg:col-span-1">
+            <CompatibleRolesCard
+              isLoading={isRecalculating}
+            />
+          </div>
+
+          <div className="lg:col-span-1">
+            <ClusterDemandCard
+              roleTitle={roleTitle}
+              isLoading={isRecalculating}
+            />
+          </div>
+
+          <div className="lg:col-span-1">
+            <MarketImpactCard
+              marketGaps={marketGaps}
+              isLoading={isRecalculating}
+            />
+          </div>
+
+          {/* Fila 4: Recomendaciones IA (Ancho completo) */}
+          <div className="lg:col-span-3">
             <AiInsightCard
               marketGaps={marketGaps}
               isLoading={isRecalculating}
             />
-
-            {/* 3. Roles Compatibles */}
-            <CompatibleRolesCard
-              isLoading={isRecalculating}
-            />
-
           </div>
 
         </div>
@@ -429,6 +455,135 @@ function DashboardContent() {
           userEmail={user?.email || undefined}
         />
       )}
+
+      {/* Drawer: Todas las Fortalezas */}
+      <Sheet open={isStrengthsDrawerOpen} onOpenChange={setIsStrengthsDrawerOpen}>
+        <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-bold">
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              Todas las Fortalezas
+            </SheetTitle>
+            <SheetDescription className="text-xs text-muted-foreground mt-1">
+              Habilidades técnicas en las que demuestras dominio según el análisis de tu CV.
+            </SheetDescription>
+          </SheetHeader>
+
+          {/* Search bar */}
+          <div className="relative my-4">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Buscar fortaleza..."
+              value={strengthsSearch}
+              onChange={(e) => setStrengthsSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-border bg-secondary/35 text-foreground placeholder-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+          </div>
+
+          {/* List */}
+          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
+            {techSkills
+              .filter((s) => s.toLowerCase().includes(strengthsSearch.toLowerCase()))
+              .map((skill, idx) => {
+                const levels = ['Avanzado', 'Intermedio - Avanzado', 'Intermedio', 'Intermedio'];
+                const level = levels[idx % levels.length];
+                const demand = Math.max(92 - idx * 5, 45);
+
+                return (
+                  <div
+                    key={skill}
+                    className="flex flex-col justify-between p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10 transition-colors hover:bg-emerald-500/10"
+                  >
+                    <div className="flex justify-between items-start gap-1">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
+                        {skill}
+                      </span>
+                      <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+                        {demand}% DEMANDA
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground mt-1">{level}</span>
+                  </div>
+                );
+              })}
+            {techSkills.filter((s) => s.toLowerCase().includes(strengthsSearch.toLowerCase())).length === 0 && (
+              <p className="text-center text-xs text-muted-foreground py-8">
+                No se encontraron fortalezas con ese nombre.
+              </p>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Drawer: Todas las Brechas */}
+      <Sheet open={isGapsDrawerOpen} onOpenChange={setIsGapsDrawerOpen}>
+        <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="flex items-center gap-2 text-red-600 dark:text-red-500 font-bold">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              Brechas Prioritarias
+            </SheetTitle>
+            <SheetDescription className="text-xs text-muted-foreground mt-1">
+              Habilidades recomendadas para aumentar tu alineación técnica y compatibilidad en el mercado.
+            </SheetDescription>
+          </SheetHeader>
+
+          {/* Search bar */}
+          <div className="relative my-4">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Buscar brecha..."
+              value={gapsSearch}
+              onChange={(e) => setGapsSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-border bg-secondary/35 text-foreground placeholder-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+          </div>
+
+          {/* List */}
+          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
+            {marketGaps
+              .filter((g) => g.toLowerCase().includes(gapsSearch.toLowerCase()))
+              .map((gap, idx) => {
+                const crit = idx < 3 ? 'Crítica' : 'Alta';
+                const demand = Math.max(74 - idx * 4, 38);
+                const borderClass =
+                  crit === 'Crítica'
+                    ? 'border-red-500/30 bg-red-500/5 hover:border-red-500/50 hover:bg-red-500/10'
+                    : 'border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50 hover:bg-amber-500/10';
+                const textClass =
+                  crit === 'Crítica'
+                    ? 'text-red-600 dark:text-red-400'
+                    : 'text-amber-600 dark:text-amber-400';
+
+                return (
+                  <div
+                    key={gap}
+                    className={`flex flex-col justify-between p-3 rounded-lg border border-dashed transition-colors ${borderClass}`}
+                  >
+                    <div className="flex justify-between items-start gap-1">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
+                        {gap}
+                      </span>
+                      <span className={`text-[9px] font-bold shrink-0 ${textClass}`}>
+                        {demand}% DEMANDA
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground mt-1">
+                      Brecha ({crit})
+                    </span>
+                  </div>
+                );
+              })}
+            {marketGaps.filter((g) => g.toLowerCase().includes(gapsSearch.toLowerCase())).length === 0 && (
+              <p className="text-center text-xs text-muted-foreground py-8">
+                No se encontraron brechas con ese nombre.
+              </p>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

@@ -40,7 +40,7 @@ export function AffinityRadarChart({ techSkills, isLoading = false }: AffinityRa
 
     const convert = (val: number, angleDeg: number) => {
       const angleRad = (angleDeg - 90) * (Math.PI / 180);
-      const r = (val / 100) * 70; // Map 100% to 70px radius
+      const r = (val / 100) * 80; // Map 100% to 80px radius
       const x = 100 + r * Math.cos(angleRad);
       const y = 100 + r * Math.sin(angleRad);
       return `${x.toFixed(1)},${y.toFixed(1)}`;
@@ -86,11 +86,11 @@ export function AffinityRadarChart({ techSkills, isLoading = false }: AffinityRa
         </div>
       </CardHeader>
       <CardContent className="flex justify-center py-4">
-        <div className="relative w-full max-w-[200px] aspect-square">
+        <div className="relative w-full max-w-[280px] aspect-square">
           <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
             {/* Background rings */}
             {[20, 40, 60, 80, 100].map((r) => {
-              const rad = (r / 100) * 70;
+              const rad = (r / 100) * 80;
               const points = [0, 72, 144, 216, 288]
                 .map((angle) => {
                   const a = (angle - 90) * (Math.PI / 180);
@@ -114,19 +114,19 @@ export function AffinityRadarChart({ techSkills, isLoading = false }: AffinityRa
                   key={angle}
                   x1={100}
                   y1={100}
-                  x2={100 + 70 * Math.cos(a)}
-                  y2={100 + 70 * Math.sin(a)}
+                  x2={100 + 80 * Math.cos(a)}
+                  y2={100 + 80 * Math.sin(a)}
                   className="stroke-border/40 stroke-1"
                 />
               );
             })}
 
             {/* Labels */}
-            <text x={100} y={15} textAnchor="middle" className="fill-muted-foreground text-[8px] font-bold font-mono">BACKEND</text>
-            <text x={178} y={75} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">FRONTEND</text>
-            <text x={155} y={185} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">CLOUD</text>
-            <text x={45} y={185} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DEVOPS</text>
-            <text x={22} y={75} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DATA</text>
+            <text x={100} y={8} textAnchor="middle" className="fill-muted-foreground text-[8px] font-bold font-mono">BACKEND</text>
+            <text x={186} y={75} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">FRONTEND</text>
+            <text x={156} y={192} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">CLOUD</text>
+            <text x={44} y={192} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DEVOPS</text>
+            <text x={14} y={75} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DATA</text>
 
             {/* Market and User polygons */}
             <polygon points={radarPoints.market} className="fill-slate-800/10 stroke-slate-500/50 stroke-1.5" />

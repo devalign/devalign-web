@@ -11,7 +11,6 @@ import {
   Lock,
   ShieldCheck,
   LogOut,
-  FileText,
   Sun,
   Moon,
   ChevronLeft,
@@ -20,7 +19,6 @@ import {
 } from 'lucide-react';
 import { useSidebar } from './sidebar-context';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useUserCVs } from '@/hooks/use-user-cvs';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -39,7 +37,6 @@ export default function AppSidebar() {
   const router = useRouter();
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const { data: cvData } = useUserCVs();
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
@@ -78,8 +75,6 @@ export default function AppSidebar() {
     { name: 'Diagnóstico', href: '/dashboard', icon: Activity },
     { name: 'Roadmap', href: '/dashboard/roadmap', icon: Map },
   ];
-
-  const currentCV = cvData?.cvs?.[0];
 
   return (
     <aside
@@ -167,53 +162,6 @@ export default function AppSidebar() {
           );
         })}
 
-        {/* Document Section (from reference) */}
-        {!isCollapsed && currentCV && (
-          <div className="mt-8 pt-6 border-t border-border space-y-3">
-            <p className="px-2 text-[10px] font-semibold text-muted-foreground tracking-wider uppercase">
-              Documento
-            </p>
-            <div className="rounded-xl border border-border bg-card p-3 transition-shadow duration-200">
-              <div className="flex items-start gap-2.5">
-                <div className="rounded-lg bg-red-50 p-1.5 text-red-500 shrink-0 dark:bg-red-950/30">
-                  <FileText className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1 space-y-0.5">
-                  <p
-                    className="text-xs font-medium text-foreground truncate"
-                    title={currentCV.original_filename}
-                  >
-                    {currentCV.original_filename}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground font-mono">
-                    {(currentCV.size_bytes / 1024 / 1024).toFixed(1)} MB • PDF
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-3 space-y-2">
-                <Link href="/profile?action=update-cv" className="block">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-[10px] h-7 border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
-                  >
-                    Actualizar CV
-                  </Button>
-                </Link>
-                <Link href="/profile?action=preview-ats" className="block">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="w-full text-[10px] h-7 cursor-pointer"
-                  >
-                    Generar CV ATS
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
       </nav>
 
       {/* Security Info */}
