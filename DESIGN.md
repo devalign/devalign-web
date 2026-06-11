@@ -23,6 +23,8 @@ colors:
   ring: '#8EAD9A'
   destructive: '#EF4444'
   destructive-foreground: '#F9FAFB'
+  success: '#10B981'
+  success-foreground: '#FFFFFF'
 
 typography:
   font-sans:
@@ -62,7 +64,7 @@ La atmósfera visual de Devalign debe evocar profesionalismo, mentoría técnica
 
 - **Seguridad**: Colores orgánicos que reducen la tensión y la fatiga visual.
 - **Precisión**: Alta legibilidad y contraste adecuado para herramientas de diagnóstico.
-- **Premium**: Acabado contemporáneo usando fondos sutiles con sombras suaves (`shadow-black/5`) y difuminado de fondo (`backdrop-blur-xl`).
+- **Premium**: Acabado contemporáneo y plano, usando fondos sutiles con bordes de contorno limpios y difuminado de fondo (`backdrop-blur-xl`).
 
 ---
 
@@ -91,9 +93,16 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
 - **Flujo de Autenticación (`/` o ruta de login)**:
   - Implementado a través de [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/page.tsx) que renderiza el [AuthShell](file:///c:/Projects/Devalign/devalign-web/src/components/auth/auth-shell.tsx) envolviendo al [AuthCard](<file:///c:/Projects/Devalign/devalign-web/src/app/(auth)/login/auth-card.tsx>).
   - Ofrece un diseño tipo "banner publicitario + formulario centrado" con un efecto visual de fondo que simula una grilla circular tecnológica de color `{colors.border}`.
-- **Zona Protegida (`/dashboard`)**:
-  - Ubicada en [src/app/dashboard/page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/dashboard/page.tsx).
-  - Contiene un diseño limpio de cabecera con navegación, resumen del usuario actual de Supabase y diagnóstico de aprovisionamiento en tiempo real con el backend de FastAPI.
+- **Zona Protegida (`(protected)`)**:
+  - Implementa un sistema de layouts de 3 columnas compuesto por:
+    - **Columna 1: Sidebar de Navegación** ([app-sidebar.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/layout/app-sidebar.tsx)): Menú colapsable lateral con información del usuario autenticado, estado activo/bloqueado de vistas y botón de cierre de sesión.
+    - **Columna 2: Contenido Principal**: El espacio flexible central (`{children}`) que renderiza páginas específicas (como `/profile` o `/dashboard`).
+    - **Columna 3: Aside Contextual** (p.ej. [profile-aside.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/profile/profile-aside.tsx)): Barra lateral derecha para mostrar beneficios, social proof, guías informativas y políticas de seguridad ajustadas al contexto activo.
+  - La landing page post-login por defecto es `/profile` ([page.tsx](<file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/profile/page.tsx>)), que contiene el flujo de upload del CV para análisis inicial del desarrollador.
+  - **Diagnóstico Inteligente (`/diagnosis`)**:
+    - Implementado a través de [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/diagnosis/page.tsx) que renderiza el [DiagnosisDashboard](file:///c:/Projects/Devalign/devalign-web/src/components/diagnosis/diagnosis-dashboard.tsx).
+    - Orquesta un bento-grid responsivo de 3 columnas en desktop para mostrar las fortalezas, brechas, afinidad por dominio, roles compatibles, insights y tendencias del mercado.
+    - Utiliza `recharts` para las visualizaciones de datos, estilizadas de forma dinámica usando las variables HSL de los temas del sistema de diseño.
 
 ### 3.2. Middleware y Protección de Rutas
 
@@ -110,10 +119,11 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
 Los componentes de interfaz se localizan en [src/components/ui](file:///c:/Projects/Devalign/devalign-web/src/components/ui). Todos ellos siguen el patrón de extender los elementos HTML estándar de React y aplicar estilos Tailwind mediante la utilidad `cn(...)` de [src/lib/utils.ts](file:///c:/Projects/Devalign/devalign-web/src/lib/utils.ts) para permitir personalizaciones locales sin perder los estilos base:
 
 1.  **Button**: Ofrece variantes estilizadas (`default`, `destructive`, `outline`, `secondary`, `ghost`, `link`) y tamaños preconfigurados. Utiliza transiciones de color suaves ante eventos hover.
-2.  **Card**: Componente estructurado en subcomponentes (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) para enmarcar secciones de contenido. Incorpora sombras sutiles (`shadow-lg shadow-black/5`) y bordes claros (`border-border`).
+2.  **Card**: Componente estructurado en subcomponentes (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) para enmarcar secciones de contenido. Se basa en un diseño plano sin sombreados, delimitado únicamente por bordes claros (`border-border`).
 3.  **Input**: Elemento de entrada de texto optimizado para formularios. Cuenta con estados deshabilitados con opacidad controlada y efectos de anillo (`focus-visible:ring-1`) al enfocarse.
 4.  **Form**: Componentes de formulario basados en `react-hook-form` y `zod` para validaciones completas en el cliente.
 5.  **Tabs**: Soporte para vistas tabulares dinámicas (utilizado para alternar entre Login y Signup).
+6.  **Diagnosis Components**: Tarjetas del panel de diagnóstico (`StrengthsCard`, `PriorityGapsCard`, `AffinityRadarChartCard`, etc.) que siguen las pautas de diseño atómico del perfil (utilizando `Card` con bordes planos y cajas de habilidades redondeadas) y exponen gráficos interactivos con `recharts` controlados por temas.
 
 ---
 

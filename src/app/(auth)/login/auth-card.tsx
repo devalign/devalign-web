@@ -29,19 +29,34 @@ const passwordRequirements = [
 const translateError = (message: string): string => {
   const lowercaseMessage = message.toLowerCase();
 
-  if (lowercaseMessage.includes('invalid login credentials') || lowercaseMessage.includes('invalid credentials')) {
+  if (
+    lowercaseMessage.includes('invalid login credentials') ||
+    lowercaseMessage.includes('invalid credentials')
+  ) {
     return 'El correo o la contraseña son incorrectos.';
   }
-  if (lowercaseMessage.includes('user already registered') || lowercaseMessage.includes('email already in use')) {
+  if (
+    lowercaseMessage.includes('user already registered') ||
+    lowercaseMessage.includes('email already in use')
+  ) {
     return 'Este correo electrónico ya está registrado.';
   }
-  if (lowercaseMessage.includes('email not confirmed') || lowercaseMessage.includes('email_not_confirmed')) {
+  if (
+    lowercaseMessage.includes('email not confirmed') ||
+    lowercaseMessage.includes('email_not_confirmed')
+  ) {
     return 'Debes confirmar tu correo electrónico antes de iniciar sesión.';
   }
-  if (lowercaseMessage.includes('signup requires a valid email') || lowercaseMessage.includes('invalid email')) {
+  if (
+    lowercaseMessage.includes('signup requires a valid email') ||
+    lowercaseMessage.includes('invalid email')
+  ) {
     return 'Por favor ingresa un correo electrónico válido.';
   }
-  if (lowercaseMessage.includes('password is too short') || lowercaseMessage.includes('should be at least')) {
+  if (
+    lowercaseMessage.includes('password is too short') ||
+    lowercaseMessage.includes('should be at least')
+  ) {
     return 'La contraseña es demasiado corta.';
   }
   if (lowercaseMessage.includes('network error') || lowercaseMessage.includes('failed to fetch')) {
@@ -139,7 +154,7 @@ export default function AuthCard() {
           password,
         });
         if (error) throw error;
-        window.location.href = '/dashboard';
+        window.location.href = '/profile';
       } else if (isSignup) {
         if (password !== confirmPassword) {
           toast.error('Las contraseñas no coinciden.');
@@ -191,7 +206,7 @@ export default function AuthCard() {
         });
         if (error) throw error;
         toast.success('Tu contraseña ha sido restablecida con éxito.');
-        window.location.href = '/dashboard';
+        window.location.href = '/profile';
       }
     } catch (err) {
       const rawMessage = err instanceof Error ? err.message : 'Ocurrió un error';
@@ -232,9 +247,7 @@ export default function AuthCard() {
   return (
     <Card className="w-full shadow-2xl shadow-black/5 border-border/50 bg-card/95 backdrop-blur-xl">
       <CardHeader className="text-center space-y-2 pb-6">
-        <CardTitle className="text-xl font-bold tracking-tight">
-          {headerInfo.title}
-        </CardTitle>
+        <CardTitle className="text-xl font-bold tracking-tight">{headerInfo.title}</CardTitle>
         <CardDescription className="text-muted-foreground font-medium">
           {headerInfo.description}
         </CardDescription>
@@ -442,12 +455,12 @@ export default function AuthCard() {
             {isLoading
               ? 'Cargando...'
               : isLogin
-              ? 'Iniciar sesión'
-              : isSignup
-              ? 'Crear cuenta'
-              : isForgotPassword
-              ? 'Enviar enlace'
-              : 'Restablecer contraseña'}
+                ? 'Iniciar sesión'
+                : isSignup
+                  ? 'Crear cuenta'
+                  : isForgotPassword
+                    ? 'Enviar enlace'
+                    : 'Restablecer contraseña'}
           </Button>
         </form>
 
@@ -536,23 +549,36 @@ export default function AuthCard() {
           </DialogHeader>
           <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
             <p>
-              Bienvenido a <strong>Devalign</strong>. Al utilizar nuestra plataforma, aceptas cumplir con los siguientes términos y condiciones que rigen el uso del software de alineación técnica y generación de roadmaps profesionales.
+              Bienvenido a <strong>Devalign</strong>. Al utilizar nuestra plataforma, aceptas
+              cumplir con los siguientes términos y condiciones que rigen el uso del software de
+              alineación técnica y generación de roadmaps profesionales.
             </p>
             <h4 className="font-bold text-foreground">1. Uso del Servicio</h4>
             <p>
-              Devalign es una herramienta de diagnóstico basada en Inteligencia Artificial. Está diseñada para analizar perfiles técnicos, identificar brechas de habilidades y recomendar rutas de aprendizaje personalizadas de acuerdo a las demandas del mercado TI.
+              Devalign es una herramienta de diagnóstico basada en Inteligencia Artificial. Está
+              diseñada para analizar perfiles técnicos, identificar brechas de habilidades y
+              recomendar rutas de aprendizaje personalizadas de acuerdo a las demandas del mercado
+              TI.
             </p>
             <h4 className="font-bold text-foreground">2. Carga de Documentos (CV)</h4>
             <p>
-              Al subir tu CV (hoja de vida) en formato PDF o DOCX, garantizas que la información es verídica y que tienes el derecho legal de compartirla. Autorizas a Devalign a procesar y analizar el contenido para generar las métricas de afinidad técnica correspondientes.
+              Al subir tu CV (hoja de vida) en formato PDF o DOCX, garantizas que la información es
+              verídica y que tienes el derecho legal de compartirla. Autorizas a Devalign a procesar
+              y analizar el contenido para generar las métricas de afinidad técnica
+              correspondientes.
             </p>
             <h4 className="font-bold text-foreground">3. Limitación de Responsabilidad</h4>
             <p>
-              Las recomendaciones y sugerencias de aprendizaje generadas por la IA son de carácter informativo y de orientación profesional. Devalign no garantiza contratación laboral ni se hace responsable por decisiones profesionales tomadas en base a los diagnósticos.
+              Las recomendaciones y sugerencias de aprendizaje generadas por la IA son de carácter
+              informativo y de orientación profesional. Devalign no garantiza contratación laboral
+              ni se hace responsable por decisiones profesionales tomadas en base a los
+              diagnósticos.
             </p>
             <h4 className="font-bold text-foreground">4. Propiedad Intelectual</h4>
             <p>
-              El código, el diseño, la marca y los algoritmos propietarios de Devalign son propiedad intelectual exclusiva de la empresa y no pueden ser reproducidos ni distribuidos sin consentimiento expreso por escrito.
+              El código, el diseño, la marca y los algoritmos propietarios de Devalign son propiedad
+              intelectual exclusiva de la empresa y no pueden ser reproducidos ni distribuidos sin
+              consentimiento expreso por escrito.
             </p>
           </div>
         </DialogContent>
@@ -566,28 +592,38 @@ export default function AuthCard() {
           </DialogHeader>
           <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
             <p>
-              En <strong>Devalign</strong>, nos tomamos muy en serio la seguridad y confidencialidad de tus datos personales. Esta política detalla cómo recopilamos, usamos y protegemos tu información.
+              En <strong>Devalign</strong>, nos tomamos muy en serio la seguridad y confidencialidad
+              de tus datos personales. Esta política detalla cómo recopilamos, usamos y protegemos
+              tu información.
             </p>
             <h4 className="font-bold text-foreground">1. Información Recopilada</h4>
             <p>
-              Recopilamos información necesaria para el funcionamiento del servicio, incluyendo: tu nombre completo, correo electrónico, credenciales de inicio de sesión y la información contenida en el documento de CV que decidas cargar de forma voluntaria.
+              Recopilamos información necesaria para el funcionamiento del servicio, incluyendo: tu
+              nombre completo, correo electrónico, credenciales de inicio de sesión y la información
+              contenida en el documento de CV que decidas cargar de forma voluntaria.
             </p>
             <h4 className="font-bold text-foreground">2. Uso de la Información</h4>
-            <p>
-              Utilizamos tus datos únicamente para:
-            </p>
+            <p>Utilizamos tus datos únicamente para:</p>
             <ul className="list-disc pl-4 space-y-1">
               <li>Autenticar tu cuenta y proteger el acceso al sistema.</li>
-              <li>Analizar tu CV mediante modelos de procesamiento de lenguaje natural (NLP) e IA para calcular tu brecha de habilidades.</li>
+              <li>
+                Analizar tu CV mediante modelos de procesamiento de lenguaje natural (NLP) e IA para
+                calcular tu brecha de habilidades.
+              </li>
               <li>Generar y personalizar tu roadmap de aprendizaje técnico.</li>
             </ul>
             <h4 className="font-bold text-foreground">3. Proveedores de Servicios</h4>
             <p>
-              Tus datos son almacenados de forma segura utilizando la infraestructura de <strong>Supabase</strong>. Los análisis de perfil técnico se ejecutan a través de APIs cifradas de proveedores de IA líderes del mercado, garantizando que tu información no se utilice para entrenar modelos públicos.
+              Tus datos son almacenados de forma segura utilizando la infraestructura de{' '}
+              <strong>Supabase</strong>. Los análisis de perfil técnico se ejecutan a través de APIs
+              cifradas de proveedores de IA líderes del mercado, garantizando que tu información no
+              se utilice para entrenar modelos públicos.
             </p>
             <h4 className="font-bold text-foreground">4. Control sobre tus Datos</h4>
             <p>
-              Puedes solicitar la eliminación permanente de tu cuenta, tu perfil y cualquier CV subido a la plataforma en cualquier momento desde tu panel de usuario o comunicándote con nuestro soporte de forma directa.
+              Puedes solicitar la eliminación permanente de tu cuenta, tu perfil y cualquier CV
+              subido a la plataforma en cualquier momento desde tu panel de usuario o comunicándote
+              con nuestro soporte de forma directa.
             </p>
           </div>
         </DialogContent>
