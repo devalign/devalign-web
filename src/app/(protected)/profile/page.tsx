@@ -95,9 +95,10 @@ function ProfileContent() {
   const [techSkills, setTechSkills] = useState<string[]>([]);
   const [softSkills, setSoftSkills] = useState<string[]>([]);
   const [toolsSkills, setToolsSkills] = useState<string[]>([]);
+  const [methodologySkills, setMethodologySkills] = useState<string[]>([]);
 
   // Active Tab for Skills editing
-  const [activeTab, setActiveTab] = useState<'tech' | 'soft' | 'tools'>('tech');
+  const [activeTab, setActiveTab] = useState<'tech' | 'soft' | 'tools' | 'methodologies'>('tech');
   const [newSkillText, setNewSkillText] = useState('');
 
   const [isSaving, setIsSaving] = useState(false);
@@ -156,10 +157,8 @@ function ProfileContent() {
   useEffect(() => {
     const loadProfileData = () => {
       if (profile) {
-        setFullName(profile.full_name || user?.full_name || 'Willy Anderson Samata Ccoya');
-        setRoleTitle(
-          profile.current_job_role || 'Practicante en Gestión de Información Financiera',
-        );
+        setFullName(profile.full_name || user?.full_name || user?.email?.split('@')[0] || 'Desarrollador');
+        setRoleTitle(profile.current_job_role || '');
         setSeniority(profile.seniority || 'mid');
 
         if (profile.education && profile.education.length > 0) {
@@ -172,14 +171,7 @@ function ProfileContent() {
             })),
           );
         } else {
-          setEducationList([
-            {
-              degree: 'Ingeniería de Sistemas de Información',
-              institution: 'Universidad Peruana de Ciencias Aplicadas - UPC',
-              start_date: '2021',
-              end_date: '2026',
-            },
-          ]);
+          setEducationList([]);
         }
 
         if (profile.work_experience && profile.work_experience.length > 0) {
@@ -192,22 +184,7 @@ function ProfileContent() {
             })),
           );
         } else {
-          setExperiences([
-            {
-              role: 'Practicante en Gestión de Información Financiera',
-              company: 'Banco de Crédito del Perú — BCP',
-              period: 'Junio 2025 — Presente',
-              description:
-                'Ejecutar y monitorear jobs en Databricks de forma diaria y mensual, garantizando la operación continua del modelo financiero. Documentar procesos y dar soporte en la solución de incidencias menores.',
-            },
-            {
-              role: 'Desarrollador Independiente',
-              company: 'Proyecto Categorización de productos de Saga Falabella',
-              period: 'Agosto 2025 — Diciembre 2025',
-              description:
-                'Realizar el preprocesamiento y el analisis exploratorio de datos (EDA) de diversas fuentes de datos empleando Python en Jupyter Notebooks.',
-            },
-          ]);
+          setExperiences([]);
         }
 
         if (profile.certifications && profile.certifications.length > 0) {
@@ -219,98 +196,44 @@ function ProfileContent() {
             })),
           );
         } else {
-          setCertifications([
-            { name: 'Data Analysis with Python', issuer: 'IBM', date: 'Octubre 2025' },
-            { name: 'Data Visualization with Python', issuer: 'IBM', date: 'Octubre 2025' },
-            {
-              name: 'Python para ciencia de datos, IA y desarrollo',
-              issuer: 'IBM',
-              date: 'Febrero 2025',
-            },
-          ]);
+          setCertifications([]);
         }
 
         if (profile.detected_skills && profile.detected_skills.length > 0) {
           const tech = profile.detected_skills
-            .filter((s) => s.skill_type === 'technical')
+            .filter((s) => s.skill_type === 'hard_skill')
             .map((s) => s.name);
           const soft = profile.detected_skills
             .filter((s) => s.skill_type === 'soft_skill')
             .map((s) => s.name);
           const tools = profile.detected_skills
-            .filter((s) => s.skill_type === 'tool' || s.skill_type === 'methodology')
+            .filter((s) => s.skill_type === 'tool')
+            .map((s) => s.name);
+          const methodologies = profile.detected_skills
+            .filter((s) => s.skill_type === 'methodology')
             .map((s) => s.name);
 
-          setTechSkills(
-            tech.length > 0
-              ? tech
-              : [
-                  'SQL Server',
-                  'Python',
-                  'Databricks',
-                  'Power BI',
-                  'Power Apps',
-                  'Power Automate',
-                  'MS Excel',
-                  'Jupyter Notebooks',
-                ],
-          );
-          setSoftSkills(
-            soft.length > 0
-              ? soft
-              : ['Trabajo en equipo', 'Comunicación efectiva', 'Resolución de problemas'],
-          );
-          setToolsSkills(tools.length > 0 ? tools : ['Git', 'PostgreSQL', 'VS Code']);
+          setTechSkills(tech);
+          setSoftSkills(soft);
+          setToolsSkills(tools);
+          setMethodologySkills(methodologies);
         } else {
-          setTechSkills([
-            'SQL Server',
-            'Python',
-            'Databricks',
-            'Power BI',
-            'Power Apps',
-            'Power Automate',
-            'MS Excel',
-            'Jupyter Notebooks',
-          ]);
-          setSoftSkills(['Trabajo en equipo', 'Comunicación efectiva', 'Resolución de problemas']);
-          setToolsSkills(['Git', 'PostgreSQL', 'VS Code']);
+          setTechSkills([]);
+          setSoftSkills([]);
+          setToolsSkills([]);
+          setMethodologySkills([]);
         }
       } else if (user) {
-        setFullName(user.full_name || 'Willy Anderson Samata Ccoya');
-        setRoleTitle('Practicante en Gestión de Información Financiera');
+        setFullName(user.full_name || user.email?.split('@')[0] || 'Desarrollador');
+        setRoleTitle('');
         setSeniority('mid');
-        setEducationList([
-          {
-            degree: 'Ingeniería de Sistemas de Información',
-            institution: 'Universidad Peruana de Ciencias Aplicadas - UPC',
-            start_date: '2021',
-            end_date: '2026',
-          },
-        ]);
-        setExperiences([
-          {
-            role: 'Practicante en Gestión de Información Financiera',
-            company: 'Banco de Crédito del Perú — BCP',
-            period: 'Junio 2025 — Presente',
-            description:
-              'Ejecutar y monitorear jobs en Databricks de forma diaria y mensual, garantizando la operación continua del modelo financiero. Documentar procesos y dar soporte en la solución de incidencias menores.',
-          },
-        ]);
-        setCertifications([
-          { name: 'Data Analysis with Python', issuer: 'IBM', date: 'Octubre 2025' },
-        ]);
-        setTechSkills([
-          'SQL Server',
-          'Python',
-          'Databricks',
-          'Power BI',
-          'Power Apps',
-          'Power Automate',
-          'MS Excel',
-          'Jupyter Notebooks',
-        ]);
-        setSoftSkills(['Trabajo en equipo', 'Comunicación efectiva', 'Resolución de problemas']);
-        setToolsSkills(['Git', 'PostgreSQL', 'VS Code']);
+        setEducationList([]);
+        setExperiences([]);
+        setCertifications([]);
+        setTechSkills([]);
+        setSoftSkills([]);
+        setToolsSkills([]);
+        setMethodologySkills([]);
       }
     };
 
@@ -330,20 +253,24 @@ function ProfileContent() {
     } else if (activeTab === 'soft') {
       if (softSkills.includes(skillName)) return toast.error('Habilidad ya añadida');
       setSoftSkills([...softSkills, skillName]);
-    } else {
+    } else if (activeTab === 'tools') {
       if (toolsSkills.includes(skillName)) return toast.error('Habilidad ya añadida');
       setToolsSkills([...toolsSkills, skillName]);
+    } else {
+      if (methodologySkills.includes(skillName)) return toast.error('Habilidad ya añadida');
+      setMethodologySkills([...methodologySkills, skillName]);
     }
 
     setNewSkillText('');
     toast.success(`Habilidad "${skillName}" añadida localmente.`);
   };
 
-  const handleDeleteSkill = (name: string, type: 'tech' | 'soft' | 'tools') => {
-    if (type === 'tech') setTechSkills(techSkills.filter((s) => s !== name));
-    else if (type === 'soft') setSoftSkills(softSkills.filter((s) => s !== name));
-    else setToolsSkills(toolsSkills.filter((s) => s !== name));
-    toast.info(`Habilidad "${name}" removida.`);
+  const handleDeleteSkill = (skillName: string, type: 'tech' | 'soft' | 'tools' | 'methodologies') => {
+    if (type === 'tech') setTechSkills(techSkills.filter((s) => s !== skillName));
+    if (type === 'soft') setSoftSkills(softSkills.filter((s) => s !== skillName));
+    if (type === 'tools') setToolsSkills(toolsSkills.filter((s) => s !== skillName));
+    if (type === 'methodologies') setMethodologySkills(methodologySkills.filter((s) => s !== skillName));
+    toast.info(`Habilidad "${skillName}" removida.`);
   };
 
   // List Modification Actions
@@ -423,9 +350,10 @@ function ProfileContent() {
   }));
 
   const detectedSkillsPayload = [
-    ...techSkills.map((name) => ({ name, skill_type: 'technical' })),
-    ...softSkills.map((name) => ({ name, skill_type: 'soft_skill' })),
-    ...toolsSkills.map((name) => ({ name, skill_type: 'tool' })),
+    ...techSkills.map((s) => ({ name: s, skill_type: 'hard_skill', market_importance: 'consolidated' })),
+    ...softSkills.map((s) => ({ name: s, skill_type: 'soft_skill', market_importance: 'consolidated' })),
+    ...toolsSkills.map((s) => ({ name: s, skill_type: 'tool', market_importance: 'consolidated' })),
+    ...methodologySkills.map((s) => ({ name: s, skill_type: 'methodology', market_importance: 'consolidated' })),
   ];
 
   // Construct dynamicProfile for ATS PDF Preview
@@ -724,8 +652,8 @@ function ProfileContent() {
                 </div>
 
                 {/* Tabs */}
-                <div className="grid grid-cols-3 gap-1 bg-secondary/35 p-0.5 rounded-lg border border-border/50 mt-3">
-                  {(['tech', 'soft', 'tools'] as const).map((tab) => (
+                <div className="grid grid-cols-4 gap-1 bg-secondary/35 p-0.5 rounded-lg border border-border/50 mt-3">
+                  {(['tech', 'soft', 'tools', 'methodologies'] as const).map((tab) => (
                     <button
                       key={tab}
                       type="button"
@@ -736,7 +664,7 @@ function ProfileContent() {
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      {tab === 'tech' ? 'Técnicas' : tab === 'soft' ? 'Blandas' : 'Herramientas'}
+                      {tab === 'tech' ? 'Técnicas' : tab === 'soft' ? 'Blandas' : tab === 'methodologies' ? 'Metodologías' : 'Herramientas'}
                     </button>
                   ))}
                 </div>
@@ -748,7 +676,9 @@ function ProfileContent() {
                     ? techSkills
                     : activeTab === 'soft'
                       ? softSkills
-                      : toolsSkills
+                      : activeTab === 'tools'
+                        ? toolsSkills
+                        : methodologySkills
                   ).length === 0 ? (
                     <p className="text-[10px] text-muted-foreground m-auto">
                       No hay habilidades en esta categoría.
@@ -758,7 +688,9 @@ function ProfileContent() {
                       ? techSkills
                       : activeTab === 'soft'
                         ? softSkills
-                        : toolsSkills
+                        : activeTab === 'tools'
+                          ? toolsSkills
+                          : methodologySkills
                     ).map((skill) => (
                       <div
                         key={skill}

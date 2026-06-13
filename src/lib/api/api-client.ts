@@ -20,11 +20,19 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-    cache: 'no-store',
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      cache: 'no-store',
+    });
+  } catch (netError) {
+    console.error('Error de red al llamar a la API:', netError);
+    throw new Error(
+      'El servidor de análisis no responde. Por favor, comprueba tu conexión o inténtalo más tarde.'
+    );
+  }
 
   if (!response.ok) {
     let errorMessage = `Error del servidor (${response.status})`;

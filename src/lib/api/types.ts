@@ -49,6 +49,7 @@ export interface SkillItem {
   name: string;
   skill_type: string;
   market_importance?: string | null;
+  market_demand_percentage?: number | null;
 }
 
 export interface ClusterAffinityItem {

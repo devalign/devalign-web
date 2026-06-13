@@ -8,7 +8,7 @@ import { useUserProfile } from '@/hooks/use-user-profile';
 import { toast } from 'sonner';
 import CVUploader from '@/components/profile/cv-uploader';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
-import { UserProfileData, EducationItem, WorkExperienceItem, CertificationItem } from '@/lib/api/types';
+import { UserProfileData, EducationItem, WorkExperienceItem, CertificationItem, SkillItem } from '@/lib/api/types';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { Sparkles, Search, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 // Refactored modular subcomponents
 import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
@@ -39,13 +39,44 @@ import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
 
 function DashboardContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const { data: cvData, isLoading: isCVLoading } = useUserCVs();
-  const { data: profile } = useUserProfile();
+  const { data: cvData, isLoading: isCVLoading, refetch: refetchCVs } = useUserCVs();
+  const { data: profile, refetch: refetchProfile } = useUserProfile();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Onboarding & CV Upload Simulation State
   const [hasCV, setHasCV] = useState(true);
+  const [isUpdatingFromCV, setIsUpdatingFromCV] = useState(false);
+
+  const handleCVProcessing = async (newCvId: string) => {
+    setIsUpdatingFromCV(true);
+    try {
+      await refetchCVs();
+
+      let attempts = 0;
+      let isUpdated = false;
+
+      while (attempts < 30 && !isUpdated) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const result = await refetchProfile();
+        if (result.data && result.data.cv_id === newCvId) {
+          isUpdated = true;
+        }
+        attempts++;
+      }
+
+      if (!isUpdated) {
+        toast.warning('El análisis está tomando más de lo esperado. Los datos se actualizarán en breve.');
+      } else {
+        toast.success('Perfil sincronizado exitosamente con tu nuevo CV.');
+      }
+    } catch (error) {
+      console.error('Error refetching profile:', error);
+      toast.error('Ocurrió un error al sincronizar tu perfil.');
+    } finally {
+      setIsUpdatingFromCV(false);
+    }
+  };
 
   // Drawers states
   const [isStrengthsDrawerOpen, setIsStrengthsDrawerOpen] = useState(false);
@@ -56,8 +87,8 @@ function DashboardContent() {
   const [gapsSearch, setGapsSearch] = useState('');
 
   // Profile Data States
-  const [fullName, setFullName] = useState('Willy Anderson Samata Ccoya');
-  const [roleTitle, setRoleTitle] = useState('Practicante en Gestión de Información Financiera');
+  const [fullName, setFullName] = useState('');
+  const [roleTitle, setRoleTitle] = useState('');
   const [seniority, setSeniority] = useState('mid');
 
   // Education, Experience, Certifications States (for ATS Preview modal generation)
@@ -66,34 +97,12 @@ function DashboardContent() {
   const [certifications, setCertifications] = useState<CertificationItem[]>([]);
 
   // Skills Lists
-  const [techSkills, setTechSkills] = useState<string[]>([
-    'SQL Server',
-    'Python',
-    'Databricks',
-    'Power BI',
-    'Power Apps',
-    'Power Automate',
-    'MS Excel',
-    'Jupyter Notebooks',
-  ]);
-  const [softSkills, setSoftSkills] = useState<string[]>([
-    'Trabajo en equipo',
-    'Comunicación efectiva',
-    'Resolución de problemas',
-  ]);
-  const [toolsSkills, setToolsSkills] = useState<string[]>(['Git', 'PostgreSQL', 'VS Code']);
+  const [techSkills, setTechSkills] = useState<string[]>([]);
+  const [softSkills, setSoftSkills] = useState<string[]>([]);
+  const [toolsSkills, setToolsSkills] = useState<string[]>([]);
 
   // ML Gap items (skills the user DOES NOT have but the market demands)
-  const [marketGaps, setMarketGaps] = useState<string[]>([
-    'Docker',
-    'Kubernetes',
-    'AWS',
-    'Microservicios',
-    'CI/CD',
-    'Spark',
-    'Hadoop',
-    'NoSQL',
-  ]);
+  const [marketGaps, setMarketGaps] = useState<SkillItem[]>([]);
 
   // ML Engine simulated recalculating state
   const [isRecalculating, setIsRecalculating] = useState(false);
@@ -207,7 +216,7 @@ function DashboardContent() {
           if (draft.certifications) setCertifications(draft.certifications);
 
           if (draft.detected_skills) {
-            const tech = draft.detected_skills.filter((s: { name: string; skill_type: string }) => s.skill_type === 'technical').map((s: { name: string; skill_type: string }) => s.name);
+            const tech = draft.detected_skills.filter((s: { name: string; skill_type: string }) => s.skill_type === 'hard_skill').map((s: { name: string; skill_type: string }) => s.name);
             const soft = draft.detected_skills.filter((s: { name: string; skill_type: string }) => s.skill_type === 'soft_skill').map((s: { name: string; skill_type: string }) => s.name);
             const tools = draft.detected_skills.filter((s: { name: string; skill_type: string }) => s.skill_type === 'tool').map((s: { name: string; skill_type: string }) => s.name);
 
@@ -217,7 +226,14 @@ function DashboardContent() {
 
             // Dynamically adjust gaps: remove skills that are now in technical skills
             const originalGaps = ['Docker', 'Kubernetes', 'AWS', 'Microservicios', 'CI/CD', 'Spark', 'Hadoop', 'NoSQL'];
-            const newGaps = originalGaps.filter(gap => !tech.includes(gap));
+            const newGaps: SkillItem[] = originalGaps
+              .filter(gap => !tech.includes(gap))
+              .map((name, idx) => ({
+                name,
+                skill_type: 'hard_skill',
+                market_importance: idx < 3 ? 'critical' : 'high',
+                market_demand_percentage: Math.max(74 - idx * 4, 38)
+              }));
             setMarketGaps(newGaps);
           }
           return; // Skip reading base profile as draft has priority in simulation
@@ -248,7 +264,7 @@ function DashboardContent() {
 
         if (profile.detected_skills && profile.detected_skills.length > 0) {
           const tech = profile.detected_skills
-            .filter((s) => s.skill_type === 'technical')
+            .filter((s) => s.skill_type === 'hard_skill')
             .map((s) => s.name);
           const soft = profile.detected_skills
             .filter((s) => s.skill_type === 'soft_skill')
@@ -263,12 +279,19 @@ function DashboardContent() {
         }
 
         if (profile.skill_gaps && profile.skill_gaps.length > 0) {
-          setMarketGaps(profile.skill_gaps.map((g) => g.name));
+          setMarketGaps(profile.skill_gaps);
         }
       } else if (user) {
-        if (user.full_name) {
-          setFullName(user.full_name);
-        }
+        setFullName(user.full_name || user.email?.split('@')[0] || 'Usuario');
+        setRoleTitle('');
+        setSeniority('mid');
+        setExperiences([]);
+        setEducationList([]);
+        setCertifications([]);
+        setTechSkills([]);
+        setSoftSkills([]);
+        setToolsSkills([]);
+        setMarketGaps([]);
       }
     };
 
@@ -289,7 +312,9 @@ function DashboardContent() {
     return Math.min(base, 98); // Max out at 98%
   };
 
-  const currentScore = getDynamicScore();
+  const currentScore = profile?.alignment_score
+    ? Math.round(profile.alignment_score * 100)
+    : getDynamicScore();
 
   // Construct profile payload for ATS Modal preview
   const dynamicProfile: UserProfileData = {
@@ -309,11 +334,11 @@ function DashboardContent() {
       { cluster_id: 'data', cluster_name: 'Data Engineering', affinity_score: 41, is_primary: true },
     ],
     detected_skills: [
-      ...techSkills.map((name) => ({ name, skill_type: 'technical' })),
+      ...techSkills.map((name) => ({ name, skill_type: 'hard_skill' })),
       ...softSkills.map((name) => ({ name, skill_type: 'soft_skill' })),
       ...toolsSkills.map((name) => ({ name, skill_type: 'tool' })),
     ],
-    skill_gaps: marketGaps.map((name) => ({ name, skill_type: 'technical' })),
+    skill_gaps: marketGaps,
     education: educationList,
     work_experience: experiences,
     certifications: certifications,
@@ -334,13 +359,37 @@ function DashboardContent() {
 
   // EMPTY STATE FLOW
   if (!hasCV) {
-    return <DashboardEmptyState onUploadSuccess={() => setHasCV(true)} />;
+    return (
+      <DashboardEmptyState
+        onUploadSuccess={async (newCvId) => {
+          setHasCV(true);
+          if (newCvId) {
+            await handleCVProcessing(newCvId);
+          }
+        }}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Carga Reactiva tras Subir CV */}
+      {isUpdatingFromCV && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/60 backdrop-blur-sm transition-all duration-300">
+          <div className="flex flex-col items-center gap-3 p-6 bg-card border border-border shadow-2xl rounded-2xl">
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            <div className="text-center">
+              <p className="text-sm font-bold text-foreground">Actualizando Perfil</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Sincronizando los datos extraídos de tu nuevo CV...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 py-8 relative">
+      <div className={`max-w-7xl mx-auto px-6 py-8 relative transition-opacity duration-300 ${isUpdatingFromCV ? 'opacity-40 pointer-events-none' : ''}`}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Fila 1: Perfil (1 col) y Score de Mercado (2 cols) */}
@@ -356,6 +405,11 @@ function DashboardContent() {
           <div className="lg:col-span-2">
             <MarketScoreCard
               currentScore={currentScore}
+              primarySpecialty={profile?.primary_specialty || 'Software Engineering'}
+              secondaryAffinities={profile?.secondary_affinities?.map(a => ({
+                name: a.cluster_name,
+                score: Math.round(a.affinity_score * 100)
+              }))}
               isLoading={isRecalculating}
             />
           </div>
@@ -437,9 +491,13 @@ function DashboardContent() {
           </DialogHeader>
           <div className="py-2">
             <CVUploader
-              onUploadSuccess={() => {
+              onUploadSuccess={async (newCvId) => {
                 handleCloseUpload(false);
-                toast.success('CV cargado y analizado exitosamente.');
+                if (newCvId) {
+                  await handleCVProcessing(newCvId);
+                } else {
+                  toast.success('CV cargado exitosamente.');
+                }
               }}
             />
           </div>
@@ -544,39 +602,43 @@ function DashboardContent() {
           {/* List */}
           <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
             {marketGaps
-              .filter((g) => g.toLowerCase().includes(gapsSearch.toLowerCase()))
-              .map((gap, idx) => {
-                const crit = idx < 3 ? 'Crítica' : 'Alta';
-                const demand = Math.max(74 - idx * 4, 38);
+              .filter((g) => g.name.toLowerCase().includes(gapsSearch.toLowerCase()))
+              .map((gap) => {
+                const crit = gap.market_importance || 'medium';
+                const demand = gap.market_demand_percentage || 50;
                 const borderClass =
-                  crit === 'Crítica'
+                  crit === 'critical'
                     ? 'border-red-500/30 bg-red-500/5 hover:border-red-500/50 hover:bg-red-500/10'
                     : 'border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50 hover:bg-amber-500/10';
                 const textClass =
-                  crit === 'Crítica'
+                  crit === 'critical'
                     ? 'text-red-600 dark:text-red-400'
                     : 'text-amber-600 dark:text-amber-400';
+                const critLabel =
+                  crit === 'critical' ? 'Crítica' :
+                  crit === 'high' ? 'Alta' :
+                  crit === 'medium' ? 'Media' : crit;
 
                 return (
                   <div
-                    key={gap}
+                    key={gap.name}
                     className={`flex flex-col justify-between p-3 rounded-lg border border-dashed transition-colors ${borderClass}`}
                   >
                     <div className="flex justify-between items-start gap-1">
                       <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
-                        {gap}
+                        {gap.name}
                       </span>
                       <span className={`text-[9px] font-bold shrink-0 ${textClass}`}>
                         {demand}% DEMANDA
                       </span>
                     </div>
                     <span className="text-[10px] text-muted-foreground mt-1">
-                      Brecha ({crit})
+                      Brecha ({critLabel})
                     </span>
                   </div>
                 );
               })}
-            {marketGaps.filter((g) => g.toLowerCase().includes(gapsSearch.toLowerCase())).length === 0 && (
+            {marketGaps.filter((g) => g.name.toLowerCase().includes(gapsSearch.toLowerCase())).length === 0 && (
               <p className="text-center text-xs text-muted-foreground py-8">
                 No se encontraron brechas con ese nombre.
               </p>

@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Loader2 } from 'lucide-react';
 
+import { SkillItem } from '@/lib/api/types';
+
 interface AiInsightCardProps {
-  marketGaps: string[];
+  marketGaps: SkillItem[];
   isLoading?: boolean;
 }
 
@@ -33,8 +35,8 @@ export function AiInsightCard({ marketGaps, isLoading = false }: AiInsightCardPr
                 Recomendación IA
               </span>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Fortalecer habilidades clave como <strong className="text-foreground">{marketGaps[0] || 'AWS'}</strong> y{' '}
-                <strong className="text-foreground">{marketGaps[1] || 'Docker'}</strong> podría aumentar tu alineación con el
+                Fortalecer habilidades clave como <strong className="text-foreground">{marketGaps[0]?.name || 'AWS'}</strong> y{' '}
+                <strong className="text-foreground">{marketGaps[1]?.name || 'Docker'}</strong> podría aumentar tu alineación con el
                 mercado en <strong className="text-emerald-600 dark:text-emerald-400">+18%</strong>.
               </p>
             </div>

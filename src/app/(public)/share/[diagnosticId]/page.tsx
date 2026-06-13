@@ -23,50 +23,120 @@ export default function PublicSharePage() {
     console.log('Public diagnostic share loaded for ID:', diagnosticId);
   }, [diagnosticId]);
 
-  // Mock static data for Willy Anderson Samata Ccoya based on the share ID
-  const developerName = 'Willy Anderson Samata Ccoya';
-  const roleTitle = 'Practicante en Gestión de Información Financiera';
-  const seniority = 'mid';
-  const degree = 'Ingeniería de Sistemas de Información';
-  const university = 'Universidad Peruana de Ciencias Aplicadas - UPC';
-  const currentScore = 64;
+  interface LocalCertificationItem {
+    name: string;
+    issuer: string | null;
+    date: string | null;
+  }
 
-  const techSkills = [
-    'SQL Server', 'Python', 'Databricks', 'Power BI', 'Power Apps', 'Power Automate', 'MS Excel', 'Jupyter Notebooks'
-  ];
+  interface LocalSkillItem {
+    name: string;
+    skill_type: string;
+  }
+
+  // State values for rendering
+  const [developerName, setDeveloperName] = React.useState('Candidato Devalign');
+  const [roleTitle, setRoleTitle] = React.useState('Desarrollador de Software');
+  const [seniority, setSeniority] = React.useState('mid');
+  const [degree, setDegree] = React.useState('Ingeniería de Sistemas');
+  const [university, setUniversity] = React.useState('Universidad Tecnológica');
+  const [currentScore, setCurrentScore] = React.useState(75);
+  const [specialty, setSpecialty] = React.useState('Software Engineering');
+
+  const [techSkills, setTechSkills] = React.useState<string[]>([
+    'SQL Server', 'Python', 'Git', 'Docker', 'Kubernetes'
+  ]);
   
-  const certifications = [
-    { name: 'Data Analysis with Python', issuer: 'IBM', date: 'Octubre 2025' },
-    { name: 'Data Visualization with Python', issuer: 'IBM', date: 'Octubre 2025' },
-    { name: 'Python para ciencia de datos, IA y desarrollo', issuer: 'IBM', date: 'Febrero 2025' },
-  ];
+  const [certifications, setCertifications] = React.useState<LocalCertificationItem[]>([
+    { name: 'Cloud Developer', issuer: 'Plataforma Cloud', date: '2025' },
+  ]);
+
+  useEffect(() => {
+    // Try to load from localStorage draft for presentation/preview
+    const draftStr = localStorage.getItem('devalign_profile_draft');
+    if (draftStr) {
+      try {
+        const draft = JSON.parse(draftStr);
+        const timeoutId = setTimeout(() => {
+          if (draft.fullName) setDeveloperName(draft.fullName);
+          if (draft.roleTitle) setRoleTitle(draft.roleTitle);
+          if (draft.seniority) setSeniority(draft.seniority);
+          
+          if (draft.education && draft.education.length > 0) {
+            setDegree(draft.education[0].degree);
+            setUniversity(draft.education[0].institution);
+          } else {
+            setDegree('Sin registrar');
+            setUniversity('Sin registrar');
+          }
+
+          if (draft.detected_skills) {
+            const tech = draft.detected_skills
+              .filter((s: LocalSkillItem) => s.skill_type === 'hard_skill')
+              .map((s: LocalSkillItem) => s.name);
+            if (tech.length > 0) setTechSkills(tech);
+            else setTechSkills([]);
+          }
+
+          if (draft.certifications && draft.certifications.length > 0) {
+            setCertifications(draft.certifications);
+          } else {
+            setCertifications([]);
+          }
+
+          if (draft.alignment_score) {
+            setCurrentScore(draft.alignment_score);
+          } else if (draft.detected_skills) {
+            // Calculate score based on skills length
+            const techCount = draft.detected_skills.filter((s: LocalSkillItem) => s.skill_type === 'hard_skill').length || 0;
+            setCurrentScore(Math.min(42 + techCount * 3, 98));
+          }
+
+          if (draft.primary_specialty) {
+            setSpecialty(draft.primary_specialty);
+          }
+        }, 0);
+        return () => clearTimeout(timeoutId);
+      } catch (e) {
+        console.error('Failed to parse profile draft:', e);
+      }
+    }
+  }, []);
 
   // SVG Radar Coordinates out of 100 for (Data, Backend, Cloud, DevOps, Frontend)
-  // Maps to: Backend (92), Frontend (42), Cloud (78), DevOps (64), Data (64)
-  const convert = (val: number, angleDeg: number) => {
+  const convert = React.useCallback((val: number, angleDeg: number) => {
     const angleRad = (angleDeg - 90) * (Math.PI / 180);
     const r = (val / 100) * 70; // Map 100% to 70px radius
     const x = 100 + r * Math.cos(angleRad);
     const y = 100 + r * Math.sin(angleRad);
     return `${x.toFixed(1)},${y.toFixed(1)}`;
-  };
+  }, []);
 
-  const radarPoints = {
-    user: [
-      convert(75, 0),    // Backend
-      convert(42, 72),   // Frontend
-      convert(55, 144),  // Cloud
-      convert(40, 216),  // DevOps
-      convert(80, 288),  // Data
-    ].join(' '),
-    market: [
-      convert(92, 0),    // Backend market demand
-      convert(42, 72),   // Frontend market demand
-      convert(78, 144),  // Cloud market demand
-      convert(64, 216),  // DevOps market demand
-      convert(64, 288),  // Data market demand
-    ].join(' ')
-  };
+  const radarPoints = React.useMemo(() => {
+    // If we have custom skills, compute user coordinates dynamically based on the currentScore
+    const userBackend = Math.min(Math.max(currentScore + 10, 40), 95);
+    const userData = Math.min(Math.max(currentScore + 15, 30), 98);
+    const userCloud = Math.min(Math.max(currentScore - 10, 20), 85);
+    const userDevOps = Math.min(Math.max(currentScore - 20, 15), 80);
+    const userFrontend = Math.min(Math.max(currentScore - 30, 10), 75);
+
+    return {
+      user: [
+        convert(userBackend, 0),    // Backend
+        convert(userFrontend, 72),   // Frontend
+        convert(userCloud, 144),  // Cloud
+        convert(userDevOps, 216),  // DevOps
+        convert(userData, 288),  // Data
+      ].join(' '),
+      market: [
+        convert(92, 0),    // Backend market demand
+        convert(42, 72),   // Frontend market demand
+        convert(78, 144),  // Cloud market demand
+        convert(64, 216),  // DevOps market demand
+        convert(64, 288),  // Data market demand
+      ].join(' ')
+    };
+  }, [currentScore, convert]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-between">
@@ -187,7 +257,7 @@ export default function PublicSharePage() {
                   
                   <div className="flex-1 text-center sm:text-right space-y-1.5 border-t sm:border-t-0 sm:border-l border-border pt-4 sm:pt-0 sm:pl-6">
                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Especialidad detectada</p>
-                    <h3 className="text-lg font-black text-foreground tracking-tight">Data Engineering</h3>
+                    <h3 className="text-lg font-black text-foreground tracking-tight">{specialty}</h3>
                     <p className="text-[9px] text-muted-foreground">Perfil verificado frente al mercado peruano.</p>
                   </div>
                 </div>

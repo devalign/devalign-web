@@ -3,9 +3,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { SkillItem } from '@/lib/api/types';
 
 interface PriorityGapsCardProps {
-  marketGaps: string[];
+  marketGaps: SkillItem[];
   onViewAll: () => void;
   isLoading?: boolean;
 }
@@ -37,34 +38,36 @@ export function PriorityGapsCard({ marketGaps, onViewAll, isLoading = false }: P
         ) : (
           <>
             <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1 scrollbar-none">
-              {marketGaps.slice(0, 4).map((bg, idx) => {
-                const criticalities = ['Crítica', 'Crítica', 'Alta', 'Alta'];
-                const demands = [74, 68, 61, 54];
-                const crit = criticalities[idx] || 'Media';
-                const demand = demands[idx] || 42;
+              {marketGaps.slice(0, 4).map((bg) => {
+                const crit = bg.market_importance || 'medium';
+                const demand = bg.market_demand_percentage || 50;
 
                 const borderClass =
-                  crit === 'Crítica'
+                  crit === 'critical' || crit === 'critical'
                     ? 'border-red-500/30 bg-red-500/5 hover:border-red-500/50'
                     : 'border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50';
                 const textClass =
-                  crit === 'Crítica'
+                  crit === 'critical' || crit === 'critical'
                     ? 'text-red-600 dark:text-red-400'
                     : 'text-amber-600 dark:text-amber-400';
+                const critLabel =
+                  crit === 'critical' ? 'Crítica' :
+                  crit === 'high' ? 'Alta' :
+                  crit === 'medium' ? 'Media' : crit;
 
                 return (
                   <div
-                    key={bg}
+                    key={bg.name}
                     className={`flex flex-col justify-between p-2.5 rounded-lg border border-dashed transition-colors ${borderClass}`}
                   >
                     <div className="flex justify-between items-start gap-1">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{bg}</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{bg.name}</span>
                       <span className={`text-[9px] font-bold shrink-0 ${textClass}`}>
                         {demand}% DEMANDA
                       </span>
                     </div>
                     <span className="text-[10px] text-muted-foreground mt-1">
-                      Brecha ({crit})
+                      Brecha ({critLabel})
                     </span>
                   </div>
                 );

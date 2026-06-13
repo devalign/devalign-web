@@ -4,14 +4,16 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Lightbulb, ArrowUpRight } from 'lucide-react';
 
+import { SkillItem } from '@/lib/api/types';
+
 interface MarketImpactCardProps {
-  marketGaps?: string[];
+  marketGaps?: SkillItem[];
   isLoading?: boolean;
 }
 
 export function MarketImpactCard({ marketGaps = [], isLoading = false }: MarketImpactCardProps) {
-  const gap1 = marketGaps[0] || 'REST APIs';
-  const gap2 = marketGaps[1] || 'microservicios';
+  const gap1 = marketGaps[0]?.name || 'REST APIs';
+  const gap2 = marketGaps[1]?.name || 'microservicios';
 
   return (
     <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col justify-between h-full min-h-[220px]">

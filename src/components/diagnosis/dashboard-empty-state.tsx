@@ -3,36 +3,86 @@
 import React, { useState } from 'react';
 import { Sparkles, UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUploadCV } from '@/hooks/use-upload-cv';
 
 interface DashboardEmptyStateProps {
-  onUploadSuccess: () => void;
+  onUploadSuccess: (cvId?: string) => void;
 }
 
 export function DashboardEmptyState({ onUploadSuccess }: DashboardEmptyStateProps) {
+  const uploadMutation = useUploadCV();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  const processFile = async (file: File) => {
+    const validTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+    ];
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    const isValidType =
+      validTypes.includes(file.type) ||
+      extension === 'pdf' ||
+      extension === 'docx' ||
+      extension === 'doc';
+
+    if (!isValidType) {
+      toast.error('Tipo de archivo no soportado. Sube un PDF o DOCX.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('El archivo excede el límite permitido de 5MB.');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(10);
+    const progressInterval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + 10;
+      });
+    }, 100);
+
+    try {
+      const result = await uploadMutation.mutateAsync(file);
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      setTimeout(() => {
+        setIsUploading(false);
+        onUploadSuccess(result.cv_id);
+        toast.success('¡CV cargado con éxito! Iniciando análisis de perfil.');
+      }, 400);
+    } catch (error) {
+      clearInterval(progressInterval);
+      setIsUploading(false);
+      const errorMessage = error instanceof Error ? error.message : 'Error al subir el archivo';
+      toast.error(errorMessage);
+    }
+  };
 
   const handleFileUpload = (
     e: React.DragEvent<HTMLDivElement> | React.ChangeEvent<HTMLInputElement>,
   ) => {
     e.preventDefault();
-    setIsUploading(true);
-    setUploadProgress(0);
+    let file: File | undefined;
+    if ('dataTransfer' in e && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      file = e.dataTransfer.files[0];
+    } else {
+      const target = e.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        file = target.files[0];
+      }
+    }
 
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setIsUploading(false);
-            onUploadSuccess();
-            toast.success('¡CV analizado con éxito! El motor JIT ha cargado tus datos.');
-          }, 400);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 150);
+    if (file) {
+      processFile(file);
+    }
   };
 
   return (

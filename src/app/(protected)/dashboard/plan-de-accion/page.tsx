@@ -7,7 +7,6 @@ import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { 
   ChevronRight, 
   Lightbulb, 
@@ -78,7 +77,7 @@ const KNOWN_SKILLS_TEMPLATES: Record<string, Omit<RoadmapStep, 'skill'>> = {
 
 export default function RoadmapPage() {
   const router = useRouter();
-  const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const { isLoading: isUserLoading } = useCurrentUser();
   const { data: profile, isLoading: isProfileLoading } = useUserProfile();
   const { data: cvData, isLoading: isCVLoading } = useUserCVs();
 
@@ -98,7 +97,10 @@ export default function RoadmapPage() {
     if (typeof window !== 'undefined') {
       const savedRoadmap = localStorage.getItem('devalign_roadmap_generated');
       if (savedRoadmap === 'true') {
-        setIsGenerated(true);
+        const timeoutId = setTimeout(() => {
+          setIsGenerated(true);
+        }, 0);
+        return () => clearTimeout(timeoutId);
       }
     }
   }, []);
@@ -163,7 +165,7 @@ export default function RoadmapPage() {
     const matchedSteps: RoadmapStep[] = gaps.map(gapName => {
       const lower = gapName.toLowerCase();
       // Try to find in template
-      let templateKey = Object.keys(KNOWN_SKILLS_TEMPLATES).find(k => lower.includes(k));
+      const templateKey = Object.keys(KNOWN_SKILLS_TEMPLATES).find(k => lower.includes(k));
       if (templateKey) {
         return {
           skill: gapName,

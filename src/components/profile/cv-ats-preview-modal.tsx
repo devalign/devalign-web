@@ -56,7 +56,6 @@ export default function CVAtsPreviewModal({
         if (type === 'tool') {
           return (
             s.skill_type === 'tool' ||
-            s.skill_type === 'methodology' ||
             nameLower === 'tool' ||
             [
               'aws',
@@ -73,19 +72,26 @@ export default function CVAtsPreviewModal({
           );
         }
         // default to technical/hard skills
-        return (
-          s.skill_type !== 'soft_skill' &&
-          s.skill_type !== 'tool' &&
-          s.skill_type !== 'methodology' &&
-          !['aws', 'docker', 'kubernetes', 'git', 'github'].some((x) => nameLower.includes(x))
-        );
+        if (type === 'hard_skill') {
+          return (
+            s.skill_type !== 'soft_skill' &&
+            s.skill_type !== 'tool' &&
+            s.skill_type !== 'methodology' &&
+            !['aws', 'docker', 'kubernetes', 'git', 'github'].some((x) => nameLower.includes(x))
+          );
+        }
+        if (type === 'methodology') {
+          return s.skill_type === 'methodology' || nameLower === 'methodology';
+        }
+        return false;
       })
       .map((s) => s.name);
   };
 
-  const technicalSkills = getSkillsByType('technical');
+  const technicalSkills = getSkillsByType('hard_skill');
   const toolSkills = getSkillsByType('tool');
   const softSkills = getSkillsByType('soft');
+  const methodologySkills = getSkillsByType('methodology');
 
   const defaultDescription = `Desarrollador técnico con experiencia en el diseño e implementación de soluciones de software. Especializado en optimización de flujos de trabajo y alineación de tecnologías a los estándares del mercado de desarrollo.`;
 
@@ -165,6 +171,15 @@ export default function CVAtsPreviewModal({
           ? `
         <div class="skills-block">
           <span class="skills-label">Herramientas y Tecnologías:</span> ${toolSkills.join(', ')}
+        </div>
+      `
+          : ''
+      }
+      ${
+        methodologySkills.length > 0
+          ? `
+        <div class="skills-block">
+          <span class="skills-label">Metodologías:</span> ${methodologySkills.join(', ')}
         </div>
       `
           : ''
@@ -498,8 +513,8 @@ export default function CVAtsPreviewModal({
                   </div>
                 )}
 
-                {/* Technical, Tools and Soft Skills */}
-                {(technicalSkills.length > 0 || toolSkills.length > 0 || softSkills.length > 0) && (
+                {/* Technical, Tools, Methodologies and Soft Skills */}
+                {(technicalSkills.length > 0 || toolSkills.length > 0 || softSkills.length > 0 || methodologySkills.length > 0) && (
                   <div className="mt-5">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
                       Habilidades
@@ -521,6 +536,12 @@ export default function CVAtsPreviewModal({
                         <div className="leading-relaxed">
                           <span className="font-semibold text-zinc-900">Habilidades Blandas: </span>
                           {softSkills.join(', ')}
+                        </div>
+                      )}
+                      {methodologySkills.length > 0 && (
+                        <div className="leading-relaxed">
+                          <span className="font-semibold text-zinc-900">Metodologías: </span>
+                          {methodologySkills.join(', ')}
                         </div>
                       )}
                     </div>

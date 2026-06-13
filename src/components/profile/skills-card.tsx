@@ -25,11 +25,11 @@ interface SkillsCardProps {
 }
 
 export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = false }: SkillsCardProps) {
-  const [activeTab, setActiveTab] = useState<'tecnicas' | 'blandas' | 'herramientas'>('tecnicas');
+  const [activeTab, setActiveTab] = useState<'tecnicas' | 'blandas' | 'herramientas' | 'metodologias'>('tecnicas');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editSkillsList, setEditSkillsList] = useState<SkillItem[]>([]);
   const [newSkillName, setNewSkillName] = useState('');
-  const [newSkillCategory, setNewSkillCategory] = useState<'tecnicas' | 'blandas' | 'herramientas'>(
+  const [newSkillCategory, setNewSkillCategory] = useState<'tecnicas' | 'blandas' | 'herramientas' | 'metodologias'>(
     'tecnicas',
   );
 
@@ -45,10 +45,11 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
   const getSkillCategory = (
     name: string,
     type: string,
-  ): 'tecnicas' | 'blandas' | 'herramientas' => {
+  ): 'tecnicas' | 'blandas' | 'herramientas' | 'metodologias' => {
     const nameLower = name.toLowerCase();
     if (type === 'soft_skill' || nameLower === 'soft_skill') return 'blandas';
-    if (type === 'tool' || type === 'methodology' || nameLower === 'tool') return 'herramientas';
+    if (type === 'tool' || nameLower === 'tool') return 'herramientas';
+    if (type === 'methodology' || nameLower === 'methodology') return 'metodologias';
 
     // Simple heuristical filters for safety
     const tools = [
@@ -131,6 +132,7 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
       tecnicas: 'hard_skill',
       blandas: 'soft_skill',
       herramientas: 'tool',
+      metodologias: 'methodology',
     };
 
     const newSkill: SkillItem = {
@@ -176,7 +178,7 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
       <CardContent>
         {/* Navigation Tabs */}
         <div className="flex border-b border-border pb-px mb-4">
-          {(['tecnicas', 'blandas', 'herramientas'] as const).map((tab) => (
+          {(['tecnicas', 'blandas', 'herramientas', 'metodologias'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -187,7 +189,7 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               } ${isPlaceholder ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {tab === 'tecnicas' ? 'Técnicas' : tab === 'blandas' ? 'Blandas' : 'Herramientas'}
+              {tab === 'tecnicas' ? 'Técnicas' : tab === 'blandas' ? 'Blandas' : tab === 'metodologias' ? 'Metodologías' : 'Herramientas'}
             </button>
           ))}
         </div>
@@ -276,13 +278,14 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
                 id="new-cat"
                 value={newSkillCategory}
                 onChange={(e) =>
-                  setNewSkillCategory(e.target.value as 'tecnicas' | 'blandas' | 'herramientas')
+                  setNewSkillCategory(e.target.value as 'tecnicas' | 'blandas' | 'herramientas' | 'metodologias')
                 }
                 className="h-9 rounded-md border border-input bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 <option value="tecnicas">Técnicas</option>
                 <option value="blandas">Blandas</option>
                 <option value="herramientas">Herramientas</option>
+                <option value="metodologias">Metodologías</option>
               </select>
             </div>
             <Button
