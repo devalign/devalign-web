@@ -7,7 +7,10 @@ import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { toast } from 'sonner';
 import CVUploader from '@/components/profile/cv-uploader';
+import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
+import { useCVAnalysis } from '@/contexts/cv-analysis-context';
+import { Button } from '@/components/ui/button';
 import { UserProfileData, EducationItem, WorkExperienceItem, CertificationItem, SkillItem } from '@/lib/api/types';
 import {
   Dialog,
@@ -23,7 +26,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Lightbulb } from 'lucide-react';
 
 // Refactored modular subcomponents
 import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
@@ -36,51 +39,24 @@ import { CompatibleRolesCard } from '@/components/diagnosis/compatible-roles-car
 import { AiInsightCard } from '@/components/diagnosis/ai-insight-card';
 import { ClusterDemandCard } from '@/components/diagnosis/cluster-demand-card';
 import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
+import { AllAffinitiesCard } from '@/components/diagnosis/all-affinities-card';
 
 function DashboardContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: cvData, isLoading: isCVLoading, refetch: refetchCVs } = useUserCVs();
   const { data: profile, refetch: refetchProfile } = useUserProfile();
+  const { startAnalysis, isAnalysisReady, commitUpdate } = useCVAnalysis();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Onboarding & CV Upload Simulation State
   const [hasCV, setHasCV] = useState(true);
-  const [isUpdatingFromCV, setIsUpdatingFromCV] = useState(false);
-
-  const handleCVProcessing = async (newCvId: string) => {
-    setIsUpdatingFromCV(true);
-    try {
-      await refetchCVs();
-
-      let attempts = 0;
-      let isUpdated = false;
-
-      while (attempts < 30 && !isUpdated) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        const result = await refetchProfile();
-        if (result.data && result.data.cv_id === newCvId) {
-          isUpdated = true;
-        }
-        attempts++;
-      }
-
-      if (!isUpdated) {
-        toast.warning('El análisis está tomando más de lo esperado. Los datos se actualizarán en breve.');
-      } else {
-        toast.success('Perfil sincronizado exitosamente con tu nuevo CV.');
-      }
-    } catch (error) {
-      console.error('Error refetching profile:', error);
-      toast.error('Ocurrió un error al sincronizar tu perfil.');
-    } finally {
-      setIsUpdatingFromCV(false);
-    }
-  };
 
   // Drawers states
   const [isStrengthsDrawerOpen, setIsStrengthsDrawerOpen] = useState(false);
   const [isGapsDrawerOpen, setIsGapsDrawerOpen] = useState(false);
+  const [isRolesDrawerOpen, setIsRolesDrawerOpen] = useState(false);
+  const [isInsightDrawerOpen, setIsInsightDrawerOpen] = useState(false);
 
   // Search states for drawers
   const [strengthsSearch, setStrengthsSearch] = useState('');
@@ -329,10 +305,9 @@ function DashboardContent() {
     availability: profile?.availability || 'Inmediata',
     alignment_score: currentScore,
     primary_specialty: profile?.primary_specialty || 'Data Engineering',
-    secondary_affinities: profile?.secondary_affinities || [
-      { cluster_id: 'devops', cluster_name: 'DevOps', affinity_score: 63, is_primary: false },
-      { cluster_id: 'data', cluster_name: 'Data Engineering', affinity_score: 41, is_primary: true },
-    ],
+    secondary_affinities: profile?.secondary_affinities || [],
+    all_affinities: profile?.all_affinities || [],
+    domain_affinities: profile?.domain_affinities || [],
     detected_skills: [
       ...techSkills.map((name) => ({ name, skill_type: 'hard_skill' })),
       ...softSkills.map((name) => ({ name, skill_type: 'soft_skill' })),
@@ -361,10 +336,10 @@ function DashboardContent() {
   if (!hasCV) {
     return (
       <DashboardEmptyState
-        onUploadSuccess={async (newCvId) => {
+        onUploadSuccess={(newCvId) => {
           setHasCV(true);
           if (newCvId) {
-            await handleCVProcessing(newCvId);
+            startAnalysis(newCvId);
           }
         }}
       />
@@ -373,23 +348,11 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Carga Reactiva tras Subir CV */}
-      {isUpdatingFromCV && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/60 backdrop-blur-sm transition-all duration-300">
-          <div className="flex flex-col items-center gap-3 p-6 bg-card border border-border shadow-2xl rounded-2xl">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            <div className="text-center">
-              <p className="text-sm font-bold text-foreground">Actualizando Perfil</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Sincronizando los datos extraídos de tu nuevo CV...
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Content Area */}
-      <div className={`max-w-7xl mx-auto px-6 py-8 relative transition-opacity duration-300 ${isUpdatingFromCV ? 'opacity-40 pointer-events-none' : ''}`}>
+      <div className="max-w-7xl mx-auto px-6 py-8 relative">
+        {/* Banner de Sincronización Diferida */}
+        <CVUpdateBanner />
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Fila 1: Perfil (1 col) y Score de Mercado (2 cols) */}
@@ -417,6 +380,7 @@ function DashboardContent() {
           {/* Fila 2: Diagnóstico (1 col cada uno: Radar, Fortalezas, Brechas) */}
           <div className="lg:col-span-1">
             <AffinityRadarChart
+              domainAffinities={dynamicProfile.domain_affinities}
               techSkills={techSkills}
               isLoading={isRecalculating}
             />
@@ -447,6 +411,8 @@ function DashboardContent() {
           {/* Fila 3: Análisis de Mercado (Roles, Demanda de Cluster, Impacto de Mercado) */}
           <div className="lg:col-span-1">
             <CompatibleRolesCard
+              roles={dynamicProfile.all_affinities?.find(a => a.is_primary)?.compatible_roles}
+              onViewAll={() => setIsRolesDrawerOpen(true)}
               isLoading={isRecalculating}
             />
           </div>
@@ -454,6 +420,7 @@ function DashboardContent() {
           <div className="lg:col-span-1">
             <ClusterDemandCard
               roleTitle={roleTitle}
+              marketInsights={dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights}
               isLoading={isRecalculating}
             />
           </div>
@@ -461,14 +428,23 @@ function DashboardContent() {
           <div className="lg:col-span-1">
             <MarketImpactCard
               marketGaps={marketGaps}
+              marketInsights={dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights}
+              onViewAll={() => setIsInsightDrawerOpen(true)}
               isLoading={isRecalculating}
             />
           </div>
 
-          {/* Fila 4: Recomendaciones IA (Ancho completo) */}
-          <div className="lg:col-span-3">
+          {/* Fila 4: Recomendaciones IA y Todas las Afinidades */}
+          <div className="lg:col-span-2">
             <AiInsightCard
               marketGaps={marketGaps}
+              isLoading={isRecalculating}
+            />
+          </div>
+
+          <div className="lg:col-span-1">
+            <AllAffinitiesCard
+              affinities={dynamicProfile.all_affinities}
               isLoading={isRecalculating}
             />
           </div>
@@ -491,12 +467,10 @@ function DashboardContent() {
           </DialogHeader>
           <div className="py-2">
             <CVUploader
-              onUploadSuccess={async (newCvId) => {
+              onUploadSuccess={(newCvId) => {
                 handleCloseUpload(false);
                 if (newCvId) {
-                  await handleCVProcessing(newCvId);
-                } else {
-                  toast.success('CV cargado exitosamente.');
+                  startAnalysis(newCvId);
                 }
               }}
             />
@@ -541,7 +515,7 @@ function DashboardContent() {
 
           {/* List */}
           <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
-            {techSkills
+            {Array.from(new Set(techSkills))
               .filter((s) => s.toLowerCase().includes(strengthsSearch.toLowerCase()))
               .map((skill, idx) => {
                 const levels = ['Avanzado', 'Intermedio - Avanzado', 'Intermedio', 'Intermedio'];
@@ -550,7 +524,7 @@ function DashboardContent() {
 
                 return (
                   <div
-                    key={skill}
+                    key={`${skill}-${idx}`}
                     className="flex flex-col justify-between p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10 transition-colors hover:bg-emerald-500/10"
                   >
                     <div className="flex justify-between items-start gap-1">
@@ -643,6 +617,78 @@ function DashboardContent() {
                 No se encontraron brechas con ese nombre.
               </p>
             )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Drawer: Todos los Roles Compatibles */}
+      <Sheet open={isRolesDrawerOpen} onOpenChange={setIsRolesDrawerOpen}>
+        <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="flex items-center gap-2 text-primary font-bold">
+              Roles Compatibles (Cluster Primario)
+            </SheetTitle>
+            <SheetDescription className="text-xs text-muted-foreground mt-1">
+              Estos son todos los roles del mercado que hacen match con tu especialidad principal.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none mt-4">
+            {dynamicProfile.all_affinities?.find(a => a.is_primary)?.compatible_roles?.map((role: any, idx: number) => {
+              const badgeClass =
+                role.match === 'Alta'
+                  ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                  : role.match === 'Media'
+                    ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                    : 'bg-red-500/10 text-red-600 border border-red-500/20';
+              
+              return (
+                <div
+                  key={idx}
+                  className="flex justify-between items-center p-3 rounded-lg bg-secondary/35 border border-border/50 text-xs"
+                >
+                  <span className="font-semibold text-foreground truncate">{role.title}</span>
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold shrink-0 ${badgeClass}`}>
+                    Afinidad {role.match}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Drawer: Detalle del Insight de Mercado */}
+      <Sheet open={isInsightDrawerOpen} onOpenChange={setIsInsightDrawerOpen}>
+        <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="flex items-center gap-2 text-amber-500 font-bold">
+              <Lightbulb className="h-5 w-5" />
+              Detalle del Insight de Mercado
+            </SheetTitle>
+            <SheetDescription className="text-xs text-muted-foreground mt-1">
+              Desglose salarial y proyección para los perfiles que cubren las brechas actuales.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1 mt-4 text-sm text-foreground">
+            <div className="p-4 rounded-lg bg-secondary/35 border border-border">
+              <h3 className="font-bold text-xs uppercase text-muted-foreground mb-2">Impacto Salarial</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Según nuestro modelo de Machine Learning entrenado con miles de ofertas locales, cerrar las brechas indicadas (especialmente aquellas marcadas como Críticas) te permite apuntar a roles Senior o Especializados.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-3 rounded-lg border border-border flex flex-col items-center justify-center text-center">
+                <span className="text-xs text-muted-foreground font-semibold">Salario Promedio Actual</span>
+                <span className="text-lg font-bold">S/. {Math.round((dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights?.average_salary_pen || 0) * 0.75) || 'N/A'}</span>
+              </div>
+              <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 flex flex-col items-center justify-center text-center">
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Salario Proyectado</span>
+                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">S/. {dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights?.average_salary_pen || 'N/A'}</span>
+              </div>
+            </div>
           </div>
         </SheetContent>
       </Sheet>

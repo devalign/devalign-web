@@ -39,6 +39,8 @@ import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
 import CVUploader from '@/components/profile/cv-uploader';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { UserProfileData } from '@/lib/api/types';
+import { useCVAnalysis } from '@/contexts/cv-analysis-context';
+import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 
 interface Experience {
   role: string;
@@ -64,6 +66,7 @@ function ProfileContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: profile, isLoading: isProfileLoading, refetch: refetchProfile } = useUserProfile();
   const { data: cvData, isLoading: isCvLoading, refetch: refetchCVs } = useUserCVs();
+  const { startAnalysis, isAnalysisReady, commitUpdate } = useCVAnalysis();
   const currentCV = profile?.cv_id 
     ? cvData?.cvs?.find((cv) => cv.cv_id === profile.cv_id) || cvData?.cvs?.[0]
     : cvData?.cvs?.[0];
@@ -107,7 +110,6 @@ function ProfileContent() {
   const action = searchParams.get('action');
   const [isCVManagerOpen, setIsCVManagerOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isUpdatingFromCV, setIsUpdatingFromCV] = useState(false);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -440,20 +442,8 @@ function ProfileContent() {
     <div className="min-h-screen bg-background pb-12">
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-6 py-6 relative">
-        {/* Carga Reactiva tras Subir CV */}
-        {isUpdatingFromCV && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/60 backdrop-blur-sm transition-all duration-300">
-            <div className="flex flex-col items-center gap-3 p-6 bg-card border border-border shadow-2xl rounded-2xl animate-in zoom-in-95 fade-in-0 duration-300">
-              <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              <div className="text-center">
-                <p className="text-sm font-bold text-foreground">Actualizando Perfil</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Sincronizando los datos extraídos de tu nuevo CV...
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Banner de Sincronización Diferida */}
+        <CVUpdateBanner />
 
         {/* Back Button & CV Export Action */}
         <div className="flex items-center justify-between mb-6">
@@ -477,7 +467,7 @@ function ProfileContent() {
             Exportar CV ATS
           </Button>
         </div>
-        <div className={cn("grid grid-cols-1 lg:grid-cols-12 gap-8 items-start transition-opacity duration-300", isUpdatingFromCV && "opacity-40 pointer-events-none")}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start transition-opacity duration-300">
           {/* Left Column (Info Principal, Habilidades, Educación) - Width 5/12 */}
           <div className="lg:col-span-5 space-y-6">
             {/* 1. Información Principal */}
@@ -684,16 +674,17 @@ function ProfileContent() {
                       No hay habilidades en esta categoría.
                     </p>
                   ) : (
-                    (activeTab === 'tech'
-                      ? techSkills
-                      : activeTab === 'soft'
-                        ? softSkills
-                        : activeTab === 'tools'
-                          ? toolsSkills
-                          : methodologySkills
-                    ).map((skill) => (
+                    Array.from(new Set(
+                      activeTab === 'tech'
+                        ? techSkills
+                        : activeTab === 'soft'
+                          ? softSkills
+                          : activeTab === 'tools'
+                            ? toolsSkills
+                            : methodologySkills
+                    )).map((skill, idx) => (
                       <div
-                        key={skill}
+                        key={`${skill}-${idx}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 transition-all hover:bg-primary/20 group"
                       >
                         <span>{skill}</span>
@@ -1310,39 +1301,9 @@ function ProfileContent() {
           </DialogHeader>
           <div className="pt-4">
             <CVUploader
-              onUploadSuccess={async (newCvId: string) => {
+              onUploadSuccess={(newCvId: string) => {
                 setIsUploadModalOpen(false);
-                setIsUpdatingFromCV(true);
-                toast.success('Tu CV ha sido cargado. Analizando tu perfil con IA...');
-                
-                try {
-                  // Refetch CV list immediately to update the file card
-                  await refetchCVs();
-
-                  let attempts = 0;
-                  let isUpdated = false;
-                  
-                  // Poll the profile until cv_id matches the new one (up to 60s)
-                  while (attempts < 30 && !isUpdated) {
-                    await new Promise((resolve) => setTimeout(resolve, 2000));
-                    const result = await refetchProfile();
-                    if (result.data && result.data.cv_id === newCvId) {
-                      isUpdated = true;
-                    }
-                    attempts++;
-                  }
-
-                  if (!isUpdated) {
-                    toast.warning('El análisis está tomando más de lo esperado. Los datos se actualizarán en breve.');
-                  } else {
-                    toast.success('Perfil sincronizado exitosamente con tu nuevo CV.');
-                  }
-                } catch (error) {
-                  console.error('Error refetching profile:', error);
-                  toast.error('Ocurrió un error al sincronizar tu perfil.');
-                } finally {
-                  setIsUpdatingFromCV(false);
-                }
+                startAnalysis(newCvId);
               }}
             />
           </div>

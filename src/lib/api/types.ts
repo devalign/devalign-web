@@ -57,6 +57,13 @@ export interface ClusterAffinityItem {
   cluster_name: string;
   affinity_score: number;
   is_primary: boolean;
+  market_insights?: any;
+  compatible_roles?: any[];
+}
+
+export interface DomainAffinityItem {
+  domain: string;
+  affinity_score: number;
 }
 
 export interface UserProfileData {
@@ -66,6 +73,8 @@ export interface UserProfileData {
   primary_specialty: string;
   alignment_score: number;
   secondary_affinities: ClusterAffinityItem[];
+  all_affinities?: ClusterAffinityItem[];
+  domain_affinities?: DomainAffinityItem[];
   detected_skills: SkillItem[];
   skill_gaps: SkillItem[];
   full_name: string | null;

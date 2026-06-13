@@ -11,15 +11,13 @@ interface CompatibleRoleItem {
 
 interface CompatibleRolesCardProps {
   roles?: CompatibleRoleItem[];
+  onViewAll?: () => void;
   isLoading?: boolean;
 }
 
 export function CompatibleRolesCard({
-  roles = [
-    { title: 'Backend Java Developer', match: 'Alta' },
-    { title: 'Java Cloud Engineer', match: 'Alta' },
-    { title: 'Data Engineer Junior', match: 'Media' },
-  ],
+  roles = [],
+  onViewAll,
   isLoading = false,
 }: CompatibleRolesCardProps) {
   return (
@@ -44,6 +42,11 @@ export function CompatibleRolesCard({
       <CardContent className="flex-1 flex flex-col justify-between px-5 pb-5 pt-0 space-y-3">
         {/* Roles List */}
         <div className="space-y-2 mt-2">
+          {roles.length === 0 && !isLoading && (
+            <div className="flex items-center justify-center p-4 rounded-lg bg-secondary/35 border border-border/50 text-xs text-muted-foreground">
+              No se detectaron roles compatibles.
+            </div>
+          )}
           {roles.map((role, idx) => {
             const badgeClass =
               role.match === 'Alta'
@@ -69,6 +72,7 @@ export function CompatibleRolesCard({
         {/* Footer Link */}
         <div className="pt-2 text-right">
           <button
+            onClick={onViewAll}
             className="text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer bg-transparent border-0"
           >
             Ver más roles <ArrowRight className="w-3 h-3" />

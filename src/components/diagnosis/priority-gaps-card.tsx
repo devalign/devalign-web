@@ -37,7 +37,7 @@ export function PriorityGapsCard({ marketGaps, onViewAll, isLoading = false }: P
           </div>
         ) : (
           <>
-            <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1 scrollbar-none">
+            <div className="space-y-2">
               {marketGaps.slice(0, 4).map((bg) => {
                 const crit = bg.market_importance || 'medium';
                 const demand = bg.market_demand_percentage || 50;

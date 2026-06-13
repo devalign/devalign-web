@@ -5,38 +5,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target, Loader2 } from 'lucide-react';
 
 interface AffinityRadarChartProps {
+  domainAffinities?: { domain: string; affinity_score: number }[];
   techSkills: string[];
   isLoading?: boolean;
 }
 
-export function AffinityRadarChart({ techSkills, isLoading = false }: AffinityRadarChartProps) {
+export function AffinityRadarChart({ domainAffinities, techSkills, isLoading = false }: AffinityRadarChartProps) {
   // DYNAMIC RADAR CHART COORDINATES CALCULATION
   const getRadarPoints = () => {
-    const dataVal = Math.min(
-      35 +
-        techSkills.filter((s) => ['Databricks', 'Spark', 'Hadoop', 'SQL Server'].includes(s))
-          .length *
-          15,
-      95,
-    );
-    const backendVal = Math.min(
-      35 +
-        techSkills.filter((s) => ['Python', 'PostgreSQL', 'Microservicios'].includes(s)).length *
-          20,
-      95,
-    );
-    const cloudVal = Math.min(
-      20 + techSkills.filter((s) => ['AWS', 'Docker'].includes(s)).length * 35,
-      95,
-    );
-    const devopsVal = Math.min(
-      20 + techSkills.filter((s) => ['Kubernetes', 'CI/CD'].includes(s)).length * 35,
-      95,
-    );
-    const frontendVal = Math.min(
-      20 + techSkills.filter((s) => ['React', 'HTML', 'CSS', 'Power BI'].includes(s)).length * 20,
-      85,
-    );
+    let dataVal = 20, backendVal = 20, cloudVal = 20, devopsVal = 20, frontendVal = 20;
+
+    if (domainAffinities && domainAffinities.length > 0) {
+      dataVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'Data')?.affinity_score || 0) * 80, 95);
+      backendVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'Backend')?.affinity_score || 0) * 80, 95);
+      cloudVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'Cloud')?.affinity_score || 0) * 80, 95);
+      devopsVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'DevOps')?.affinity_score || 0) * 80, 95);
+      frontendVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'Frontend')?.affinity_score || 0) * 80, 85);
+    } else {
+      // Fallback
+      dataVal = Math.min(35 + techSkills.filter((s) => ['Databricks', 'Spark', 'Hadoop', 'SQL Server'].includes(s)).length * 15, 95);
+      backendVal = Math.min(35 + techSkills.filter((s) => ['Python', 'PostgreSQL', 'Microservicios'].includes(s)).length * 20, 95);
+      cloudVal = Math.min(20 + techSkills.filter((s) => ['AWS', 'Docker'].includes(s)).length * 35, 95);
+      devopsVal = Math.min(20 + techSkills.filter((s) => ['Kubernetes', 'CI/CD'].includes(s)).length * 35, 95);
+      frontendVal = Math.min(20 + techSkills.filter((s) => ['React', 'HTML', 'CSS', 'Power BI'].includes(s)).length * 20, 85);
+    }
 
     const convert = (val: number, angleDeg: number) => {
       const angleRad = (angleDeg - 90) * (Math.PI / 180);

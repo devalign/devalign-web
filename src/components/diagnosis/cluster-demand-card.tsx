@@ -6,10 +6,13 @@ import { Loader2, TrendingUp } from 'lucide-react';
 
 interface ClusterDemandCardProps {
   roleTitle?: string;
+  marketInsights?: any;
   isLoading?: boolean;
 }
 
-export function ClusterDemandCard({ roleTitle = 'Data Engineering', isLoading = false }: ClusterDemandCardProps) {
+export function ClusterDemandCard({ roleTitle = 'Data Engineering', marketInsights, isLoading = false }: ClusterDemandCardProps) {
+  const growth = marketInsights?.growth_percentage ?? null;
+  const isPositive = growth !== null && growth >= 0;
   return (
     <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col justify-between h-full min-h-[220px]">
       <CardContent className="p-5 flex flex-col justify-between h-full gap-4">
@@ -31,10 +34,10 @@ export function ClusterDemandCard({ roleTitle = 'Data Engineering', isLoading = 
                 </span>
               </div>
               <div className="flex items-baseline gap-2 pt-1">
-                <span className="text-3xl font-extrabold text-foreground tracking-tight">
-                  +28%
+                <span className={`text-3xl font-extrabold tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}>
+                  {growth !== null ? `${isPositive ? '+' : ''}${growth}%` : 'N/A'}
                 </span>
-                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className={`text-[11px] font-semibold ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                   Crecimiento laboral
                 </span>
               </div>
@@ -42,7 +45,7 @@ export function ClusterDemandCard({ roleTitle = 'Data Engineering', isLoading = 
 
             {/* Description */}
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Las ofertas para la especialidad <strong className="text-foreground">{roleTitle}</strong> se han incrementado en los últimos 6 meses en el mercado regional.
+              Las ofertas para la especialidad <strong className="text-foreground">{roleTitle}</strong> han mostrado este comportamiento recientemente (Market Share: {marketInsights?.market_share_percentage ?? 'N/A'}%).
             </p>
 
             {/* Sparkline chart (SVG) */}

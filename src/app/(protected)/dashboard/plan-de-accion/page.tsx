@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useCVAnalysis } from '@/contexts/cv-analysis-context';
+import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 
 interface RoadmapStep {
   skill: string;
@@ -80,6 +82,7 @@ export default function RoadmapPage() {
   const { isLoading: isUserLoading } = useCurrentUser();
   const { data: profile, isLoading: isProfileLoading } = useUserProfile();
   const { data: cvData, isLoading: isCVLoading } = useUserCVs();
+  const { isAnalysisReady, commitUpdate } = useCVAnalysis();
 
   // Generator simulation state
   const [isGenerated, setIsGenerated] = useState(false);
@@ -370,6 +373,8 @@ export default function RoadmapPage() {
       )}>
         {/* Header */}
         <div className="max-w-4xl mx-auto mb-8">
+          <CVUpdateBanner />
+
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
               <Sparkles className="w-3 h-3" />

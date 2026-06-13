@@ -8,12 +8,16 @@ import { SkillItem } from '@/lib/api/types';
 
 interface MarketImpactCardProps {
   marketGaps?: SkillItem[];
+  marketInsights?: any;
+  onViewAll?: () => void;
   isLoading?: boolean;
 }
 
-export function MarketImpactCard({ marketGaps = [], isLoading = false }: MarketImpactCardProps) {
+export function MarketImpactCard({ marketGaps = [], marketInsights, onViewAll, isLoading = false }: MarketImpactCardProps) {
   const gap1 = marketGaps[0]?.name || 'REST APIs';
   const gap2 = marketGaps[1]?.name || 'microservicios';
+  const salaryDiff = marketInsights?.salary_differential_percentage ?? null;
+  const isPositive = salaryDiff !== null && salaryDiff >= 0;
 
   return (
     <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col justify-between h-full min-h-[220px]">
@@ -36,10 +40,10 @@ export function MarketImpactCard({ marketGaps = [], isLoading = false }: MarketI
                 </span>
               </div>
               <div className="flex items-baseline gap-1 pt-1">
-                <span className="text-3xl font-extrabold text-foreground tracking-tight">
-                  +32%
+                <span className={`text-3xl font-extrabold tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}>
+                  {salaryDiff !== null ? `${isPositive ? '+' : ''}${salaryDiff}%` : 'N/A'}
                 </span>
-                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                <span className={`text-[11px] font-semibold ${isPositive ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>
                   Diferencial Salarial
                 </span>
               </div>
@@ -47,15 +51,14 @@ export function MarketImpactCard({ marketGaps = [], isLoading = false }: MarketI
 
             {/* Description */}
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Los profesionales que dominan <strong className="text-foreground">{gap1}</strong> y{' '}
-              <strong className="text-foreground">{gap2}</strong> perciben ingresos promedio <strong>32% más altos (2.3x)</strong> en vacantes locales.
+              Los profesionales que dominan este stack técnico perciben ingresos promedio <strong>{salaryDiff !== null ? (isPositive ? `${salaryDiff}% más altos` : `${Math.abs(salaryDiff)}% más bajos`) : 'variables'}</strong> (S/. {marketInsights?.average_salary_pen ?? 'N/A'}) respecto a la media del mercado.
             </p>
 
             {/* Footer action link */}
-            <div className="flex items-center gap-1 text-[10px] font-bold text-primary cursor-pointer hover:underline pt-2 group w-fit">
+            <button onClick={onViewAll} className="flex items-center gap-1 text-[10px] font-bold text-primary cursor-pointer hover:underline pt-2 group w-fit bg-transparent border-0 p-0 text-left">
               <span>Ver detalle del insight</span>
               <ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </div>
+            </button>
           </>
         )}
       </CardContent>

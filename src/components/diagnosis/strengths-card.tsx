@@ -30,7 +30,7 @@ export function StrengthsCard({ techSkills, onViewAll, isLoading = false }: Stre
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-between pt-0 space-y-3">
-        <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1 scrollbar-none">
+        <div className="space-y-2">
           {techSkills.slice(0, 4).map((f, idx) => {
             const levels = ['Avanzado', 'Intermedio - Avanzado', 'Intermedio', 'Intermedio'];
             const demands = [92, 85, 78, 71];
