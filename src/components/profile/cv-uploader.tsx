@@ -2,13 +2,13 @@
 
 import React, { useRef, useState } from 'react';
 import { useUploadCV } from '@/hooks/use-upload-cv';
-import { UploadCloud, FileText, Loader2, Lock } from 'lucide-react';
+import { UploadCloud, FileText, Loader2, Lock, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface CVUploaderProps {
-  onUploadSuccess?: () => void;
+  onUploadSuccess?: (cvId: string) => void;
 }
 
 export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
@@ -69,7 +69,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
     }
 
     setSelectedFile(file);
-    toast.success(`Archivo seleccionado: ${file.name}`);
+    // Quitamos el toast redundante ya que ahora la interfaz mostrará la vista previa visualmente
   };
 
   const onButtonClick = () => {
@@ -80,11 +80,11 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
     if (!selectedFile) return;
 
     try {
-      await uploadMutation.mutateAsync(selectedFile);
+      const result = await uploadMutation.mutateAsync(selectedFile);
       toast.success('¡Tu CV se ha subido y el diagnóstico inicial ha comenzado!');
       setSelectedFile(null);
       if (onUploadSuccess) {
-        onUploadSuccess();
+        onUploadSuccess(result.cv_id);
       }
     } catch (error) {
       console.error(error);
@@ -105,10 +105,10 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         onDrop={handleDrop}
         onClick={onButtonClick}
         className={cn(
-          'relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 md:p-12 text-center transition-all duration-300 cursor-pointer bg-card',
-          dragActive
-            ? 'border-primary bg-primary/5 scale-[1.01] shadow-lg shadow-primary/5'
-            : 'border-border hover:border-primary/50 hover:bg-secondary/20',
+          'relative flex flex-col items-center justify-center rounded-2xl transition-all duration-300',
+          !selectedFile ? 'border-2 border-dashed p-8 md:p-12 text-center cursor-pointer bg-card' : 'border-2 border-dashed border-border/50 bg-secondary/5 p-8 cursor-default',
+          dragActive && !selectedFile ? 'border-primary bg-primary/5 scale-[1.01] shadow-lg shadow-primary/5' : '',
+          !dragActive && !selectedFile ? 'border-border hover:border-primary/50 hover:bg-secondary/20' : '',
           isUploading ? 'pointer-events-none opacity-60' : '',
         )}
       >
@@ -122,25 +122,46 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         />
 
         <div className="space-y-4">
-          {/* Icono de estado */}
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-            {isUploading ? (
-              <Loader2 className="h-7 w-7 animate-spin" />
-            ) : selectedFile ? (
-              <FileText className="h-7 w-7 animate-bounce" />
-            ) : (
-              <UploadCloud className="h-7 w-7" />
-            )}
-          </div>
+          {/* Icono de estado (Solo se muestra si no hay archivo seleccionado o está cargando) */}
+          {(!selectedFile || isUploading) && (
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+              {isUploading ? (
+                <Loader2 className="h-7 w-7 animate-spin" />
+              ) : (
+                <UploadCloud className="h-7 w-7" />
+              )}
+            </div>
+          )}
 
           {/* Textos descriptivos */}
-          <div className="space-y-1">
+          <div className="space-y-1 w-full">
             {selectedFile ? (
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">Archivo listo para análisis</p>
-                <p className="text-xs text-muted-foreground font-mono truncate max-w-xs md:max-w-md mx-auto">
-                  {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
+              <div className="w-full flex flex-col items-center justify-center space-y-4">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                  <FileText className="h-7 w-7" />
+                </div>
+                <div className="space-y-1 text-center">
+                  <p className="text-sm font-semibold text-foreground">Archivo listo para análisis</p>
+                  <p className="text-xs text-muted-foreground font-mono truncate max-w-[200px] sm:max-w-[320px] mx-auto px-2">
+                    {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                </div>
+                
+                {selectedFile.type === 'application/pdf' && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary mt-2 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(URL.createObjectURL(selectedFile), '_blank');
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Abrir vista previa
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="space-y-1">
@@ -153,9 +174,11 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
           </div>
 
           {/* Restricciones */}
-          <div className="text-[10px] text-muted-foreground/80 font-medium">
-            Máx. 5MB &bull; PDF, DOCX &bull; Español o Inglés
-          </div>
+          {!selectedFile && (
+            <div className="text-[10px] text-muted-foreground/80 font-medium">
+              Máx. 5MB &bull; PDF, DOCX &bull; Español o Inglés
+            </div>
+          )}
         </div>
 
         {/* Overlay de Carga */}

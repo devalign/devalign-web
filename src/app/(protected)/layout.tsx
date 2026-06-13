@@ -16,10 +16,10 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
 
     if (path.startsWith('/profile')) {
       items.push({ label: 'Perfil Profesional', href: '/profile' });
-    } else if (path.startsWith('/dashboard/roadmap')) {
-      items.push({ label: 'Roadmap', href: '/dashboard/roadmap' });
+    } else if (path.startsWith('/dashboard/plan-de-accion')) {
+      items.push({ label: 'Plan de Acción', href: '/dashboard/plan-de-accion' });
     } else if (path.startsWith('/dashboard')) {
-      items.push({ label: 'Diagnóstico', href: '/dashboard' });
+      items.push({ label: 'Alineación', href: '/dashboard' });
     }
 
     return items;
@@ -55,13 +55,13 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
                 Actualizado: {formattedDate}
               </span>
             )}
-            {pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/roadmap') && (
+            {pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/plan-de-accion') && (
               <span className="flex items-center gap-1.5 bg-secondary/50 px-2.5 py-1 rounded-full border border-border/40">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                 Último análisis: {formattedDate}
               </span>
             )}
-            {pathname.startsWith('/dashboard/roadmap') && (
+            {pathname.startsWith('/dashboard/plan-de-accion') && (
               <span className="flex items-center gap-1.5 bg-secondary/50 px-2.5 py-1 rounded-full border border-border/40">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                 Último análisis: {formattedDate}

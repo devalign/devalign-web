@@ -41,7 +41,7 @@ export function AiInsightCard({ marketGaps, isLoading = false }: AiInsightCardPr
           </div>
 
           <div className="shrink-0 w-full md:w-auto">
-            <Link href="/dashboard/roadmap" className="w-full md:w-auto block">
+            <Link href="/dashboard/plan-de-accion" className="w-full md:w-auto block">
               <Button
                 className="w-full md:w-auto px-5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/95 shadow-sm hover:shadow transition-all duration-200 cursor-pointer h-9 rounded-lg"
               >

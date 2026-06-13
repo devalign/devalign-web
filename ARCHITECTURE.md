@@ -688,7 +688,92 @@ Lista los CVs subidos por el usuario.
 Sube y analiza el CV para generar el perfil de desarrollador mediante K-Prototypes y Embeddings (devuelve 202).
 
 `GET /api/v1/profile/me`
-Obtiene el perfil calculado del desarrollador autenticado (Diagnóstico).
+Obtiene el perfil calculado del desarrollador autenticado (Vista Alineación / Diagnóstico).
+
+**Esquema de Respuesta Esperado (JSON):**
+
+```json
+{
+  "summary": {
+    "alignment_score": 66,
+    "alignment_label": "Media afinidad",
+    "primary_cluster": "Data Engineering",
+    "cluster_distribution": [
+      { "name": "DevOps", "affinity_percentage": 63 },
+      { "name": "Data Engineering", "affinity_percentage": 41 }
+    ]
+  },
+  "radar_chart": {
+    "domains": ["Backend", "Frontend", "Cloud", "DevOps", "Data"],
+    "datasets": {
+      "user": [40, 20, 60, 50, 70],
+      "market": [80, 30, 70, 60, 85]
+    }
+  },
+  "strengths": [
+    {
+      "skill_name": "SQL Server",
+      "user_level": "Avanzado",
+      "market_demand_percentage": 80
+    },
+    {
+      "skill_name": "Python",
+      "user_level": "Intermedio - Avanzado",
+      "market_demand_percentage": 65
+    }
+  ],
+  "gaps": [
+    {
+      "skill_name": "REST APIs",
+      "severity": "Crítica",
+      "market_demand_percentage": 74
+    },
+    {
+      "skill_name": "Microservicios",
+      "severity": "Crítica",
+      "market_demand_percentage": 68
+    },
+    {
+      "skill_name": "Node.js",
+      "severity": "Alta",
+      "market_demand_percentage": 61
+    }
+  ],
+  "compatible_roles": [
+    {
+      "role_title": "Backend Java Developer",
+      "affinity_label": "Alta"
+    },
+    {
+      "role_title": "Java Cloud Engineer",
+      "affinity_label": "Alta"
+    },
+    {
+      "role_title": "Data Engineer Junior",
+      "affinity_label": "Media"
+    }
+  ],
+  "market_insights": {
+    "cluster_demand": {
+      "metric_value": 28,
+      "trend": "positive",
+      "label": "Crecimiento laboral",
+      "description": "Las ofertas para la especialidad Practicante en Gestión de Información Financiera se han incrementado en los últimos 6 meses en el mercado regional."
+    },
+    "salary_differential": {
+      "metric_value": 32,
+      "trend": "positive",
+      "label": "Diferencial Salarial",
+      "description": "Los profesionales que dominan REST APIs y microservicios perciben ingresos promedio 32% más altos (2.3x) en vacantes locales."
+    }
+  },
+  "action_recommendation": {
+    "target_skills": ["REST APIs", "microservicios"],
+    "projected_alignment_increase_percentage": 18,
+    "text": "Fortalecer habilidades clave como **REST APIs** y **microservicios** podría aumentar tu alineación con el mercado en **+18%**."
+  }
+}
+```
 
 `PATCH /api/v1/profile/me`
 Actualiza campos manuales del perfil (experiencia, educación, etc.).

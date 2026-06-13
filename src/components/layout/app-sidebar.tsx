@@ -72,8 +72,8 @@ export default function AppSidebar() {
   };
 
   const navItems: { name: string; href: string; icon: LucideIcon; disabled?: boolean }[] = [
-    { name: 'Diagnóstico', href: '/dashboard', icon: Activity },
-    { name: 'Roadmap', href: '/dashboard/roadmap', icon: Map },
+    { name: 'Alineación', href: '/dashboard', icon: Activity },
+    { name: 'Plan de Acción', href: '/dashboard/plan-de-accion', icon: Map },
   ];
 
   return (
