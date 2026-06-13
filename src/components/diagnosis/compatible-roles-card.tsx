@@ -3,11 +3,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Briefcase, ArrowRight, Loader2 } from 'lucide-react';
-
-interface CompatibleRoleItem {
-  title: string;
-  match: 'Alta' | 'Media' | 'Baja';
-}
+import { CompatibleRoleItem } from '@/lib/api/types';
 
 interface CompatibleRolesCardProps {
   roles?: CompatibleRoleItem[];

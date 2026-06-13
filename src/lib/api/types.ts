@@ -52,13 +52,27 @@ export interface SkillItem {
   market_demand_percentage?: number | null;
 }
 
+export interface CompatibleRoleItem {
+  title: string;
+  match: 'Alta' | 'Media' | 'Baja';
+  frequency?: number;
+}
+
+export interface MarketInsights {
+  average_salary_pen?: number | null;
+  salary_differential_percentage?: number | null;
+  market_share_percentage?: number | null;
+  total_demand?: number | null;
+  growth_percentage?: number | null;
+}
+
 export interface ClusterAffinityItem {
   cluster_id: string;
   cluster_name: string;
   affinity_score: number;
   is_primary: boolean;
-  market_insights?: Record<string, unknown>;
-  compatible_roles?: Record<string, unknown>[];
+  market_insights?: MarketInsights;
+  compatible_roles?: CompatibleRoleItem[];
 }
 
 export interface DomainAffinityItem {

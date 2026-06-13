@@ -3,10 +3,11 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, TrendingUp } from 'lucide-react';
+import { MarketInsights } from '@/lib/api/types';
 
 interface ClusterDemandCardProps {
   roleTitle?: string;
-  marketInsights?: Record<string, unknown>;
+  marketInsights?: MarketInsights;
   isLoading?: boolean;
 }
 

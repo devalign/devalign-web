@@ -4,11 +4,11 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Lightbulb, ArrowUpRight } from 'lucide-react';
 
-import { SkillItem } from '@/lib/api/types';
+import { SkillItem, MarketInsights } from '@/lib/api/types';
 
 interface MarketImpactCardProps {
   marketGaps?: SkillItem[];
-  marketInsights?: Record<string, unknown>;
+  marketInsights?: MarketInsights;
   onViewAll?: () => void;
   isLoading?: boolean;
 }
