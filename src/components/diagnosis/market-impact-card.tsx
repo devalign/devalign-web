@@ -8,14 +8,12 @@ import { SkillItem } from '@/lib/api/types';
 
 interface MarketImpactCardProps {
   marketGaps?: SkillItem[];
-  marketInsights?: any;
+  marketInsights?: Record<string, unknown>;
   onViewAll?: () => void;
   isLoading?: boolean;
 }
 
 export function MarketImpactCard({ marketGaps = [], marketInsights, onViewAll, isLoading = false }: MarketImpactCardProps) {
-  const gap1 = marketGaps[0]?.name || 'REST APIs';
-  const gap2 = marketGaps[1]?.name || 'microservicios';
   const salaryDiff = marketInsights?.salary_differential_percentage ?? null;
   const isPositive = salaryDiff !== null && salaryDiff >= 0;
 

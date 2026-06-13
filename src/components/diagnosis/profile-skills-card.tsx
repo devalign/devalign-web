@@ -4,8 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Settings2, Loader2, Sparkles } from 'lucide-react';
-import { useCVAnalysis } from '@/contexts/cv-analysis-context';
+import { User, Settings2, Loader2 } from 'lucide-react';
 
 interface ProfileSkillsCardProps {
   fullName: string;
@@ -20,7 +19,6 @@ export function ProfileSkillsCard({
   seniority,
   isLoading = false,
 }: ProfileSkillsCardProps) {
-  const { isAnalyzing, isAnalysisReady, commitUpdate } = useCVAnalysis();
 
   return (
     <Card className="shadow-lg shadow-black/5 border-border bg-card overflow-hidden relative h-full flex flex-col justify-between">

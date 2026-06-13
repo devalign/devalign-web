@@ -634,11 +634,12 @@ function DashboardContent() {
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none mt-4">
-            {dynamicProfile.all_affinities?.find(a => a.is_primary)?.compatible_roles?.map((role: any, idx: number) => {
+            {dynamicProfile.all_affinities?.find(a => a.is_primary)?.compatible_roles?.map((role: Record<string, unknown>, idx: number) => {
+              const r = role as { title?: string; match?: string };
               const badgeClass =
-                role.match === 'Alta'
+                r.match === 'Alta'
                   ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
-                  : role.match === 'Media'
+                  : r.match === 'Media'
                     ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
                     : 'bg-red-500/10 text-red-600 border border-red-500/20';
               
@@ -647,9 +648,9 @@ function DashboardContent() {
                   key={idx}
                   className="flex justify-between items-center p-3 rounded-lg bg-secondary/35 border border-border/50 text-xs"
                 >
-                  <span className="font-semibold text-foreground truncate">{role.title}</span>
+                  <span className="font-semibold text-foreground truncate">{r.title}</span>
                   <span className={`px-2 py-0.5 rounded text-[9px] font-bold shrink-0 ${badgeClass}`}>
-                    Afinidad {role.match}
+                    Afinidad {r.match}
                   </span>
                 </div>
               );

@@ -125,13 +125,17 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
         try {
           const parsed = JSON.parse(stored);
           if (parsed.isAnalyzing && parsed.analyzedCvId) {
-            setIsAnalyzing(true);
-            setIsAnalysisReady(false);
-            setAnalyzedCvId(parsed.analyzedCvId);
-            runPolling(parsed.analyzedCvId);
+            setTimeout(() => {
+              setIsAnalyzing(true);
+              setIsAnalysisReady(false);
+              setAnalyzedCvId(parsed.analyzedCvId);
+              runPolling(parsed.analyzedCvId);
+            }, 0);
           } else if (parsed.isAnalysisReady) {
-            setIsAnalysisReady(true);
-            setAnalyzedCvId(parsed.analyzedCvId);
+            setTimeout(() => {
+              setIsAnalysisReady(true);
+              setAnalyzedCvId(parsed.analyzedCvId);
+            }, 0);
           }
         } catch (e) {
           console.error('Error parsing stored CV analysis state:', e);

@@ -6,7 +6,7 @@ import { Loader2, TrendingUp } from 'lucide-react';
 
 interface ClusterDemandCardProps {
   roleTitle?: string;
-  marketInsights?: any;
+  marketInsights?: Record<string, unknown>;
   isLoading?: boolean;
 }
 

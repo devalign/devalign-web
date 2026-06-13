@@ -57,8 +57,8 @@ export interface ClusterAffinityItem {
   cluster_name: string;
   affinity_score: number;
   is_primary: boolean;
-  market_insights?: any;
-  compatible_roles?: any[];
+  market_insights?: Record<string, unknown>;
+  compatible_roles?: Record<string, unknown>[];
 }
 
 export interface DomainAffinityItem {
