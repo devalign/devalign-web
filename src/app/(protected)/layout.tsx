@@ -70,6 +70,12 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
                 Actualizado: {formattedDate}
               </span>
             )}
+            {pathname.startsWith('/dashboard') && (
+              <span className="hidden md:flex items-center gap-1.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-full border border-blue-500/20 font-semibold text-[10px] sm:text-xs" title="Los datos del mercado se actualizan cada semana de forma automática">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                Dataset: Semanal (Scraping automatizado)
+              </span>
+            )}
             {pathname.startsWith('/dashboard') && !pathname.startsWith('/dashboard/plan-de-accion') && (
               <span className="flex items-center gap-1.5 bg-secondary/50 px-2.5 py-1 rounded-full border border-border/40">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />

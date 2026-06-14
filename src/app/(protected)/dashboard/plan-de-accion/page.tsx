@@ -237,7 +237,15 @@ export default function RoadmapPage() {
     );
   }
 
-  const primarySpecialty = profile?.primary_specialty || 'Data Engineering';
+  const primaryAffinity = profile?.all_affinities?.find(a => a.is_primary);
+  const primarySpecialty = primaryAffinity?.cluster_name || profile?.primary_specialty || 'Data Engineering';
+  const marketInsights = primaryAffinity?.market_insights;
+  
+  const growth = marketInsights?.growth_percentage ?? null;
+  const isPositiveGrowth = growth !== null && growth >= 0;
+  
+  const salaryDiff = marketInsights?.salary_differential_percentage ?? null;
+  const isPositiveSalary = salaryDiff !== null && salaryDiff >= 0;
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -461,13 +469,15 @@ export default function RoadmapPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-foreground tracking-tight">+28%</span>
+                  <span className="text-3xl font-black text-foreground tracking-tight">
+                    {growth !== null ? `${isPositiveGrowth ? '+' : ''}${growth}%` : 'N/A'}
+                  </span>
                   <span className="text-[10px] text-muted-foreground font-semibold">
                     Crecimiento laboral
                   </span>
                 </div>
                 <p className="text-[10px] text-muted-foreground leading-normal">
-                  Las ofertas para la especialidad <strong>{primarySpecialty}</strong> se han incrementado en los últimos 6 meses en Lima metropolitana.
+                  Las ofertas para el clúster <strong>{primarySpecialty}</strong> {isPositiveGrowth ? 'se han incrementado' : 'han disminuido'} en los últimos 6 meses en Lima metropolitana.
                 </p>
 
                 {/* Sparkline Graph */}
@@ -496,7 +506,7 @@ export default function RoadmapPage() {
                       INSIGHT IA
                     </h4>
                     <p className="text-[10px] text-muted-foreground leading-normal">
-                      Los perfiles <strong>{primarySpecialty}</strong> con dominio de habilidades críticas de nube e infraestructura tienen salarios promedios hasta <strong>32% más altos (2.3x)</strong> en el mercado peruano comparado con perfiles tradicionales.
+                      Los perfiles <strong>{primarySpecialty}</strong> con dominio de habilidades críticas de nube e infraestructura tienen salarios promedios <strong>{salaryDiff !== null ? (isPositiveSalary ? `${salaryDiff}% más altos` : `${Math.abs(salaryDiff)}% más bajos`) : 'variables'}</strong> en el mercado peruano comparado con perfiles tradicionales.
                     </p>
                   </div>
                 </div>

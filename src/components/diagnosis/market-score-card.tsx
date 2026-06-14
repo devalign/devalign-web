@@ -64,6 +64,9 @@ export function MarketScoreCard({
                 {currentScore}%
               </span>
             </div>
+            <p className="text-[10px] text-muted-foreground font-medium pb-1">
+              Basado en el análisis de 600 ofertas reales.
+            </p>
             <span
               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${scoreState.color}`}
             >

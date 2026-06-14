@@ -419,7 +419,7 @@ function DashboardContent() {
 
           <div className="lg:col-span-1">
             <ClusterDemandCard
-              roleTitle={roleTitle}
+              clusterName={dynamicProfile.all_affinities?.find(a => a.is_primary)?.cluster_name || dynamicProfile.primary_specialty}
               marketInsights={dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights}
               isLoading={isRecalculating}
             />

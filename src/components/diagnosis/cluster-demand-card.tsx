@@ -6,12 +6,12 @@ import { Loader2, TrendingUp } from 'lucide-react';
 import { MarketInsights } from '@/lib/api/types';
 
 interface ClusterDemandCardProps {
-  roleTitle?: string;
+  clusterName?: string;
   marketInsights?: MarketInsights;
   isLoading?: boolean;
 }
 
-export function ClusterDemandCard({ roleTitle = 'Data Engineering', marketInsights, isLoading = false }: ClusterDemandCardProps) {
+export function ClusterDemandCard({ clusterName = 'Data Engineering', marketInsights, isLoading = false }: ClusterDemandCardProps) {
   const growth = marketInsights?.growth_percentage ?? null;
   const isPositive = growth !== null && growth >= 0;
   return (
@@ -46,7 +46,7 @@ export function ClusterDemandCard({ roleTitle = 'Data Engineering', marketInsigh
 
             {/* Description */}
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Las ofertas para la especialidad <strong className="text-foreground">{roleTitle}</strong> han mostrado este comportamiento recientemente (Market Share: {marketInsights?.market_share_percentage ?? 'N/A'}%).
+              Las ofertas para el clúster <strong className="text-foreground">{clusterName}</strong> han mostrado este comportamiento recientemente (Market Share: {marketInsights?.market_share_percentage ?? 'N/A'}%).
             </p>
 
             {/* Sparkline chart (SVG) */}
