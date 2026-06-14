@@ -13,7 +13,7 @@ interface PriorityGapsCardProps {
 
 export function PriorityGapsCard({ marketGaps, onViewAll, isLoading = false }: PriorityGapsCardProps) {
   return (
-    <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col h-full relative overflow-hidden">
+    <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col h-full relative overflow-hidden min-h-[280px]">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />

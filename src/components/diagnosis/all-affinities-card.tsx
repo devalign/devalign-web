@@ -17,6 +17,8 @@ import {
 interface AllAffinitiesCardProps {
   affinities?: ClusterAffinityItem[];
   isLoading?: boolean;
+  activeClusterName?: string;
+  onSelectAffinity?: (name: string) => void;
 }
 
 const MARKET_CLUSTERS = [
@@ -57,7 +59,12 @@ const MARKET_CLUSTERS = [
   }
 ];
 
-export function AllAffinitiesCard({ affinities = [], isLoading = false }: AllAffinitiesCardProps) {
+export function AllAffinitiesCard({ 
+  affinities = [], 
+  isLoading = false,
+  activeClusterName,
+  onSelectAffinity
+}: AllAffinitiesCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   
   // Sort affinities by score descending
@@ -90,22 +97,31 @@ export function AllAffinitiesCard({ affinities = [], isLoading = false }: AllAff
               <span className="text-xs">No hay afinidades detectadas</span>
             </div>
           ) : (
-            <div className="space-y-3 pt-2">
+            <div className="space-y-2.5 pt-2">
               {sortedAffinities.map((affinity) => {
                 const scorePercent = Math.round(affinity.affinity_score * 100);
                 const isPrimary = affinity.is_primary;
+                const isActive = affinity.cluster_name === activeClusterName;
                 
                 return (
-                  <div key={affinity.cluster_id} className="space-y-1">
+                  <div 
+                    key={affinity.cluster_id} 
+                    onClick={() => onSelectAffinity?.(affinity.cluster_name)}
+                    className={`space-y-1 p-2 rounded-lg transition-all cursor-pointer border ${
+                      isActive 
+                        ? 'bg-primary/5 border-primary/20 shadow-xs scale-[1.01]' 
+                        : 'hover:bg-secondary/40 border-transparent'
+                    }`}
+                  >
                     <div className="flex justify-between text-xs">
-                      <span className={`font-semibold ${isPrimary ? 'text-primary' : 'text-foreground'}`}>
+                      <span className={`font-semibold transition-colors ${isActive ? 'text-primary' : isPrimary ? 'text-primary/80' : 'text-foreground'}`}>
                         {affinity.cluster_name} {isPrimary && <span className="text-[9px] px-1.5 py-0.5 ml-1 rounded-full bg-primary/10 text-primary">Primaria</span>}
                       </span>
                       <span className="font-bold text-muted-foreground">{scorePercent}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-secondary overflow-hidden rounded-full">
                       <div 
-                        className={`h-full ${isPrimary ? 'bg-primary' : 'bg-muted-foreground/40'} rounded-full transition-all duration-1000 ease-out`}
+                        className={`h-full ${isActive ? 'bg-primary' : isPrimary ? 'bg-primary/70' : 'bg-muted-foreground/40'} rounded-full transition-all duration-1000 ease-out`}
                         style={{ width: `${scorePercent}%` }}
                       />
                     </div>

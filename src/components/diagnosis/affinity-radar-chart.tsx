@@ -1,16 +1,28 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Target, Loader2, User, Settings2 } from 'lucide-react';
 
 interface AffinityRadarChartProps {
   domainAffinities?: { domain: string; affinity_score: number }[];
   techSkills: string[];
+  fullName?: string;
+  roleTitle?: string;
+  seniority?: string;
   isLoading?: boolean;
 }
 
-export function AffinityRadarChart({ domainAffinities, techSkills, isLoading = false }: AffinityRadarChartProps) {
+export function AffinityRadarChart({ 
+  domainAffinities, 
+  techSkills, 
+  fullName = 'Usuario',
+  roleTitle = 'Desarrollador',
+  seniority = 'Junior',
+  isLoading = false 
+}: AffinityRadarChartProps) {
   // DYNAMIC RADAR CHART COORDINATES CALCULATION
   const getRadarPoints = () => {
     let dataVal = 20, backendVal = 20, cloudVal = 20, devopsVal = 20, frontendVal = 20;
@@ -59,7 +71,9 @@ export function AffinityRadarChart({ domainAffinities, techSkills, isLoading = f
   const radarPoints = getRadarPoints();
 
   return (
-    <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden">
+    <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden flex flex-col h-full">
+      <div className="h-2 bg-gradient-to-r from-primary/30 via-primary to-primary/60 shrink-0" />
+      
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -69,15 +83,51 @@ export function AffinityRadarChart({ domainAffinities, techSkills, isLoading = f
         </div>
       )}
 
-      <CardHeader className="pb-2">
+      {/* Cabecera Perfil */}
+      <div className="p-5 pb-3 flex justify-between items-start gap-4 border-b border-border/50">
+        <div className="space-y-1.5 flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/10 text-primary rounded-lg shrink-0">
+              <User className="w-4 h-4" />
+            </div>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold font-mono bg-secondary text-foreground uppercase">
+              {seniority}
+            </span>
+          </div>
+          <h2 className="text-lg font-bold tracking-tight text-foreground truncate mt-1">
+            {fullName}
+          </h2>
+          <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">
+            {roleTitle}
+          </p>
+        </div>
+        
+        <div className="shrink-0">
+          <Link href="/profile">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary hover:bg-primary/10 text-[10px] h-7 cursor-pointer gap-1 px-2"
+            >
+              <Settings2 className="w-3 h-3" />
+              Ajustar
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <CardHeader className="pb-0 pt-4">
         <div className="flex items-center gap-2">
           <Target className="w-4 h-4 text-primary" />
-          <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+          <CardTitle className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
             Afinidad Técnica por Dominio
           </CardTitle>
         </div>
+        <p className="text-[10px] text-muted-foreground mt-1">
+          Basado en el análisis de 600 ofertas reales.
+        </p>
       </CardHeader>
-      <CardContent className="flex justify-center py-4">
+      <CardContent className="flex justify-center py-4 flex-1 items-center">
         <div className="relative w-full max-w-[280px] aspect-square">
           <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
             {/* Background rings */}

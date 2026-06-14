@@ -30,16 +30,92 @@ import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Lightbulb } from 
 
 // Refactored modular subcomponents
 import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
-import { ProfileSkillsCard } from '@/components/diagnosis/profile-skills-card';
-import { AffinityRadarChart } from '@/components/diagnosis/affinity-radar-chart';
+import { PriorityGapsCard } from '@/components/diagnosis/priority-gaps-card';
 import { MarketScoreCard } from '@/components/diagnosis/market-score-card';
 import { StrengthsCard } from '@/components/diagnosis/strengths-card';
-import { PriorityGapsCard } from '@/components/diagnosis/priority-gaps-card';
+import { AffinityRadarChart } from '@/components/diagnosis/affinity-radar-chart';
 import { CompatibleRolesCard } from '@/components/diagnosis/compatible-roles-card';
 import { AiInsightCard } from '@/components/diagnosis/ai-insight-card';
 import { ClusterDemandCard } from '@/components/diagnosis/cluster-demand-card';
 import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
-import { AllAffinitiesCard } from '@/components/diagnosis/all-affinities-card';
+
+const CLUSTER_SKILLS_MAP: Record<
+  string,
+  { name: string; category: string; importance: 'critical' | 'high' | 'medium'; demandPercentage: number }[]
+> = {
+  'Backend Java': [
+    { name: 'Java', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
+    { name: 'Spring Boot', category: 'hard_skill', importance: 'critical', demandPercentage: 88 },
+    { name: 'REST APIs', category: 'hard_skill', importance: 'high', demandPercentage: 80 },
+    { name: 'Microservicios', category: 'hard_skill', importance: 'high', demandPercentage: 82 },
+    { name: 'PostgreSQL', category: 'hard_skill', importance: 'high', demandPercentage: 74 },
+    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 62 },
+    { name: 'Docker', category: 'tool', importance: 'high', demandPercentage: 70 },
+    { name: 'Kubernetes', category: 'tool', importance: 'medium', demandPercentage: 55 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 90 },
+  ],
+  'Backend Python': [
+    { name: 'Python', category: 'hard_skill', importance: 'critical', demandPercentage: 95 },
+    { name: 'FastAPI', category: 'hard_skill', importance: 'critical', demandPercentage: 82 },
+    { name: 'REST APIs', category: 'hard_skill', importance: 'high', demandPercentage: 85 },
+    { name: 'PostgreSQL', category: 'hard_skill', importance: 'high', demandPercentage: 78 },
+    { name: 'MongoDB', category: 'hard_skill', importance: 'high', demandPercentage: 60 },
+    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 68 },
+    { name: 'Docker', category: 'tool', importance: 'high', demandPercentage: 75 },
+    { name: 'Redis', category: 'hard_skill', importance: 'medium', demandPercentage: 55 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 92 },
+  ],
+  'Frontend React': [
+    { name: 'React', category: 'hard_skill', importance: 'critical', demandPercentage: 96 },
+    { name: 'Next.js', category: 'hard_skill', importance: 'critical', demandPercentage: 85 },
+    { name: 'JavaScript', category: 'hard_skill', importance: 'critical', demandPercentage: 94 },
+    { name: 'TypeScript', category: 'hard_skill', importance: 'high', demandPercentage: 88 },
+    { name: 'HTML5', category: 'hard_skill', importance: 'high', demandPercentage: 90 },
+    { name: 'CSS3', category: 'hard_skill', importance: 'high', demandPercentage: 90 },
+    { name: 'Tailwind CSS', category: 'tool', importance: 'medium', demandPercentage: 82 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 92 },
+  ],
+  'DevOps Cloud': [
+    { name: 'Docker', category: 'tool', importance: 'critical', demandPercentage: 94 },
+    { name: 'Kubernetes', category: 'tool', importance: 'critical', demandPercentage: 88 },
+    { name: 'Terraform', category: 'tool', importance: 'critical', demandPercentage: 80 },
+    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 85 },
+    { name: 'Linux', category: 'hard_skill', importance: 'high', demandPercentage: 78 },
+    { name: 'CI/CD', category: 'methodology', importance: 'high', demandPercentage: 90 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 95 },
+  ],
+  'Data Engineering': [
+    { name: 'Python', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
+    { name: 'Spark', category: 'hard_skill', importance: 'critical', demandPercentage: 88 },
+    { name: 'SQL', category: 'hard_skill', importance: 'critical', demandPercentage: 90 },
+    { name: 'Kafka', category: 'tool', importance: 'high', demandPercentage: 75 },
+    { name: 'Airflow', category: 'tool', importance: 'high', demandPercentage: 80 },
+    { name: 'Snowflake', category: 'tool', importance: 'high', demandPercentage: 65 },
+    { name: 'NoSQL', category: 'hard_skill', importance: 'medium', demandPercentage: 70 },
+    { name: 'Docker', category: 'tool', importance: 'medium', demandPercentage: 60 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 85 },
+  ],
+  'QA & Automation': [
+    { name: 'QA', category: 'hard_skill', importance: 'critical', demandPercentage: 90 },
+    { name: 'Selenium', category: 'tool', importance: 'critical', demandPercentage: 85 },
+    { name: 'Cypress', category: 'tool', importance: 'high', demandPercentage: 78 },
+    { name: 'SQL', category: 'hard_skill', importance: 'high', demandPercentage: 80 },
+    { name: 'Postman', category: 'tool', importance: 'high', demandPercentage: 75 },
+    { name: 'Python', category: 'hard_skill', importance: 'medium', demandPercentage: 70 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 88 },
+  ],
+};
+
+const getClusterKey = (name: string): string => {
+  const n = name.toLowerCase();
+  if (n.includes('java')) return 'Backend Java';
+  if (n.includes('python')) return 'Backend Python';
+  if (n.includes('frontend') || n.includes('react')) return 'Frontend React';
+  if (n.includes('devops') || n.includes('cloud')) return 'DevOps Cloud';
+  if (n.includes('data')) return 'Data Engineering';
+  if (n.includes('qa') || n.includes('automation')) return 'QA & Automation';
+  return name;
+};
 
 function DashboardContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
@@ -89,6 +165,7 @@ function DashboardContent() {
 
   const action = searchParams.get('action');
   const recalculateParam = searchParams.get('recalculate');
+  const clusterParam = searchParams.get('cluster');
 
   // Handle URL actions
   useEffect(() => {
@@ -275,22 +352,180 @@ function DashboardContent() {
     return () => clearTimeout(timeoutId);
   }, [profile, user]);
 
-  // DYNAMIC ALIGNMENT ENGINE SIMULATION
-  const getDynamicScore = () => {
-    let base = 42; // Base percentage
-    base += techSkills.length * 3;
-    if (techSkills.includes('Docker')) base += 5;
-    if (techSkills.includes('Kubernetes')) base += 5;
-    if (techSkills.includes('AWS')) base += 5;
-    if (techSkills.includes('Spark')) base += 4;
-    if (techSkills.includes('Hadoop')) base += 4;
+  // Active Cluster Index for navigation
+  const [activeClusterIndex, setActiveClusterIndex] = useState(0);
 
-    return Math.min(base, 98); // Max out at 98%
+  // Get all affinities with fallback if not provided by backend (Top 3 only)
+  const allAffinities = React.useMemo(() => {
+    let list = [];
+    if (profile?.all_affinities && profile.all_affinities.length > 0) {
+      list = [...profile.all_affinities].sort((a, b) => b.affinity_score - a.affinity_score);
+    } else {
+      list = [
+        {
+          cluster_id: '1',
+          cluster_name: 'Backend Java',
+          affinity_score: 0.78,
+          is_primary: true,
+          market_insights: {
+            average_salary_pen: 8500,
+            salary_differential_percentage: 32,
+            market_share_percentage: 23,
+            total_demand: 145,
+            growth_percentage: 28
+          },
+          compatible_roles: [
+            { title: 'Backend Java Developer', match: 'Alta' as const },
+            { title: 'Java Cloud Engineer', match: 'Alta' as const },
+            { title: 'Backend Microservices Developer', match: 'Media' as const }
+          ]
+        },
+        {
+          cluster_id: '2',
+          cluster_name: 'DevOps Cloud',
+          affinity_score: 0.63,
+          is_primary: false,
+          market_insights: {
+            average_salary_pen: 9500,
+            salary_differential_percentage: 42,
+            market_share_percentage: 20,
+            total_demand: 125,
+            growth_percentage: 35
+          },
+          compatible_roles: [
+            { title: 'DevOps Engineer', match: 'Alta' as const },
+            { title: 'Cloud Architect', match: 'Media' as const },
+            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const }
+          ]
+        },
+        {
+          cluster_id: '3',
+          cluster_name: 'Data Engineering',
+          affinity_score: 0.41,
+          is_primary: false,
+          market_insights: {
+            average_salary_pen: 9000,
+            salary_differential_percentage: 38,
+            market_share_percentage: 24,
+            total_demand: 148,
+            growth_percentage: 31
+          },
+          compatible_roles: [
+            { title: 'Data Engineer', match: 'Alta' as const },
+            { title: 'Big Data Developer', match: 'Alta' as const },
+            { title: 'Analytics Engineer', match: 'Media' as const }
+          ]
+        },
+        {
+          cluster_id: '4',
+          cluster_name: 'Frontend React',
+          affinity_score: 0.30,
+          is_primary: false,
+          market_insights: {
+            average_salary_pen: 7000,
+            salary_differential_percentage: 15,
+            market_share_percentage: 17,
+            total_demand: 190,
+            growth_percentage: 18
+          },
+          compatible_roles: [
+            { title: 'Frontend Developer', match: 'Alta' as const },
+            { title: 'React Developer', match: 'Alta' as const },
+            { title: 'UI Engineer', match: 'Media' as const }
+          ]
+        },
+        {
+          cluster_id: '5',
+          cluster_name: 'QA & Automation',
+          affinity_score: 0.25,
+          is_primary: false,
+          market_insights: {
+            average_salary_pen: 6500,
+            salary_differential_percentage: 12,
+            market_share_percentage: 14,
+            total_demand: 84,
+            growth_percentage: 15
+          },
+          compatible_roles: [
+            { title: 'QA Automation Engineer', match: 'Alta' as const },
+            { title: 'Software Development Engineer in Test (SDET)', match: 'Alta' as const },
+            { title: 'QA Analyst', match: 'Media' as const }
+          ]
+        }
+      ];
+    }
+    return list.slice(0, 3);
+  }, [profile]);
+
+  // Sync activeClusterIndex with primary specialty or URL parameter on load/change
+  useEffect(() => {
+    if (allAffinities && allAffinities.length > 0) {
+      if (clusterParam) {
+        const idx = allAffinities.findIndex(
+          (a) => a.cluster_name.toLowerCase() === clusterParam.toLowerCase()
+        );
+        if (idx !== -1) {
+          setActiveClusterIndex(idx);
+          return;
+        }
+      }
+      const primaryIdx = allAffinities.findIndex((a) => a.is_primary);
+      if (primaryIdx !== -1) {
+        setActiveClusterIndex(primaryIdx);
+      }
+    }
+  }, [allAffinities, clusterParam]);
+
+  const handleSelectCluster = (index: number) => {
+    const cluster = allAffinities[index];
+    if (cluster) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('cluster', cluster.cluster_name);
+      router.push(`?${params.toString()}`, { scroll: false });
+    }
   };
 
-  const currentScore = profile?.alignment_score
-    ? Math.round(profile.alignment_score * 100)
-    : getDynamicScore();
+  const activeCluster = allAffinities[activeClusterIndex] || allAffinities[0];
+  const activeScore = Math.round((activeCluster?.affinity_score || 0.5) * 100);
+
+  // Dynamically calculate strengths and gaps based on active cluster
+  const { strengths: activeStrengths, gaps: activeGaps } = React.useMemo(() => {
+    if (!activeCluster) return { strengths: [], gaps: [] };
+    const key = getClusterKey(activeCluster.cluster_name);
+    const clusterSkills = CLUSTER_SKILLS_MAP[key] || [];
+    
+    const strengths: any[] = [];
+    const gaps: any[] = [];
+    
+    // Normalize user tech skills for case-insensitive lookup
+    const userSkillsSet = new Set(techSkills.map(s => s.toLowerCase()));
+    
+    clusterSkills.forEach(skill => {
+      const isOwned = userSkillsSet.has(skill.name.toLowerCase());
+      if (isOwned) {
+        strengths.push({
+          name: skill.name,
+          level: skill.importance === 'critical' ? 'Avanzado' : 'Intermedio',
+          score: skill.importance === 'critical' ? 3 : 2,
+          demandPercentage: skill.demandPercentage
+        });
+      } else {
+        gaps.push({
+          name: skill.name,
+          skill_type: skill.category,
+          market_importance: skill.importance,
+          market_demand_percentage: skill.demandPercentage
+        });
+      }
+    });
+    
+    // Sort strengths by demand percentage descending
+    strengths.sort((a, b) => b.demandPercentage - a.demandPercentage);
+    // Sort gaps by demand percentage descending
+    gaps.sort((a, b) => b.market_demand_percentage - a.market_demand_percentage);
+    
+    return { strengths, gaps };
+  }, [activeCluster, techSkills]);
 
   // Construct profile payload for ATS Modal preview
   const dynamicProfile: UserProfileData = {
@@ -303,17 +538,17 @@ function DashboardContent() {
     location: profile?.location || 'Lima, Peru',
     preferred_modality: profile?.preferred_modality || 'Híbrido / Presencial',
     availability: profile?.availability || 'Inmediata',
-    alignment_score: currentScore,
-    primary_specialty: profile?.primary_specialty || 'Data Engineering',
-    secondary_affinities: profile?.secondary_affinities || [],
-    all_affinities: profile?.all_affinities || [],
+    alignment_score: activeScore,
+    primary_specialty: activeCluster?.cluster_name || 'Data Engineering',
+    secondary_affinities: allAffinities.filter(a => !a.is_primary),
+    all_affinities: allAffinities,
     domain_affinities: profile?.domain_affinities || [],
     detected_skills: [
       ...techSkills.map((name) => ({ name, skill_type: 'hard_skill' })),
       ...softSkills.map((name) => ({ name, skill_type: 'soft_skill' })),
       ...toolsSkills.map((name) => ({ name, skill_type: 'tool' })),
     ],
-    skill_gaps: marketGaps,
+    skill_gaps: activeGaps,
     education: educationList,
     work_experience: experiences,
     certifications: certifications,
@@ -355,9 +590,11 @@ function DashboardContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Fila 1: Perfil (1 col) y Score de Mercado (2 cols) */}
-          <div className="lg:col-span-1">
-            <ProfileSkillsCard
+          {/* Columna Izquierda: Perfil y Radar */}
+          <div className="lg:col-span-1 flex flex-col gap-6">
+            <AffinityRadarChart
+              domainAffinities={dynamicProfile.domain_affinities}
+              techSkills={techSkills}
               fullName={fullName}
               roleTitle={roleTitle}
               seniority={seniority}
@@ -365,53 +602,58 @@ function DashboardContent() {
             />
           </div>
 
-          <div className="lg:col-span-2">
+          {/* Columna Derecha: Score, Fortalezas, Brechas */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
             <MarketScoreCard
-              currentScore={currentScore}
-              primarySpecialty={profile?.primary_specialty || 'Software Engineering'}
-              secondaryAffinities={profile?.secondary_affinities?.map(a => ({
+              currentScore={activeScore}
+              primarySpecialty={activeCluster?.cluster_name || 'Software Engineering'}
+              secondaryAffinities={allAffinities.map(a => ({
                 name: a.cluster_name,
-                score: Math.round(a.affinity_score * 100)
+                score: Math.round(a.affinity_score * 100),
+                isPrimary: a.is_primary
               }))}
               isLoading={isRecalculating}
-            />
-          </div>
-
-          {/* Fila 2: Diagnóstico (1 col cada uno: Radar, Fortalezas, Brechas) */}
-          <div className="lg:col-span-1">
-            <AffinityRadarChart
-              domainAffinities={dynamicProfile.domain_affinities}
-              techSkills={techSkills}
-              isLoading={isRecalculating}
-            />
-          </div>
-
-          <div className="lg:col-span-1">
-            <StrengthsCard
-              techSkills={techSkills}
-              onViewAll={() => {
-                setStrengthsSearch('');
-                setIsStrengthsDrawerOpen(true);
+              currentIndex={activeClusterIndex}
+              totalClusters={allAffinities.length}
+              isPrimaryCluster={activeCluster?.is_primary}
+              onNext={() => handleSelectCluster(Math.min(allAffinities.length - 1, activeClusterIndex + 1))}
+              onPrev={() => handleSelectCluster(Math.max(0, activeClusterIndex - 1))}
+              onSelectSpecialty={(name) => {
+                const idx = allAffinities.findIndex(a => a.cluster_name === name);
+                if (idx !== -1) handleSelectCluster(idx);
               }}
-              isLoading={isRecalculating}
-            />
-          </div>
-
-          <div className="lg:col-span-1">
-            <PriorityGapsCard
-              marketGaps={marketGaps}
-              onViewAll={() => {
-                setGapsSearch('');
-                setIsGapsDrawerOpen(true);
+              onViewRoadmap={() => {
+                router.push(`/dashboard/action-plan?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`);
               }}
-              isLoading={isRecalculating}
+              onViewTopology={() => {
+                router.push(`/market?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`);
+              }}
             />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <StrengthsCard
+                strengths={activeStrengths}
+                onViewAll={() => {
+                  setStrengthsSearch('');
+                  setIsStrengthsDrawerOpen(true);
+                }}
+                isLoading={isRecalculating}
+              />
+              <PriorityGapsCard
+                marketGaps={activeGaps}
+                onViewAll={() => {
+                  setGapsSearch('');
+                  setIsGapsDrawerOpen(true);
+                }}
+                isLoading={isRecalculating}
+              />
+            </div>
           </div>
 
           {/* Fila 3: Análisis de Mercado (Roles, Demanda de Cluster, Impacto de Mercado) */}
           <div className="lg:col-span-1">
             <CompatibleRolesCard
-              roles={dynamicProfile.all_affinities?.find(a => a.is_primary)?.compatible_roles}
+              roles={activeCluster?.compatible_roles}
               onViewAll={() => setIsRolesDrawerOpen(true)}
               isLoading={isRecalculating}
             />
@@ -419,32 +661,25 @@ function DashboardContent() {
 
           <div className="lg:col-span-1">
             <ClusterDemandCard
-              clusterName={dynamicProfile.all_affinities?.find(a => a.is_primary)?.cluster_name || dynamicProfile.primary_specialty}
-              marketInsights={dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights}
+              clusterName={activeCluster?.cluster_name || dynamicProfile.primary_specialty}
+              marketInsights={activeCluster?.market_insights}
               isLoading={isRecalculating}
             />
           </div>
 
           <div className="lg:col-span-1">
             <MarketImpactCard
-              marketGaps={marketGaps}
-              marketInsights={dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights}
+              marketGaps={activeGaps}
+              marketInsights={activeCluster?.market_insights}
               onViewAll={() => setIsInsightDrawerOpen(true)}
               isLoading={isRecalculating}
             />
           </div>
 
-          {/* Fila 4: Recomendaciones IA y Todas las Afinidades */}
-          <div className="lg:col-span-2">
+          {/* Fila 4: Recomendaciones IA */}
+          <div className="lg:col-span-3">
             <AiInsightCard
-              marketGaps={marketGaps}
-              isLoading={isRecalculating}
-            />
-          </div>
-
-          <div className="lg:col-span-1">
-            <AllAffinitiesCard
-              affinities={dynamicProfile.all_affinities}
+              marketGaps={activeGaps}
               isLoading={isRecalculating}
             />
           </div>
@@ -515,31 +750,27 @@ function DashboardContent() {
 
           {/* List */}
           <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
-            {Array.from(new Set(techSkills))
-              .filter((s) => s.toLowerCase().includes(strengthsSearch.toLowerCase()))
-              .map((skill, idx) => {
-                const levels = ['Avanzado', 'Intermedio - Avanzado', 'Intermedio', 'Intermedio'];
-                const level = levels[idx % levels.length];
-                const demand = Math.max(92 - idx * 5, 45);
-
+            {activeStrengths
+              .filter((s) => s.name.toLowerCase().includes(strengthsSearch.toLowerCase()))
+              .map((strength, idx) => {
                 return (
                   <div
-                    key={`${skill}-${idx}`}
+                    key={`${strength.name}-${idx}`}
                     className="flex flex-col justify-between p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10 transition-colors hover:bg-emerald-500/10"
                   >
                     <div className="flex justify-between items-start gap-1">
                       <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
-                        {skill}
+                        {strength.name}
                       </span>
                       <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
-                        {demand}% DEMANDA
+                        {strength.demandPercentage}% DEMANDA
                       </span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground mt-1">{level}</span>
+                    <span className="text-[10px] text-muted-foreground mt-1">{strength.level}</span>
                   </div>
                 );
               })}
-            {techSkills.filter((s) => s.toLowerCase().includes(strengthsSearch.toLowerCase())).length === 0 && (
+            {activeStrengths.filter((s) => s.name.toLowerCase().includes(strengthsSearch.toLowerCase())).length === 0 && (
               <p className="text-center text-xs text-muted-foreground py-8">
                 No se encontraron fortalezas con ese nombre.
               </p>
@@ -575,7 +806,7 @@ function DashboardContent() {
 
           {/* List */}
           <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
-            {marketGaps
+            {activeGaps
               .filter((g) => g.name.toLowerCase().includes(gapsSearch.toLowerCase()))
               .map((gap) => {
                 const crit = gap.market_importance || 'medium';
@@ -612,7 +843,7 @@ function DashboardContent() {
                   </div>
                 );
               })}
-            {marketGaps.filter((g) => g.name.toLowerCase().includes(gapsSearch.toLowerCase())).length === 0 && (
+            {activeGaps.filter((g) => g.name.toLowerCase().includes(gapsSearch.toLowerCase())).length === 0 && (
               <p className="text-center text-xs text-muted-foreground py-8">
                 No se encontraron brechas con ese nombre.
               </p>
@@ -626,15 +857,15 @@ function DashboardContent() {
         <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
           <SheetHeader className="pb-4">
             <SheetTitle className="flex items-center gap-2 text-primary font-bold">
-              Roles Compatibles (Cluster Primario)
+              Roles Compatibles ({activeCluster?.cluster_name || 'Especialidad'})
             </SheetTitle>
             <SheetDescription className="text-xs text-muted-foreground mt-1">
-              Estos son todos los roles del mercado que hacen match con tu especialidad principal.
+              Estos son todos los roles del mercado que hacen match con esta especialidad evaluada.
             </SheetDescription>
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none mt-4">
-            {dynamicProfile.all_affinities?.find(a => a.is_primary)?.compatible_roles?.map((role, idx) => {
+            {activeCluster?.compatible_roles?.map((role, idx) => {
               const badgeClass =
                 role.match === 'Alta'
                   ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
@@ -682,11 +913,11 @@ function DashboardContent() {
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 rounded-lg border border-border flex flex-col items-center justify-center text-center">
                 <span className="text-xs text-muted-foreground font-semibold">Salario Promedio Actual</span>
-                <span className="text-lg font-bold">S/. {Math.round((dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights?.average_salary_pen || 0) * 0.75) || 'N/A'}</span>
+                <span className="text-lg font-bold">S/. {Math.round((activeCluster?.market_insights?.average_salary_pen || 0) * 0.75) || 'N/A'}</span>
               </div>
               <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 flex flex-col items-center justify-center text-center">
                 <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Salario Proyectado</span>
-                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">S/. {dynamicProfile.all_affinities?.find(a => a.is_primary)?.market_insights?.average_salary_pen || 'N/A'}</span>
+                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">S/. {activeCluster?.market_insights?.average_salary_pen || 'N/A'}</span>
               </div>
             </div>
           </div>

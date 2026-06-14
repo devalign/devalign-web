@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -37,6 +37,84 @@ interface RoadmapPhase {
   description: string;
   steps: RoadmapStep[];
 }
+
+const CLUSTER_SKILLS_MAP: Record<
+  string,
+  { name: string; category: string; importance: 'critical' | 'high' | 'medium'; demandPercentage: number }[]
+> = {
+  'Backend Java': [
+    { name: 'Java', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
+    { name: 'Spring Boot', category: 'hard_skill', importance: 'critical', demandPercentage: 88 },
+    { name: 'REST APIs', category: 'hard_skill', importance: 'high', demandPercentage: 80 },
+    { name: 'Microservicios', category: 'hard_skill', importance: 'high', demandPercentage: 82 },
+    { name: 'PostgreSQL', category: 'hard_skill', importance: 'high', demandPercentage: 74 },
+    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 62 },
+    { name: 'Docker', category: 'tool', importance: 'high', demandPercentage: 70 },
+    { name: 'Kubernetes', category: 'tool', importance: 'medium', demandPercentage: 55 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 90 },
+  ],
+  'Backend Python': [
+    { name: 'Python', category: 'hard_skill', importance: 'critical', demandPercentage: 95 },
+    { name: 'FastAPI', category: 'hard_skill', importance: 'critical', demandPercentage: 82 },
+    { name: 'REST APIs', category: 'hard_skill', importance: 'high', demandPercentage: 85 },
+    { name: 'PostgreSQL', category: 'hard_skill', importance: 'high', demandPercentage: 78 },
+    { name: 'MongoDB', category: 'hard_skill', importance: 'high', demandPercentage: 60 },
+    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 68 },
+    { name: 'Docker', category: 'tool', importance: 'high', demandPercentage: 75 },
+    { name: 'Redis', category: 'hard_skill', importance: 'medium', demandPercentage: 55 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 92 },
+  ],
+  'Frontend React': [
+    { name: 'React', category: 'hard_skill', importance: 'critical', demandPercentage: 96 },
+    { name: 'Next.js', category: 'hard_skill', importance: 'critical', demandPercentage: 85 },
+    { name: 'JavaScript', category: 'hard_skill', importance: 'critical', demandPercentage: 94 },
+    { name: 'TypeScript', category: 'hard_skill', importance: 'high', demandPercentage: 88 },
+    { name: 'HTML5', category: 'hard_skill', importance: 'high', demandPercentage: 90 },
+    { name: 'CSS3', category: 'hard_skill', importance: 'high', demandPercentage: 90 },
+    { name: 'Tailwind CSS', category: 'tool', importance: 'medium', demandPercentage: 82 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 92 },
+  ],
+  'DevOps Cloud': [
+    { name: 'Docker', category: 'tool', importance: 'critical', demandPercentage: 94 },
+    { name: 'Kubernetes', category: 'tool', importance: 'critical', demandPercentage: 88 },
+    { name: 'Terraform', category: 'tool', importance: 'critical', demandPercentage: 80 },
+    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 85 },
+    { name: 'Linux', category: 'hard_skill', importance: 'high', demandPercentage: 78 },
+    { name: 'CI/CD', category: 'methodology', importance: 'high', demandPercentage: 90 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 95 },
+  ],
+  'Data Engineering': [
+    { name: 'Python', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
+    { name: 'Spark', category: 'hard_skill', importance: 'critical', demandPercentage: 88 },
+    { name: 'SQL', category: 'hard_skill', importance: 'critical', demandPercentage: 90 },
+    { name: 'Kafka', category: 'tool', importance: 'high', demandPercentage: 75 },
+    { name: 'Airflow', category: 'tool', importance: 'high', demandPercentage: 80 },
+    { name: 'Snowflake', category: 'tool', importance: 'high', demandPercentage: 65 },
+    { name: 'NoSQL', category: 'hard_skill', importance: 'medium', demandPercentage: 70 },
+    { name: 'Docker', category: 'tool', importance: 'medium', demandPercentage: 60 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 85 },
+  ],
+  'QA & Automation': [
+    { name: 'QA', category: 'hard_skill', importance: 'critical', demandPercentage: 90 },
+    { name: 'Selenium', category: 'tool', importance: 'critical', demandPercentage: 85 },
+    { name: 'Cypress', category: 'tool', importance: 'high', demandPercentage: 78 },
+    { name: 'SQL', category: 'hard_skill', importance: 'high', demandPercentage: 80 },
+    { name: 'Postman', category: 'tool', importance: 'high', demandPercentage: 75 },
+    { name: 'Python', category: 'hard_skill', importance: 'medium', demandPercentage: 70 },
+    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 88 },
+  ],
+};
+
+const getClusterKey = (name: string): string => {
+  const n = name.toLowerCase();
+  if (n.includes('java')) return 'Backend Java';
+  if (n.includes('python')) return 'Backend Python';
+  if (n.includes('frontend') || n.includes('react')) return 'Frontend React';
+  if (n.includes('devops') || n.includes('cloud')) return 'DevOps Cloud';
+  if (n.includes('data')) return 'Data Engineering';
+  if (n.includes('qa') || n.includes('automation')) return 'QA & Automation';
+  return name;
+};
 
 // Predefined detailed templates for common gaps
 const KNOWN_SKILLS_TEMPLATES: Record<string, Omit<RoadmapStep, 'skill'>> = {
@@ -77,8 +155,11 @@ const KNOWN_SKILLS_TEMPLATES: Record<string, Omit<RoadmapStep, 'skill'>> = {
   },
 };
 
-export default function RoadmapPage() {
+function RoadmapContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const clusterParam = searchParams.get('cluster');
+
   const { isLoading: isUserLoading } = useCurrentUser();
   const { data: profile, isLoading: isProfileLoading } = useUserProfile();
   const { data: cvData, isLoading: isCVLoading } = useUserCVs();
@@ -130,9 +211,177 @@ export default function RoadmapPage() {
     };
   };
 
-  // Compute phases dynamically based on user profile gaps
+  // Get all affinities with fallback (slice(0, 3) to align with dashboard)
+  const allAffinities = useMemo(() => {
+    let list = [];
+    if (profile?.all_affinities && profile.all_affinities.length > 0) {
+      list = [...profile.all_affinities].sort((a, b) => b.affinity_score - a.affinity_score);
+    } else {
+      list = [
+        {
+          cluster_id: '1',
+          cluster_name: 'Backend Java',
+          affinity_score: 0.78,
+          is_primary: true,
+          market_insights: {
+            average_salary_pen: 8500,
+            salary_differential_percentage: 32,
+            market_share_percentage: 23,
+            total_demand: 145,
+            growth_percentage: 28
+          },
+          compatible_roles: [
+            { title: 'Backend Java Developer', match: 'Alta' as const },
+            { title: 'Java Cloud Engineer', match: 'Alta' as const },
+            { title: 'Backend Microservices Developer', match: 'Media' as const }
+          ]
+        },
+        {
+          cluster_id: '2',
+          cluster_name: 'DevOps Cloud',
+          affinity_score: 0.63,
+          is_primary: false,
+          market_insights: {
+            average_salary_pen: 9500,
+            salary_differential_percentage: 42,
+            market_share_percentage: 20,
+            total_demand: 125,
+            growth_percentage: 35
+          },
+          compatible_roles: [
+            { title: 'DevOps Engineer', match: 'Alta' as const },
+            { title: 'Cloud Architect', match: 'Media' as const },
+            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const }
+          ]
+        },
+        {
+          cluster_id: '3',
+          cluster_name: 'Data Engineering',
+          affinity_score: 0.41,
+          is_primary: false,
+          market_insights: {
+            average_salary_pen: 9000,
+            salary_differential_percentage: 38,
+            market_share_percentage: 24,
+            total_demand: 148,
+            growth_percentage: 31
+          },
+          compatible_roles: [
+            { title: 'Data Engineer', match: 'Alta' as const },
+            { title: 'Big Data Developer', match: 'Alta' as const },
+            { title: 'Analytics Engineer', match: 'Media' as const }
+          ]
+        },
+        {
+          cluster_id: '4',
+          cluster_name: 'Frontend React',
+          affinity_score: 0.30,
+          is_primary: false,
+          market_insights: {
+            average_salary_pen: 7000,
+            salary_differential_percentage: 15,
+            market_share_percentage: 17,
+            total_demand: 190,
+            growth_percentage: 18
+          },
+          compatible_roles: [
+            { title: 'Frontend Developer', match: 'Alta' as const },
+            { title: 'React Developer', match: 'Alta' as const },
+            { title: 'UI Engineer', match: 'Media' as const }
+          ]
+        },
+        {
+          cluster_id: '5',
+          cluster_name: 'QA & Automation',
+          affinity_score: 0.25,
+          is_primary: false,
+          market_insights: {
+            average_salary_pen: 6500,
+            salary_differential_percentage: 12,
+            market_share_percentage: 14,
+            total_demand: 84,
+            growth_percentage: 15
+          },
+          compatible_roles: [
+            { title: 'QA Automation Engineer', match: 'Alta' as const },
+            { title: 'Software Development Engineer in Test (SDET)', match: 'Alta' as const },
+            { title: 'QA Analyst', match: 'Media' as const }
+          ]
+        }
+      ];
+    }
+    return list.slice(0, 3);
+  }, [profile]);
+
+  // Find target active cluster based on URL parameter (or default to primary)
+  const activeCluster = useMemo(() => {
+    if (allAffinities && allAffinities.length > 0) {
+      if (clusterParam) {
+        const found = allAffinities.find(
+          (a) => a.cluster_name.toLowerCase() === clusterParam.toLowerCase()
+        );
+        if (found) return found;
+      }
+      const primary = allAffinities.find((a) => a.is_primary);
+      return primary || allAffinities[0];
+    }
+    return null;
+  }, [allAffinities, clusterParam]);
+
+  // Retrieve user hard skills (supports profile hook and offline localStorage draft)
+  const techSkills = useMemo<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const draftStr = localStorage.getItem('devalign_profile_draft');
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          if (draft.detected_skills) {
+            return draft.detected_skills
+              .filter((s: any) => s.skill_type === 'hard_skill')
+              .map((s: any) => s.name);
+          }
+        } catch (e) {
+          console.error('Failed to parse offline profile draft:', e);
+        }
+      }
+    }
+
+    if (profile?.detected_skills) {
+      return profile.detected_skills
+        .filter((s) => s.skill_type === 'hard_skill')
+        .map((s) => s.name);
+    }
+    return [];
+  }, [profile]);
+
+  // Calculate gaps dynamically based on active cluster and techSkills
+  const dynamicGaps = useMemo(() => {
+    if (!activeCluster) return [];
+    const key = getClusterKey(activeCluster.cluster_name);
+    const clusterSkills = CLUSTER_SKILLS_MAP[key] || [];
+
+    const gaps: any[] = [];
+    const userSkillsSet = new Set(techSkills.map((s: string) => s.toLowerCase()));
+
+    clusterSkills.forEach((skill) => {
+      const isOwned = userSkillsSet.has(skill.name.toLowerCase());
+      if (!isOwned) {
+        gaps.push({
+          name: skill.name,
+          skill_type: skill.category,
+          market_importance: skill.importance,
+          market_demand_percentage: skill.demandPercentage
+        });
+      }
+    });
+
+    // Sort by demand percentage descending
+    gaps.sort((a, b) => b.market_demand_percentage - a.market_demand_percentage);
+    return gaps;
+  }, [activeCluster, techSkills]);
+
+  // Compute phases dynamically based on dynamic gaps
   const phases: RoadmapPhase[] = useMemo(() => {
-    // Fallback static phases if profile is offline or no gaps detected
     const fallbackPhases: RoadmapPhase[] = [
       {
         title: 'Fase 1: Fundamentos de Contenedores',
@@ -159,40 +408,36 @@ export default function RoadmapPage() {
       },
     ];
 
-    if (!profile || !profile.skill_gaps || profile.skill_gaps.length === 0) {
+    if (!activeCluster || dynamicGaps.length === 0) {
       return fallbackPhases;
     }
 
-    // Map profile gaps to RoadmapSteps
-    const gaps = profile.skill_gaps.map(g => g.name);
-    const matchedSteps: RoadmapStep[] = gaps.map(gapName => {
+    // Map dynamic gaps to RoadmapSteps
+    const gaps = dynamicGaps.map((g) => g.name);
+    const matchedSteps: RoadmapStep[] = gaps.map((gapName) => {
       const lower = gapName.toLowerCase();
-      // Try to find in template
-      const templateKey = Object.keys(KNOWN_SKILLS_TEMPLATES).find(k => lower.includes(k));
+      const templateKey = Object.keys(KNOWN_SKILLS_TEMPLATES).find((k) => lower.includes(k));
       if (templateKey) {
         return {
           skill: gapName,
           ...KNOWN_SKILLS_TEMPLATES[templateKey],
         };
       }
-      // Generate dynamic step if not known
       return {
         skill: gapName,
         impact: '+5% de Alineación',
         topics: [`Fundamentos de ${gapName}`, 'Ecosistema y buenas prácticas', 'Integración en proyectos'],
-        justification: `${gapName} es una habilidad clave demandada por reclutadores en ofertas vinculadas a tu especialidad de ${profile.primary_specialty}.`,
-        rule: `${profile.primary_specialty} -> ${gapName} (Confianza: 65%)`,
+        justification: `${gapName} es una habilidad clave demandada por reclutadores en ofertas vinculadas a tu especialidad de ${activeCluster.cluster_name}.`,
+        rule: `${activeCluster.cluster_name} -> ${gapName} (Confianza: 65%)`,
         trendData: [40, 43, 46, 50, 54, 60],
       };
     });
 
-    // Group steps into 3 logical phases
-    if (matchedSteps.length === 0) {
-      return fallbackPhases;
-    }
-
     const phase1Steps = matchedSteps.slice(0, Math.ceil(matchedSteps.length / 3));
-    const phase2Steps = matchedSteps.slice(phase1Steps.length, phase1Steps.length + Math.ceil(matchedSteps.length / 3));
+    const phase2Steps = matchedSteps.slice(
+      phase1Steps.length,
+      phase1Steps.length + Math.ceil(matchedSteps.length / 3)
+    );
     const phase3Steps = matchedSteps.slice(phase1Steps.length + phase2Steps.length);
 
     const result: RoadmapPhase[] = [];
@@ -219,7 +464,7 @@ export default function RoadmapPage() {
     }
 
     return result;
-  }, [profile]);
+  }, [activeCluster, dynamicGaps]);
 
   const handleStepClick = (step: RoadmapStep) => {
     setActiveStep(step);
@@ -237,13 +482,12 @@ export default function RoadmapPage() {
     );
   }
 
-  const primaryAffinity = profile?.all_affinities?.find(a => a.is_primary);
-  const primarySpecialty = primaryAffinity?.cluster_name || profile?.primary_specialty || 'Data Engineering';
-  const marketInsights = primaryAffinity?.market_insights;
-  
+  const primarySpecialty = activeCluster?.cluster_name || 'Data Engineering';
+  const marketInsights = activeCluster?.market_insights;
+
   const growth = marketInsights?.growth_percentage ?? null;
   const isPositiveGrowth = growth !== null && growth >= 0;
-  
+
   const salaryDiff = marketInsights?.salary_differential_percentage ?? null;
   const isPositiveSalary = salaryDiff !== null && salaryDiff >= 0;
 
@@ -392,9 +636,47 @@ export default function RoadmapPage() {
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
             Tu Plan de Acción
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1 mb-4">
             Una ruta secuencial optimizada mediante reglas de asociación para reducir tus brechas con el mercado.
           </p>
+
+          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            <span className="text-[10px] text-muted-foreground mr-1 font-bold uppercase tracking-wider">
+              {activeCluster?.cluster_name || 'Especialidad'}:
+            </span>
+            {allAffinities.map((aff) => {
+              const isSelected = aff.cluster_name === activeCluster?.cluster_name;
+              return (
+                <button
+                  key={aff.cluster_name}
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('cluster', aff.cluster_name);
+                    router.push(`?${params.toString()}`);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-primary/10 border-primary/30 text-primary scale-105 shadow-sm'
+                      : 'bg-secondary border-transparent text-muted-foreground hover:border-border hover:bg-secondary/80'
+                  }`}
+                >
+                  {aff.is_primary && (
+                    <Sparkles className={`h-2.5 w-2.5 shrink-0 transition-colors duration-500 ${isSelected ? 'text-primary mr-1' : 'text-emerald-500 mr-1.5'}`} />
+                  )}
+                  <span 
+                    className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out ${
+                      isSelected ? 'max-w-0 opacity-0 m-0' : 'max-w-[150px] opacity-100 mr-1.5'
+                    }`}
+                  >
+                    {aff.cluster_name}
+                  </span>
+                  <span className={`transition-all duration-500 ${isSelected ? 'opacity-100' : 'opacity-90'}`}>
+                    {Math.round(aff.affinity_score * 100)}%
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Grid Layout (Roadmap + Market Insights) */}
@@ -635,5 +917,22 @@ export default function RoadmapPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function RoadmapPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-xs text-muted-foreground font-semibold">Cargando tu Plan de Acción...</p>
+          </div>
+        </div>
+      }
+    >
+      <RoadmapContent />
+    </Suspense>
   );
 }

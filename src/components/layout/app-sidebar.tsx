@@ -7,6 +7,7 @@ import {
   Hexagon,
   Activity,
   Map,
+  Network,
   Settings,
   Lock,
   ShieldCheck,
@@ -72,8 +73,8 @@ export default function AppSidebar() {
   };
 
   const navItems: { name: string; href: string; icon: LucideIcon; disabled?: boolean }[] = [
-    { name: 'Alineación', href: '/dashboard', icon: Activity },
-    { name: 'Plan de Acción', href: '/dashboard/plan-de-accion', icon: Map },
+    { name: 'Evaluación', href: '/dashboard', icon: Activity },
+    { name: 'Plan de Acción', href: '/dashboard/action-plan', icon: Map },
   ];
 
   return (
@@ -113,7 +114,7 @@ export default function AppSidebar() {
       <nav className="flex-1 space-y-1.5 px-3 py-4 overflow-y-auto">
         {!isCollapsed && (
           <p className="px-2 text-[10px] font-semibold text-muted-foreground tracking-wider uppercase mb-2">
-            Navegación
+            Diagnóstico
           </p>
         )}
         {navItems.map((item) => {
