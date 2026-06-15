@@ -1,5 +1,5 @@
 import { apiClient } from './api-client';
-import { UserProfile, CVUploadResult, CVList, UserProfileData, SkillItem } from './types';
+import { UserProfile, CVUploadResult, CVList, UserProfileData, SkillItem, Cluster } from './types';
 
 /**
  * Gets the currently logged-in user profile, provisioning JIT if needed.
@@ -26,6 +26,15 @@ export async function uploadCV(file: File): Promise<CVUploadResult> {
  */
 export async function listUserCVs(): Promise<CVList> {
   return apiClient<CVList>('/users/me/cvs');
+}
+
+/**
+ * Triggers re-analysis of a CV that was previously uploaded.
+ */
+export async function reanalyzeCV(cvId: string): Promise<CVUploadResult> {
+  return apiClient<CVUploadResult>(`/users/me/cvs/${cvId}/reanalyze`, {
+    method: 'POST',
+  });
 }
 
 /**
@@ -59,4 +68,11 @@ export async function updateUserProfileSkills(skills: SkillItem[]): Promise<User
     },
     body: JSON.stringify({ skills }),
   });
+}
+
+/**
+ * Gets all market clusters from the API.
+ */
+export async function getMarketClusters(): Promise<Cluster[]> {
+  return apiClient<Cluster[]>('/profile/clusters');
 }

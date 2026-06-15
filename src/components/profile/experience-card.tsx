@@ -26,7 +26,11 @@ interface ExperienceCardProps {
   isPlaceholder?: boolean;
 }
 
-export default function ExperienceCard({ type, items, isPlaceholder = false }: ExperienceCardProps) {
+export default function ExperienceCard({
+  type,
+  items,
+  isPlaceholder = false,
+}: ExperienceCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editedItems, setEditedItems] = useState<ExperienceCardItem[]>([]);
   const updateProfileMutation = useUpdateUserProfile();
@@ -149,16 +153,21 @@ export default function ExperienceCard({ type, items, isPlaceholder = false }: E
                 <div className="relative pl-5 border-l-2 border-primary/10 space-y-1.5 opacity-40 select-none">
                   <div className="absolute -left-[6px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary/45" />
                   <h5 className="text-xs font-bold text-foreground">Rol Profesional</h5>
-                  <p className="text-[10px] text-muted-foreground font-mono">Año Inicio — Año Fin</p>
+                  <p className="text-[10px] text-muted-foreground font-mono">
+                    Año Inicio — Año Fin
+                  </p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Tus funciones y logros se auto-completarán al cargar el archivo de tu currículum.
+                    Tus funciones y logros se auto-completarán al cargar el archivo de tu
+                    currículum.
                   </p>
                 </div>
               )}
               {type === 'education' && (
                 <div className="space-y-1 opacity-40 select-none">
                   <h5 className="text-xs font-bold text-foreground">Título o Carrera</h5>
-                  <p className="text-xs text-muted-foreground font-medium">Universidad o Centro de Estudios</p>
+                  <p className="text-xs text-muted-foreground font-medium">
+                    Universidad o Centro de Estudios
+                  </p>
                   <p className="text-[10px] text-muted-foreground font-mono">Año Inicio — Fin</p>
                 </div>
               )}
@@ -167,7 +176,9 @@ export default function ExperienceCard({ type, items, isPlaceholder = false }: E
                   <Star className="h-4 w-4 text-amber-500/65 shrink-0 mt-0.5" />
                   <div className="space-y-0.5">
                     <h5 className="text-xs font-bold text-foreground">Certificación Obtenida</h5>
-                    <p className="text-[10px] text-muted-foreground">Emisor de Certificación • Año</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      Emisor de Certificación • Año
+                    </p>
                   </div>
                 </div>
               )}

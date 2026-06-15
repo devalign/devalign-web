@@ -19,11 +19,10 @@ export function ProfileSkillsCard({
   seniority,
   isLoading = false,
 }: ProfileSkillsCardProps) {
-
   return (
     <Card className="shadow-lg shadow-black/5 border-border bg-card overflow-hidden relative h-full flex flex-col justify-between">
       <div className="h-2 bg-gradient-to-r from-primary/30 via-primary to-primary/60" />
-      
+
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
@@ -48,11 +47,9 @@ export function ProfileSkillsCard({
             <h2 className="text-lg font-bold tracking-tight text-foreground truncate mt-1">
               {fullName}
             </h2>
-            <p className="text-xs text-muted-foreground font-medium leading-relaxed">
-              {roleTitle}
-            </p>
+            <p className="text-xs text-muted-foreground font-medium leading-relaxed">{roleTitle}</p>
           </div>
-          
+
           <div className="shrink-0">
             <Link href="/profile">
               <Button

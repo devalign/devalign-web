@@ -24,14 +24,20 @@ interface SkillsCardProps {
   isPlaceholder?: boolean;
 }
 
-export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = false }: SkillsCardProps) {
-  const [activeTab, setActiveTab] = useState<'tecnicas' | 'blandas' | 'herramientas' | 'metodologias'>('tecnicas');
+export default function SkillsCard({
+  detectedSkills,
+  skillGaps,
+  isPlaceholder = false,
+}: SkillsCardProps) {
+  const [activeTab, setActiveTab] = useState<
+    'tecnicas' | 'blandas' | 'herramientas' | 'metodologias'
+  >('tecnicas');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editSkillsList, setEditSkillsList] = useState<SkillItem[]>([]);
   const [newSkillName, setNewSkillName] = useState('');
-  const [newSkillCategory, setNewSkillCategory] = useState<'tecnicas' | 'blandas' | 'herramientas' | 'metodologias'>(
-    'tecnicas',
-  );
+  const [newSkillCategory, setNewSkillCategory] = useState<
+    'tecnicas' | 'blandas' | 'herramientas' | 'metodologias'
+  >('tecnicas');
 
   const updateSkillsMutation = useUpdateUserSkills();
 
@@ -95,8 +101,6 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
 
   // Filter skills for active tab view
   const tabSkills = allSkills.filter((s) => getSkillCategory(s.name, s.skill_type) === activeTab);
-
-
 
   const handleOpenEdit = () => {
     setEditSkillsList(allSkills.map((s) => ({ ...s })));
@@ -189,7 +193,13 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               } ${isPlaceholder ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {tab === 'tecnicas' ? 'Técnicas' : tab === 'blandas' ? 'Blandas' : tab === 'metodologias' ? 'Metodologías' : 'Herramientas'}
+              {tab === 'tecnicas'
+                ? 'Técnicas'
+                : tab === 'blandas'
+                  ? 'Blandas'
+                  : tab === 'metodologias'
+                    ? 'Metodologías'
+                    : 'Herramientas'}
             </button>
           ))}
         </div>
@@ -198,17 +208,20 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
         {isPlaceholder ? (
           <div className="space-y-4 py-2">
             <p className="text-xs text-muted-foreground italic mb-2">
-              Sube tu currículum para que la IA extraiga automáticamente tus habilidades técnicas, blandas e identifique brechas.
+              Sube tu currículum para que la IA extraiga automáticamente tus habilidades técnicas,
+              blandas e identifique brechas.
             </p>
             <div className="flex flex-wrap gap-2 opacity-50">
-              {['React', 'TypeScript', 'Node.js', 'Spring Boot', 'Docker', 'AWS'].map((skill, index) => (
-                <div
-                  key={index}
-                  className="px-3 py-1.5 rounded-full border border-border/60 bg-secondary/40 text-muted-foreground text-xs font-medium cursor-not-allowed select-none"
-                >
-                  {skill}
-                </div>
-              ))}
+              {['React', 'TypeScript', 'Node.js', 'Spring Boot', 'Docker', 'AWS'].map(
+                (skill, index) => (
+                  <div
+                    key={index}
+                    className="px-3 py-1.5 rounded-full border border-border/60 bg-secondary/40 text-muted-foreground text-xs font-medium cursor-not-allowed select-none"
+                  >
+                    {skill}
+                  </div>
+                ),
+              )}
             </div>
           </div>
         ) : tabSkills.length === 0 ? (
@@ -278,7 +291,9 @@ export default function SkillsCard({ detectedSkills, skillGaps, isPlaceholder = 
                 id="new-cat"
                 value={newSkillCategory}
                 onChange={(e) =>
-                  setNewSkillCategory(e.target.value as 'tecnicas' | 'blandas' | 'herramientas' | 'metodologias')
+                  setNewSkillCategory(
+                    e.target.value as 'tecnicas' | 'blandas' | 'herramientas' | 'metodologias',
+                  )
                 }
                 className="h-9 rounded-md border border-input bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               >

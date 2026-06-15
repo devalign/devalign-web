@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { listUserCVs } from '@/lib/api';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { listUserCVs, reanalyzeCV } from '@/lib/api';
 
 export function useUserCVs() {
   return useQuery({
@@ -7,5 +7,11 @@ export function useUserCVs() {
     queryFn: listUserCVs,
     staleTime: 30 * 1000, // 30 seconds
     retry: 1,
+  });
+}
+
+export function useReanalyzeCV() {
+  return useMutation({
+    mutationFn: (cvId: string) => reanalyzeCV(cvId),
   });
 }

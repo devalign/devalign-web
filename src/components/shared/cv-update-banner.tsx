@@ -19,7 +19,8 @@ export function CVUpdateBanner() {
         <div className="space-y-0.5 text-center sm:text-left">
           <p className="text-sm font-bold text-foreground">¡Nuevo análisis de CV listo!</p>
           <p className="text-xs text-muted-foreground">
-            Hemos procesado tu nuevo CV. Haz clic en sincronizar para actualizar tus habilidades, diagnóstico y plan de acción.
+            Hemos procesado tu nuevo CV. Haz clic en sincronizar para actualizar tus habilidades,
+            diagnóstico y plan de acción.
           </p>
         </div>
       </div>

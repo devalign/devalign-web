@@ -11,7 +11,11 @@ interface ClusterDemandCardProps {
   isLoading?: boolean;
 }
 
-export function ClusterDemandCard({ clusterName = 'Data Engineering', marketInsights, isLoading = false }: ClusterDemandCardProps) {
+export function ClusterDemandCard({
+  clusterName = 'Data Engineering',
+  marketInsights,
+  isLoading = false,
+}: ClusterDemandCardProps) {
   const growth = marketInsights?.growth_percentage ?? null;
   const isPositive = growth !== null && growth >= 0;
   return (
@@ -35,10 +39,14 @@ export function ClusterDemandCard({ clusterName = 'Data Engineering', marketInsi
                 </span>
               </div>
               <div className="flex items-baseline gap-2 pt-1">
-                <span className={`text-3xl font-extrabold tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}>
+                <span
+                  className={`text-3xl font-extrabold tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}
+                >
                   {growth !== null ? `${isPositive ? '+' : ''}${growth}%` : 'N/A'}
                 </span>
-                <span className={`text-[11px] font-semibold ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                <span
+                  className={`text-[11px] font-semibold ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}
+                >
                   Crecimiento laboral
                 </span>
               </div>
@@ -46,7 +54,9 @@ export function ClusterDemandCard({ clusterName = 'Data Engineering', marketInsi
 
             {/* Description */}
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Las ofertas para el clúster <strong className="text-foreground">{clusterName}</strong> han mostrado este comportamiento recientemente (Market Share: {marketInsights?.market_share_percentage ?? 'N/A'}%).
+              Las ofertas para el clúster <strong className="text-foreground">{clusterName}</strong>{' '}
+              han mostrado este comportamiento recientemente (Market Share:{' '}
+              {marketInsights?.market_share_percentage ?? 'N/A'}%).
             </p>
 
             {/* Sparkline chart (SVG) */}

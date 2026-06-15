@@ -11,7 +11,13 @@ import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { Button } from '@/components/ui/button';
-import { UserProfileData, EducationItem, WorkExperienceItem, CertificationItem, SkillItem } from '@/lib/api/types';
+import {
+  UserProfileData,
+  EducationItem,
+  WorkExperienceItem,
+  CertificationItem,
+  SkillItem,
+} from '@/lib/api/types';
 import {
   Dialog,
   DialogContent,
@@ -41,7 +47,12 @@ import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
 
 const CLUSTER_SKILLS_MAP: Record<
   string,
-  { name: string; category: string; importance: 'critical' | 'high' | 'medium'; demandPercentage: number }[]
+  {
+    name: string;
+    category: string;
+    importance: 'critical' | 'high' | 'medium';
+    demandPercentage: number;
+  }[]
 > = {
   'Backend Java': [
     { name: 'Java', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
@@ -236,7 +247,7 @@ function DashboardContent() {
           {
             duration: 8000,
             id: 'backend-offline-warning',
-          }
+          },
         );
       }
     };
@@ -263,29 +274,44 @@ function DashboardContent() {
           if (draft.fullName) setFullName(draft.fullName);
           if (draft.roleTitle) setRoleTitle(draft.roleTitle);
           if (draft.seniority) setSeniority(draft.seniority);
-          
+
           if (draft.work_experience) setExperiences(draft.work_experience);
           if (draft.education) setEducationList(draft.education);
           if (draft.certifications) setCertifications(draft.certifications);
 
           if (draft.detected_skills) {
-            const tech = draft.detected_skills.filter((s: { name: string; skill_type: string }) => s.skill_type === 'hard_skill').map((s: { name: string; skill_type: string }) => s.name);
-            const soft = draft.detected_skills.filter((s: { name: string; skill_type: string }) => s.skill_type === 'soft_skill').map((s: { name: string; skill_type: string }) => s.name);
-            const tools = draft.detected_skills.filter((s: { name: string; skill_type: string }) => s.skill_type === 'tool').map((s: { name: string; skill_type: string }) => s.name);
+            const tech = draft.detected_skills
+              .filter((s: { name: string; skill_type: string }) => s.skill_type === 'hard_skill')
+              .map((s: { name: string; skill_type: string }) => s.name);
+            const soft = draft.detected_skills
+              .filter((s: { name: string; skill_type: string }) => s.skill_type === 'soft_skill')
+              .map((s: { name: string; skill_type: string }) => s.name);
+            const tools = draft.detected_skills
+              .filter((s: { name: string; skill_type: string }) => s.skill_type === 'tool')
+              .map((s: { name: string; skill_type: string }) => s.name);
 
             if (tech.length > 0) setTechSkills(tech);
             if (soft.length > 0) setSoftSkills(soft);
             if (tools.length > 0) setToolsSkills(tools);
 
             // Dynamically adjust gaps: remove skills that are now in technical skills
-            const originalGaps = ['Docker', 'Kubernetes', 'AWS', 'Microservicios', 'CI/CD', 'Spark', 'Hadoop', 'NoSQL'];
+            const originalGaps = [
+              'Docker',
+              'Kubernetes',
+              'AWS',
+              'Microservicios',
+              'CI/CD',
+              'Spark',
+              'Hadoop',
+              'NoSQL',
+            ];
             const newGaps: SkillItem[] = originalGaps
-              .filter(gap => !tech.includes(gap))
+              .filter((gap) => !tech.includes(gap))
               .map((name, idx) => ({
                 name,
                 skill_type: 'hard_skill',
                 market_importance: idx < 3 ? 'critical' : 'high',
-                market_demand_percentage: Math.max(74 - idx * 4, 38)
+                market_demand_percentage: Math.max(74 - idx * 4, 38),
               }));
             setMarketGaps(newGaps);
           }
@@ -372,13 +398,13 @@ function DashboardContent() {
             salary_differential_percentage: 32,
             market_share_percentage: 23,
             total_demand: 145,
-            growth_percentage: 28
+            growth_percentage: 28,
           },
           compatible_roles: [
             { title: 'Backend Java Developer', match: 'Alta' as const },
             { title: 'Java Cloud Engineer', match: 'Alta' as const },
-            { title: 'Backend Microservices Developer', match: 'Media' as const }
-          ]
+            { title: 'Backend Microservices Developer', match: 'Media' as const },
+          ],
         },
         {
           cluster_id: '2',
@@ -390,13 +416,13 @@ function DashboardContent() {
             salary_differential_percentage: 42,
             market_share_percentage: 20,
             total_demand: 125,
-            growth_percentage: 35
+            growth_percentage: 35,
           },
           compatible_roles: [
             { title: 'DevOps Engineer', match: 'Alta' as const },
             { title: 'Cloud Architect', match: 'Media' as const },
-            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const }
-          ]
+            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const },
+          ],
         },
         {
           cluster_id: '3',
@@ -408,31 +434,31 @@ function DashboardContent() {
             salary_differential_percentage: 38,
             market_share_percentage: 24,
             total_demand: 148,
-            growth_percentage: 31
+            growth_percentage: 31,
           },
           compatible_roles: [
             { title: 'Data Engineer', match: 'Alta' as const },
             { title: 'Big Data Developer', match: 'Alta' as const },
-            { title: 'Analytics Engineer', match: 'Media' as const }
-          ]
+            { title: 'Analytics Engineer', match: 'Media' as const },
+          ],
         },
         {
           cluster_id: '4',
           cluster_name: 'Frontend React',
-          affinity_score: 0.30,
+          affinity_score: 0.3,
           is_primary: false,
           market_insights: {
             average_salary_pen: 7000,
             salary_differential_percentage: 15,
             market_share_percentage: 17,
             total_demand: 190,
-            growth_percentage: 18
+            growth_percentage: 18,
           },
           compatible_roles: [
             { title: 'Frontend Developer', match: 'Alta' as const },
             { title: 'React Developer', match: 'Alta' as const },
-            { title: 'UI Engineer', match: 'Media' as const }
-          ]
+            { title: 'UI Engineer', match: 'Media' as const },
+          ],
         },
         {
           cluster_id: '5',
@@ -444,14 +470,14 @@ function DashboardContent() {
             salary_differential_percentage: 12,
             market_share_percentage: 14,
             total_demand: 84,
-            growth_percentage: 15
+            growth_percentage: 15,
           },
           compatible_roles: [
             { title: 'QA Automation Engineer', match: 'Alta' as const },
             { title: 'Software Development Engineer in Test (SDET)', match: 'Alta' as const },
-            { title: 'QA Analyst', match: 'Media' as const }
-          ]
-        }
+            { title: 'QA Analyst', match: 'Media' as const },
+          ],
+        },
       ];
     }
     return list.slice(0, 3);
@@ -462,16 +488,17 @@ function DashboardContent() {
     if (allAffinities && allAffinities.length > 0) {
       if (clusterParam) {
         const idx = allAffinities.findIndex(
-          (a) => a.cluster_name.toLowerCase() === clusterParam.toLowerCase()
+          (a) => a.cluster_name.toLowerCase() === clusterParam.toLowerCase(),
         );
         if (idx !== -1) {
-          setActiveClusterIndex(idx);
-          return;
+          const timer = setTimeout(() => setActiveClusterIndex(idx), 0);
+          return () => clearTimeout(timer);
         }
       }
       const primaryIdx = allAffinities.findIndex((a) => a.is_primary);
       if (primaryIdx !== -1) {
-        setActiveClusterIndex(primaryIdx);
+        const timer = setTimeout(() => setActiveClusterIndex(primaryIdx), 0);
+        return () => clearTimeout(timer);
       }
     }
   }, [allAffinities, clusterParam]);
@@ -493,37 +520,49 @@ function DashboardContent() {
     if (!activeCluster) return { strengths: [], gaps: [] };
     const key = getClusterKey(activeCluster.cluster_name);
     const clusterSkills = CLUSTER_SKILLS_MAP[key] || [];
-    
-    const strengths: any[] = [];
-    const gaps: any[] = [];
-    
+
+    interface TechStrength {
+      name: string;
+      level: string;
+      score: number;
+      demandPercentage: number;
+    }
+    interface SkillGap {
+      name: string;
+      skill_type: string;
+      market_importance: string;
+      market_demand_percentage: number;
+    }
+    const strengths: TechStrength[] = [];
+    const gaps: SkillGap[] = [];
+
     // Normalize user tech skills for case-insensitive lookup
-    const userSkillsSet = new Set(techSkills.map(s => s.toLowerCase()));
-    
-    clusterSkills.forEach(skill => {
+    const userSkillsSet = new Set(techSkills.map((s) => s.toLowerCase()));
+
+    clusterSkills.forEach((skill) => {
       const isOwned = userSkillsSet.has(skill.name.toLowerCase());
       if (isOwned) {
         strengths.push({
           name: skill.name,
           level: skill.importance === 'critical' ? 'Avanzado' : 'Intermedio',
           score: skill.importance === 'critical' ? 3 : 2,
-          demandPercentage: skill.demandPercentage
+          demandPercentage: skill.demandPercentage,
         });
       } else {
         gaps.push({
           name: skill.name,
           skill_type: skill.category,
           market_importance: skill.importance,
-          market_demand_percentage: skill.demandPercentage
+          market_demand_percentage: skill.demandPercentage,
         });
       }
     });
-    
+
     // Sort strengths by demand percentage descending
     strengths.sort((a, b) => b.demandPercentage - a.demandPercentage);
     // Sort gaps by demand percentage descending
     gaps.sort((a, b) => b.market_demand_percentage - a.market_demand_percentage);
-    
+
     return { strengths, gaps };
   }, [activeCluster, techSkills]);
 
@@ -540,7 +579,7 @@ function DashboardContent() {
     availability: profile?.availability || 'Inmediata',
     alignment_score: activeScore,
     primary_specialty: activeCluster?.cluster_name || 'Data Engineering',
-    secondary_affinities: allAffinities.filter(a => !a.is_primary),
+    secondary_affinities: allAffinities.filter((a) => !a.is_primary),
     all_affinities: allAffinities,
     domain_affinities: profile?.domain_affinities || [],
     detected_skills: [
@@ -589,7 +628,6 @@ function DashboardContent() {
         <CVUpdateBanner />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
           {/* Columna Izquierda: Perfil y Radar */}
           <div className="lg:col-span-1 flex flex-col gap-6">
             <AffinityRadarChart
@@ -607,26 +645,32 @@ function DashboardContent() {
             <MarketScoreCard
               currentScore={activeScore}
               primarySpecialty={activeCluster?.cluster_name || 'Software Engineering'}
-              secondaryAffinities={allAffinities.map(a => ({
+              secondaryAffinities={allAffinities.map((a) => ({
                 name: a.cluster_name,
                 score: Math.round(a.affinity_score * 100),
-                isPrimary: a.is_primary
+                isPrimary: a.is_primary,
               }))}
               isLoading={isRecalculating}
               currentIndex={activeClusterIndex}
               totalClusters={allAffinities.length}
               isPrimaryCluster={activeCluster?.is_primary}
-              onNext={() => handleSelectCluster(Math.min(allAffinities.length - 1, activeClusterIndex + 1))}
+              onNext={() =>
+                handleSelectCluster(Math.min(allAffinities.length - 1, activeClusterIndex + 1))
+              }
               onPrev={() => handleSelectCluster(Math.max(0, activeClusterIndex - 1))}
               onSelectSpecialty={(name) => {
-                const idx = allAffinities.findIndex(a => a.cluster_name === name);
+                const idx = allAffinities.findIndex((a) => a.cluster_name === name);
                 if (idx !== -1) handleSelectCluster(idx);
               }}
               onViewRoadmap={() => {
-                router.push(`/dashboard/action-plan?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`);
+                router.push(
+                  `/dashboard/action-plan?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`,
+                );
               }}
               onViewTopology={() => {
-                router.push(`/market?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`);
+                router.push(
+                  `/market?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`,
+                );
               }}
             />
 
@@ -678,12 +722,8 @@ function DashboardContent() {
 
           {/* Fila 4: Recomendaciones IA */}
           <div className="lg:col-span-3">
-            <AiInsightCard
-              marketGaps={activeGaps}
-              isLoading={isRecalculating}
-            />
+            <AiInsightCard marketGaps={activeGaps} isLoading={isRecalculating} />
           </div>
-
         </div>
       </div>
 
@@ -770,7 +810,9 @@ function DashboardContent() {
                   </div>
                 );
               })}
-            {activeStrengths.filter((s) => s.name.toLowerCase().includes(strengthsSearch.toLowerCase())).length === 0 && (
+            {activeStrengths.filter((s) =>
+              s.name.toLowerCase().includes(strengthsSearch.toLowerCase()),
+            ).length === 0 && (
               <p className="text-center text-xs text-muted-foreground py-8">
                 No se encontraron fortalezas con ese nombre.
               </p>
@@ -788,7 +830,8 @@ function DashboardContent() {
               Brechas Prioritarias
             </SheetTitle>
             <SheetDescription className="text-xs text-muted-foreground mt-1">
-              Habilidades recomendadas para aumentar tu alineación técnica y compatibilidad en el mercado.
+              Habilidades recomendadas para aumentar tu alineación técnica y compatibilidad en el
+              mercado.
             </SheetDescription>
           </SheetHeader>
 
@@ -820,9 +863,13 @@ function DashboardContent() {
                     ? 'text-red-600 dark:text-red-400'
                     : 'text-amber-600 dark:text-amber-400';
                 const critLabel =
-                  crit === 'critical' ? 'Crítica' :
-                  crit === 'high' ? 'Alta' :
-                  crit === 'medium' ? 'Media' : crit;
+                  crit === 'critical'
+                    ? 'Crítica'
+                    : crit === 'high'
+                      ? 'Alta'
+                      : crit === 'medium'
+                        ? 'Media'
+                        : crit;
 
                 return (
                   <div
@@ -843,7 +890,8 @@ function DashboardContent() {
                   </div>
                 );
               })}
-            {activeGaps.filter((g) => g.name.toLowerCase().includes(gapsSearch.toLowerCase())).length === 0 && (
+            {activeGaps.filter((g) => g.name.toLowerCase().includes(gapsSearch.toLowerCase()))
+              .length === 0 && (
               <p className="text-center text-xs text-muted-foreground py-8">
                 No se encontraron brechas con ese nombre.
               </p>
@@ -872,14 +920,16 @@ function DashboardContent() {
                   : role.match === 'Media'
                     ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
                     : 'bg-red-500/10 text-red-600 border border-red-500/20';
-              
+
               return (
                 <div
                   key={idx}
                   className="flex justify-between items-center p-3 rounded-lg bg-secondary/35 border border-border/50 text-xs"
                 >
                   <span className="font-semibold text-foreground truncate">{role.title}</span>
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold shrink-0 ${badgeClass}`}>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[9px] font-bold shrink-0 ${badgeClass}`}
+                  >
                     Afinidad {role.match}
                   </span>
                 </div>
@@ -904,20 +954,34 @@ function DashboardContent() {
 
           <div className="flex-1 overflow-y-auto space-y-4 pr-1 mt-4 text-sm text-foreground">
             <div className="p-4 rounded-lg bg-secondary/35 border border-border">
-              <h3 className="font-bold text-xs uppercase text-muted-foreground mb-2">Impacto Salarial</h3>
+              <h3 className="font-bold text-xs uppercase text-muted-foreground mb-2">
+                Impacto Salarial
+              </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Según nuestro modelo de Machine Learning entrenado con miles de ofertas locales, cerrar las brechas indicadas (especialmente aquellas marcadas como Críticas) te permite apuntar a roles Senior o Especializados.
+                Según nuestro modelo de Machine Learning entrenado con miles de ofertas locales,
+                cerrar las brechas indicadas (especialmente aquellas marcadas como Críticas) te
+                permite apuntar a roles Senior o Especializados.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 rounded-lg border border-border flex flex-col items-center justify-center text-center">
-                <span className="text-xs text-muted-foreground font-semibold">Salario Promedio Actual</span>
-                <span className="text-lg font-bold">S/. {Math.round((activeCluster?.market_insights?.average_salary_pen || 0) * 0.75) || 'N/A'}</span>
+                <span className="text-xs text-muted-foreground font-semibold">
+                  Salario Promedio Actual
+                </span>
+                <span className="text-lg font-bold">
+                  S/.{' '}
+                  {Math.round((activeCluster?.market_insights?.average_salary_pen || 0) * 0.75) ||
+                    'N/A'}
+                </span>
               </div>
               <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 flex flex-col items-center justify-center text-center">
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Salario Proyectado</span>
-                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">S/. {activeCluster?.market_insights?.average_salary_pen || 'N/A'}</span>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                  Salario Proyectado
+                </span>
+                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                  S/. {activeCluster?.market_insights?.average_salary_pen || 'N/A'}
+                </span>
               </div>
             </div>
           </div>

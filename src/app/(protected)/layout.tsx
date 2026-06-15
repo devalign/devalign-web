@@ -10,16 +10,18 @@ import { Breadcrumb, BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { CVAnalysisProvider, useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { Loader2, Network } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useUserProfile } from '@/hooks/use-user-profile';
 
 function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { data: cvData } = useUserCVs();
   const { isAnalyzing, isAnalysisReady } = useCVAnalysis();
+  const { data: profile } = useUserProfile();
 
   const getBreadcrumbs = (path: string): BreadcrumbItem[] => {
     const items: BreadcrumbItem[] = [];
-    const cluster = searchParams.get('cluster');
+    const cluster = searchParams.get('cluster') || profile?.primary_specialty || '';
 
     if (path.startsWith('/profile')) {
       items.push({ label: 'Perfil Profesional', href: '/profile' });
@@ -28,9 +30,15 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
       if (cluster) {
         items.push({ label: cluster, href: `/dashboard?cluster=${encodeURIComponent(cluster)}` });
       }
-      items.push({ label: 'Plan de Acción', href: `/dashboard/action-plan?cluster=${encodeURIComponent(cluster || '')}` });
+      items.push({
+        label: 'Plan de Acción',
+        href: `/dashboard/action-plan?cluster=${encodeURIComponent(cluster || '')}`,
+      });
     } else if (path.startsWith('/market')) {
-      items.push({ label: 'Mercado', href: `/market?cluster=${encodeURIComponent(cluster || '')}` });
+      items.push({
+        label: 'Mercado',
+        href: `/market?cluster=${encodeURIComponent(cluster || '')}`,
+      });
       if (cluster) {
         items.push({ label: cluster, href: `/market?cluster=${encodeURIComponent(cluster)}` });
       }
@@ -69,7 +77,10 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Right side: Page-specific metadata & status */}
           <div className="flex items-center gap-3 text-[10px] sm:text-xs text-muted-foreground font-medium select-none">
             {!pathname.startsWith('/market') && (
-              <Link href={`/market?cluster=${encodeURIComponent(searchParams.get('cluster') || '')}`} className="mr-1">
+              <Link
+                href={`/market?cluster=${encodeURIComponent(searchParams.get('cluster') || profile?.primary_specialty || '')}`}
+                className="mr-1"
+              >
                 <Button
                   variant="outline"
                   size="sm"
@@ -109,9 +120,7 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Contenido de la página */}
-        <div className="flex-1">
-          {children}
-        </div>
+        <div className="flex-1">{children}</div>
       </main>
     </div>
   );

@@ -30,7 +30,7 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
   } catch (netError) {
     console.error('Error de red al llamar a la API:', netError);
     throw new Error(
-      'El servidor de análisis no responde. Por favor, comprueba tu conexión o inténtalo más tarde.'
+      'El servidor de análisis no responde. Por favor, comprueba tu conexión o inténtalo más tarde.',
     );
   }
 

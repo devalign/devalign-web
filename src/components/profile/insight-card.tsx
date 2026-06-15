@@ -11,7 +11,11 @@ interface InsightCardProps {
   isPlaceholder?: boolean;
 }
 
-export default function InsightCard({ primarySpecialty, skillGaps, isPlaceholder = false }: InsightCardProps) {
+export default function InsightCard({
+  primarySpecialty,
+  skillGaps,
+  isPlaceholder = false,
+}: InsightCardProps) {
   // Generate a friendly message based on user profile and gaps
   const topGaps = skillGaps.slice(0, 2).map((s) => s.name);
   const gapMessage =
@@ -32,7 +36,8 @@ export default function InsightCard({ primarySpecialty, skillGaps, isPlaceholder
           <p className="text-xs text-foreground leading-relaxed">
             {isPlaceholder ? (
               <span className="text-muted-foreground/80 italic">
-                Sube tu currículum para recibir un diagnóstico personalizado de IA e insights de mercado basados en tus habilidades.
+                Sube tu currículum para recibir un diagnóstico personalizado de IA e insights de
+                mercado basados en tus habilidades.
               </span>
             ) : (
               <>

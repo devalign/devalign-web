@@ -100,7 +100,7 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
     - **Columna 3: Aside Contextual** (p.ej. [profile-aside.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/profile/profile-aside.tsx)): Barra lateral derecha para mostrar beneficios, social proof, guías informativas y políticas de seguridad ajustadas al contexto activo.
   - La landing page post-login por defecto es `/profile` ([page.tsx](<file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/profile/page.tsx>)), que contiene el flujo de upload del CV para análisis inicial del desarrollador.
   - **Diagnóstico Inteligente (`/diagnosis`)**:
-    - Implementado a través de [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/diagnosis/page.tsx) que renderiza el [DiagnosisDashboard](file:///c:/Projects/Devalign/devalign-web/src/components/diagnosis/diagnosis-dashboard.tsx).
+    - Implementado a través de [page.tsx](<file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/diagnosis/page.tsx>) que renderiza el [DiagnosisDashboard](file:///c:/Projects/Devalign/devalign-web/src/components/diagnosis/diagnosis-dashboard.tsx).
     - Orquesta un bento-grid responsivo de 3 columnas en desktop para mostrar las fortalezas, brechas, afinidad por dominio, roles compatibles, insights y tendencias del mercado.
     - Utiliza `recharts` para las visualizaciones de datos, estilizadas de forma dinámica usando las variables HSL de los temas del sistema de diseño.
 

@@ -46,7 +46,8 @@ export const mockDiagnosisData: DiagnosisResult = {
     { title: 'Java Cloud Engineer', match: 'Alta' },
     { title: 'Backend Microservices Developer', match: 'Media' },
   ],
-  aiInsight: 'Los perfiles Backend Java con Kubernetes y AWS tienen 2.3x mas salarios promedio 32% más altos en el mercado peruano.',
+  aiInsight:
+    'Los perfiles Backend Java con Kubernetes y AWS tienen 2.3x mas salarios promedio 32% más altos en el mercado peruano.',
   totalSkillsDetected: 24,
   domainsCovered: 5,
 };

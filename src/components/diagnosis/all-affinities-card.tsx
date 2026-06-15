@@ -26,47 +26,51 @@ const MARKET_CLUSTERS = [
     name: 'Data Engineering',
     offers: 148,
     percent: 24.6,
-    description: 'Procesamiento de datos a gran escala, ETLs y almacenamiento relacional/no-relacional.',
-    skills: ['SQL', 'Python', 'Spark', 'Hadoop', 'AWS', 'PostgreSQL']
+    description:
+      'Procesamiento de datos a gran escala, ETLs y almacenamiento relacional/no-relacional.',
+    skills: ['SQL', 'Python', 'Spark', 'Hadoop', 'AWS', 'PostgreSQL'],
   },
   {
     name: 'Backend Development',
     offers: 138,
     percent: 23.0,
-    description: 'Construcción de APIs, lógica de negocio del lado del servidor y arquitectura de microservicios.',
-    skills: ['Java', 'Spring Boot', 'Node.js', 'SQL', 'PostgreSQL', 'Docker', 'Git']
+    description:
+      'Construcción de APIs, lógica de negocio del lado del servidor y arquitectura de microservicios.',
+    skills: ['Java', 'Spring Boot', 'Node.js', 'SQL', 'PostgreSQL', 'Docker', 'Git'],
   },
   {
     name: 'Cloud & DevOps Engineer',
     offers: 125,
     percent: 20.8,
-    description: 'Automatización de despliegues, infraestructura como código y administración de nube.',
-    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Linux', 'Git', 'CI/CD']
+    description:
+      'Automatización de despliegues, infraestructura como código y administración de nube.',
+    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Linux', 'Git', 'CI/CD'],
   },
   {
     name: 'Frontend Development',
     offers: 105,
     percent: 17.5,
     description: 'Interfaces de usuario interactivas, rendimiento web y diseño adaptativo.',
-    skills: ['React', 'TypeScript', 'JavaScript', 'CSS', 'HTML', 'Git', 'Tailwind']
+    skills: ['React', 'TypeScript', 'JavaScript', 'CSS', 'HTML', 'Git', 'Tailwind'],
   },
   {
     name: 'QA & Automation',
     offers: 84,
     percent: 14.0,
-    description: 'Aseguramiento de la calidad de software, pruebas automatizadas y pipelines de integración.',
-    skills: ['QA', 'SQL', 'Selenium', 'Cypress', 'Git', 'Python', 'Postman']
-  }
+    description:
+      'Aseguramiento de la calidad de software, pruebas automatizadas y pipelines de integración.',
+    skills: ['QA', 'SQL', 'Selenium', 'Cypress', 'Git', 'Python', 'Postman'],
+  },
 ];
 
-export function AllAffinitiesCard({ 
-  affinities = [], 
+export function AllAffinitiesCard({
+  affinities = [],
   isLoading = false,
   activeClusterName,
-  onSelectAffinity
+  onSelectAffinity,
 }: AllAffinitiesCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   // Sort affinities by score descending
   const sortedAffinities = [...affinities].sort((a, b) => b.affinity_score - a.affinity_score);
 
@@ -90,7 +94,7 @@ export function AllAffinitiesCard({
             </CardTitle>
           </div>
         </CardHeader>
-        
+
         <CardContent className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {sortedAffinities.length === 0 && !isLoading ? (
             <div className="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground">
@@ -102,25 +106,32 @@ export function AllAffinitiesCard({
                 const scorePercent = Math.round(affinity.affinity_score * 100);
                 const isPrimary = affinity.is_primary;
                 const isActive = affinity.cluster_name === activeClusterName;
-                
+
                 return (
-                  <div 
-                    key={affinity.cluster_id} 
+                  <div
+                    key={affinity.cluster_id}
                     onClick={() => onSelectAffinity?.(affinity.cluster_name)}
                     className={`space-y-1 p-2 rounded-lg transition-all cursor-pointer border ${
-                      isActive 
-                        ? 'bg-primary/5 border-primary/20 shadow-xs scale-[1.01]' 
+                      isActive
+                        ? 'bg-primary/5 border-primary/20 shadow-xs scale-[1.01]'
                         : 'hover:bg-secondary/40 border-transparent'
                     }`}
                   >
                     <div className="flex justify-between text-xs">
-                      <span className={`font-semibold transition-colors ${isActive ? 'text-primary' : isPrimary ? 'text-primary/80' : 'text-foreground'}`}>
-                        {affinity.cluster_name} {isPrimary && <span className="text-[9px] px-1.5 py-0.5 ml-1 rounded-full bg-primary/10 text-primary">Primaria</span>}
+                      <span
+                        className={`font-semibold transition-colors ${isActive ? 'text-primary' : isPrimary ? 'text-primary/80' : 'text-foreground'}`}
+                      >
+                        {affinity.cluster_name}{' '}
+                        {isPrimary && (
+                          <span className="text-[9px] px-1.5 py-0.5 ml-1 rounded-full bg-primary/10 text-primary">
+                            Primaria
+                          </span>
+                        )}
                       </span>
                       <span className="font-bold text-muted-foreground">{scorePercent}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-secondary overflow-hidden rounded-full">
-                      <div 
+                      <div
                         className={`h-full ${isActive ? 'bg-primary' : isPrimary ? 'bg-primary/70' : 'bg-muted-foreground/40'} rounded-full transition-all duration-1000 ease-out`}
                         style={{ width: `${scorePercent}%` }}
                       />
@@ -133,9 +144,9 @@ export function AllAffinitiesCard({
         </CardContent>
 
         <div className="p-3 pt-0 border-t border-border/40 mt-auto flex justify-end">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setIsOpen(true)}
             className="text-[10px] h-8 font-bold text-primary hover:bg-primary/5 cursor-pointer gap-1"
           >
@@ -153,7 +164,8 @@ export function AllAffinitiesCard({
               <span>Topología del Mercado IT</span>
             </SheetTitle>
             <SheetDescription className="text-xs text-muted-foreground mt-1">
-              Estructura técnica descubierta mediante análisis no supervisado de la demanda laboral actual.
+              Estructura técnica descubierta mediante análisis no supervisado de la demanda laboral
+              actual.
             </SheetDescription>
           </SheetHeader>
 
@@ -165,28 +177,36 @@ export function AllAffinitiesCard({
             </h4>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 font-medium">
               <div className="flex flex-col gap-0.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Volumen analizado</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
+                  Volumen analizado
+                </span>
                 <span className="text-foreground font-semibold flex items-center gap-1">
                   <Database className="h-3 w-3 text-muted-foreground" />
                   600 ofertas reales
                 </span>
               </div>
               <div className="flex flex-col gap-0.5 border-l border-border/60 pl-3">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Habilidades únicas</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
+                  Habilidades únicas
+                </span>
                 <span className="text-foreground font-semibold flex items-center gap-1">
                   <Binary className="h-3 w-3 text-muted-foreground" />
                   73 tecnologías
                 </span>
               </div>
               <div className="flex flex-col gap-0.5 mt-1">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Algoritmo</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
+                  Algoritmo
+                </span>
                 <span className="text-foreground font-semibold flex items-center gap-1">
                   <Cpu className="h-3 w-3 text-muted-foreground" />
                   K-Modes Multivariado
                 </span>
               </div>
               <div className="flex flex-col gap-0.5 mt-1 border-l border-border/60 pl-3">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Frecuencia</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
+                  Frecuencia
+                </span>
                 <span className="text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1">
                   <Info className="h-3 w-3 text-blue-500" />
                   Semanal (Automatizada)
@@ -198,16 +218,17 @@ export function AllAffinitiesCard({
           {/* Cluster List */}
           <div className="flex-1 overflow-y-auto pr-1 space-y-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
             {MARKET_CLUSTERS.map((cluster) => (
-              <div 
-                key={cluster.name} 
+              <div
+                key={cluster.name}
                 className="p-3.5 rounded-xl border border-border/50 hover:border-primary/25 bg-secondary/10 hover:bg-secondary/20 transition-all duration-200 space-y-2.5"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-bold text-sm text-foreground">
-                    {cluster.name}
-                  </h3>
+                  <h3 className="font-bold text-sm text-foreground">{cluster.name}</h3>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge variant="outline" className="text-[9px] font-bold py-0.5 px-2 bg-background border-border/80 text-muted-foreground">
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] font-bold py-0.5 px-2 bg-background border-border/80 text-muted-foreground"
+                    >
                       {cluster.offers} ofertas
                     </Badge>
                     <Badge className="text-[9px] font-extrabold py-0.5 px-2 bg-primary/10 text-primary border-0">
@@ -215,15 +236,15 @@ export function AllAffinitiesCard({
                     </Badge>
                   </div>
                 </div>
-                
+
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {cluster.description}
                 </p>
 
                 <div className="flex flex-wrap gap-1.5 pt-1.5">
                   {cluster.skills.map((skill) => (
-                    <span 
-                      key={skill} 
+                    <span
+                      key={skill}
                       className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-secondary text-foreground/80 hover:text-foreground transition-colors"
                     >
                       {skill}

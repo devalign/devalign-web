@@ -30,7 +30,7 @@ function SheetOverlay({
       data-slot="sheet-overlay"
       className={cn(
         'fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity duration-300 data-[state=closed]:opacity-0 data-[state=open]:opacity-100',
-        className
+        className,
       )}
       {...props}
     />
@@ -52,7 +52,7 @@ function SheetContent({
         data-slot="sheet-content"
         className={cn(
           'fixed right-0 top-0 bottom-0 z-50 h-full w-full max-w-md border-l border-border bg-card p-6 shadow-xl outline-none transition-transform duration-300 ease-in-out data-[state=closed]:translate-x-full data-[state=open]:translate-x-0 flex flex-col',
-          className
+          className,
         )}
         {...props}
       >
@@ -81,14 +81,14 @@ function SheetHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function SheetFooter({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
+function SheetFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="sheet-footer"
-      className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-auto pt-4 border-t border-border/60', className)}
+      className={cn(
+        'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-auto pt-4 border-t border-border/60',
+        className,
+      )}
       {...props}
     />
   );

@@ -109,17 +109,21 @@ export default function AffinityCard({
           );
         })}
 
-        <div className={`pt-2 border-t border-border flex items-center justify-between text-xs font-bold ${
-          isPlaceholder
-            ? 'text-muted-foreground/50 cursor-not-allowed select-none'
-            : 'text-primary hover:underline cursor-pointer group'
-        }`}>
-          <span>Ver detalle de afinidad</span>
-          <ArrowUpRight className={`h-4 w-4 ${
+        <div
+          className={`pt-2 border-t border-border flex items-center justify-between text-xs font-bold ${
             isPlaceholder
-              ? 'opacity-40'
-              : 'transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5'
-          }`} />
+              ? 'text-muted-foreground/50 cursor-not-allowed select-none'
+              : 'text-primary hover:underline cursor-pointer group'
+          }`}
+        >
+          <span>Ver detalle de afinidad</span>
+          <ArrowUpRight
+            className={`h-4 w-4 ${
+              isPlaceholder
+                ? 'opacity-40'
+                : 'transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5'
+            }`}
+          />
         </div>
       </CardContent>
     </Card>

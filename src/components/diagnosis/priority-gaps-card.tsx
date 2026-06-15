@@ -11,7 +11,11 @@ interface PriorityGapsCardProps {
   isLoading?: boolean;
 }
 
-export function PriorityGapsCard({ marketGaps, onViewAll, isLoading = false }: PriorityGapsCardProps) {
+export function PriorityGapsCard({
+  marketGaps,
+  onViewAll,
+  isLoading = false,
+}: PriorityGapsCardProps) {
   return (
     <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col h-full relative overflow-hidden min-h-[280px]">
       {isLoading && (
@@ -51,9 +55,13 @@ export function PriorityGapsCard({ marketGaps, onViewAll, isLoading = false }: P
                     ? 'text-red-600 dark:text-red-400'
                     : 'text-amber-600 dark:text-amber-400';
                 const critLabel =
-                  crit === 'critical' ? 'Crítica' :
-                  crit === 'high' ? 'Alta' :
-                  crit === 'medium' ? 'Media' : crit;
+                  crit === 'critical'
+                    ? 'Crítica'
+                    : crit === 'high'
+                      ? 'Alta'
+                      : crit === 'medium'
+                        ? 'Media'
+                        : crit;
 
                 return (
                   <div
@@ -61,7 +69,9 @@ export function PriorityGapsCard({ marketGaps, onViewAll, isLoading = false }: P
                     className={`flex flex-col justify-between p-2.5 rounded-lg border border-dashed transition-colors ${borderClass}`}
                   >
                     <div className="flex justify-between items-start gap-1">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{bg.name}</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                        {bg.name}
+                      </span>
                       <span className={`text-[9px] font-bold shrink-0 ${textClass}`}>
                         {demand}% DEMANDA
                       </span>

@@ -4,14 +4,14 @@ import React, { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Sparkles, 
-  Award, 
-  Target, 
-  GraduationCap, 
-  TrendingUp, 
+import {
+  Sparkles,
+  Award,
+  Target,
+  GraduationCap,
+  TrendingUp,
   Hexagon,
-  ShieldCheck
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -44,9 +44,13 @@ export default function PublicSharePage() {
   const [specialty, setSpecialty] = React.useState('Software Engineering');
 
   const [techSkills, setTechSkills] = React.useState<string[]>([
-    'SQL Server', 'Python', 'Git', 'Docker', 'Kubernetes'
+    'SQL Server',
+    'Python',
+    'Git',
+    'Docker',
+    'Kubernetes',
   ]);
-  
+
   const [certifications, setCertifications] = React.useState<LocalCertificationItem[]>([
     { name: 'Cloud Developer', issuer: 'Plataforma Cloud', date: '2025' },
   ]);
@@ -61,7 +65,7 @@ export default function PublicSharePage() {
           if (draft.fullName) setDeveloperName(draft.fullName);
           if (draft.roleTitle) setRoleTitle(draft.roleTitle);
           if (draft.seniority) setSeniority(draft.seniority);
-          
+
           if (draft.education && draft.education.length > 0) {
             setDegree(draft.education[0].degree);
             setUniversity(draft.education[0].institution);
@@ -88,7 +92,9 @@ export default function PublicSharePage() {
             setCurrentScore(draft.alignment_score);
           } else if (draft.detected_skills) {
             // Calculate score based on skills length
-            const techCount = draft.detected_skills.filter((s: LocalSkillItem) => s.skill_type === 'hard_skill').length || 0;
+            const techCount =
+              draft.detected_skills.filter((s: LocalSkillItem) => s.skill_type === 'hard_skill')
+                .length || 0;
             setCurrentScore(Math.min(42 + techCount * 3, 98));
           }
 
@@ -122,25 +128,24 @@ export default function PublicSharePage() {
 
     return {
       user: [
-        convert(userBackend, 0),    // Backend
-        convert(userFrontend, 72),   // Frontend
-        convert(userCloud, 144),  // Cloud
-        convert(userDevOps, 216),  // DevOps
-        convert(userData, 288),  // Data
+        convert(userBackend, 0), // Backend
+        convert(userFrontend, 72), // Frontend
+        convert(userCloud, 144), // Cloud
+        convert(userDevOps, 216), // DevOps
+        convert(userData, 288), // Data
       ].join(' '),
       market: [
-        convert(92, 0),    // Backend market demand
-        convert(42, 72),   // Frontend market demand
-        convert(78, 144),  // Cloud market demand
-        convert(64, 216),  // DevOps market demand
-        convert(64, 288),  // Data market demand
-      ].join(' ')
+        convert(92, 0), // Backend market demand
+        convert(42, 72), // Frontend market demand
+        convert(78, 144), // Cloud market demand
+        convert(64, 216), // DevOps market demand
+        convert(64, 288), // Data market demand
+      ].join(' '),
     };
   }, [currentScore, convert]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-between">
-      
       {/* Header / Logo */}
       <header className="border-b border-border bg-card/60 backdrop-blur-md py-4">
         <div className="max-w-4xl mx-auto px-6 flex items-center justify-between">
@@ -158,10 +163,8 @@ export default function PublicSharePage() {
       {/* Main Content (Centered Diagnostic Summary Card) */}
       <main className="flex-grow max-w-4xl w-full mx-auto px-6 py-10 flex items-center justify-center">
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          
           {/* LEFT PANEL: verified developer profile */}
           <div className="space-y-6">
-            
             {/* Developer credentials */}
             <Card className="shadow-lg shadow-black/5 border-border bg-card">
               <CardContent className="pt-6">
@@ -169,7 +172,9 @@ export default function PublicSharePage() {
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-primary/10 text-primary border border-primary/20">
                     <Sparkles className="w-3.5 h-3.5" /> Perfil Validado por IA
                   </span>
-                  <h1 className="text-2xl font-black tracking-tight text-foreground">{developerName}</h1>
+                  <h1 className="text-2xl font-black tracking-tight text-foreground">
+                    {developerName}
+                  </h1>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground font-semibold">{roleTitle}</span>
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold font-mono bg-secondary text-foreground uppercase">
@@ -185,7 +190,9 @@ export default function PublicSharePage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-4 h-4 text-primary" />
-                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">Formación Académica</span>
+                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+                    Formación Académica
+                  </span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-1">
@@ -199,13 +206,15 @@ export default function PublicSharePage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">Habilidades Verificadas</span>
+                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+                    Habilidades Verificadas
+                  </span>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-1.5">
                   {techSkills.map((skill) => (
-                    <span 
+                    <span
                       key={skill}
                       className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
                     >
@@ -221,7 +230,9 @@ export default function PublicSharePage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-primary" />
-                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">Certificaciones obtenidas</span>
+                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+                    Certificaciones obtenidas
+                  </span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -231,7 +242,9 @@ export default function PublicSharePage() {
                       <p className="font-semibold text-foreground">{c.name}</p>
                       <p className="text-[10px] text-muted-foreground">{c.issuer}</p>
                     </div>
-                    <span className="text-[10px] text-muted-foreground font-mono shrink-0">{c.date}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                      {c.date}
+                    </span>
                   </div>
                 ))}
               </CardContent>
@@ -240,25 +253,34 @@ export default function PublicSharePage() {
 
           {/* RIGHT PANEL: Alignment metrics */}
           <div className="space-y-6">
-            
             {/* Score & specialty */}
             <Card className="shadow-lg shadow-black/5 border-border bg-card">
               <CardContent className="pt-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                   <div className="text-center sm:text-left space-y-1">
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Alineación con el mercado</p>
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Alineación con el mercado
+                    </p>
                     <div className="flex items-baseline justify-center sm:justify-start gap-1">
-                      <span className="text-5xl font-black text-foreground tracking-tight">{currentScore}%</span>
+                      <span className="text-5xl font-black text-foreground tracking-tight">
+                        {currentScore}%
+                      </span>
                     </div>
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border text-emerald-600 bg-emerald-500/10 border-emerald-500/35">
                       Alta afinidad
                     </span>
                   </div>
-                  
+
                   <div className="flex-1 text-center sm:text-right space-y-1.5 border-t sm:border-t-0 sm:border-l border-border pt-4 sm:pt-0 sm:pl-6">
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Especialidad detectada</p>
-                    <h3 className="text-lg font-black text-foreground tracking-tight">{specialty}</h3>
-                    <p className="text-[9px] text-muted-foreground">Perfil verificado frente al mercado peruano.</p>
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Especialidad detectada
+                    </p>
+                    <h3 className="text-lg font-black text-foreground tracking-tight">
+                      {specialty}
+                    </h3>
+                    <p className="text-[9px] text-muted-foreground">
+                      Perfil verificado frente al mercado peruano.
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -269,7 +291,9 @@ export default function PublicSharePage() {
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-primary" />
-                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">Afinidad por Dominio</span>
+                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+                    Afinidad por Dominio
+                  </span>
                 </div>
               </CardHeader>
               <CardContent className="flex justify-center py-4">
@@ -277,10 +301,12 @@ export default function PublicSharePage() {
                   <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
                     {[20, 40, 60, 80, 100].map((r) => {
                       const rad = (r / 100) * 70;
-                      const points = [0, 72, 144, 216, 288].map((angle) => {
-                        const a = (angle - 90) * (Math.PI / 180);
-                        return `${100 + rad * Math.cos(a)},${100 + rad * Math.sin(a)}`;
-                      }).join(' ');
+                      const points = [0, 72, 144, 216, 288]
+                        .map((angle) => {
+                          const a = (angle - 90) * (Math.PI / 180);
+                          return `${100 + rad * Math.cos(a)},${100 + rad * Math.sin(a)}`;
+                        })
+                        .join(' ');
                       return (
                         <polygon
                           key={r}
@@ -304,14 +330,55 @@ export default function PublicSharePage() {
                       );
                     })}
 
-                    <text x={100} y={15} textAnchor="middle" className="fill-muted-foreground text-[8px] font-bold font-mono">BACKEND</text>
-                    <text x={178} y={75} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">FRONTEND</text>
-                    <text x={155} y={185} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">CLOUD</text>
-                    <text x={45} y={185} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DEVOPS</text>
-                    <text x={22} y={75} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DATA</text>
+                    <text
+                      x={100}
+                      y={15}
+                      textAnchor="middle"
+                      className="fill-muted-foreground text-[8px] font-bold font-mono"
+                    >
+                      BACKEND
+                    </text>
+                    <text
+                      x={178}
+                      y={75}
+                      textAnchor="start"
+                      className="fill-muted-foreground text-[8px] font-bold font-mono"
+                    >
+                      FRONTEND
+                    </text>
+                    <text
+                      x={155}
+                      y={185}
+                      textAnchor="start"
+                      className="fill-muted-foreground text-[8px] font-bold font-mono"
+                    >
+                      CLOUD
+                    </text>
+                    <text
+                      x={45}
+                      y={185}
+                      textAnchor="end"
+                      className="fill-muted-foreground text-[8px] font-bold font-mono"
+                    >
+                      DEVOPS
+                    </text>
+                    <text
+                      x={22}
+                      y={75}
+                      textAnchor="end"
+                      className="fill-muted-foreground text-[8px] font-bold font-mono"
+                    >
+                      DATA
+                    </text>
 
-                    <polygon points={radarPoints.market} className="fill-slate-800/10 stroke-slate-500/50 stroke-1.5" />
-                    <polygon points={radarPoints.user} className="fill-primary/25 stroke-primary stroke-2" />
+                    <polygon
+                      points={radarPoints.market}
+                      className="fill-slate-800/10 stroke-slate-500/50 stroke-1.5"
+                    />
+                    <polygon
+                      points={radarPoints.user}
+                      className="fill-primary/25 stroke-primary stroke-2"
+                    />
 
                     {radarPoints.market.split(' ').map((p, idx) => {
                       const [x, y] = p.split(',');
@@ -320,7 +387,15 @@ export default function PublicSharePage() {
 
                     {radarPoints.user.split(' ').map((p, idx) => {
                       const [x, y] = p.split(',');
-                      return <circle key={idx} cx={x} cy={y} r={3} className="fill-primary stroke-card stroke-1" />;
+                      return (
+                        <circle
+                          key={idx}
+                          cx={x}
+                          cy={y}
+                          r={3}
+                          className="fill-primary stroke-card stroke-1"
+                        />
+                      );
                     })}
                   </svg>
 
@@ -343,22 +418,27 @@ export default function PublicSharePage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-primary" />
-                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">Roles compatibles</span>
+                  <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+                    Roles compatibles
+                  </span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between items-center p-2 rounded-lg bg-secondary/35 text-xs">
                   <span className="font-bold text-foreground">Backend Java Developer</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">Afinidad Alta</span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                    Afinidad Alta
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-2 rounded-lg bg-secondary/35 text-xs">
                   <span className="font-bold text-foreground">Java Cloud Engineer</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">Afinidad Alta</span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                    Afinidad Alta
+                  </span>
                 </div>
               </CardContent>
             </Card>
           </div>
-
         </div>
       </main>
 
@@ -366,8 +446,12 @@ export default function PublicSharePage() {
       <footer className="border-t border-border bg-card py-6">
         <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-center sm:text-left">
-            <p className="text-xs font-bold text-foreground">¿Quieres medir tu alineación técnica?</p>
-            <p className="text-[10px] text-muted-foreground">Descubre tus brechas frente al mercado TI con Devalign.</p>
+            <p className="text-xs font-bold text-foreground">
+              ¿Quieres medir tu alineación técnica?
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              Descubre tus brechas frente al mercado TI con Devalign.
+            </p>
           </div>
           <Link href="/">
             <Button size="sm" className="h-10 px-6 font-bold cursor-pointer shadow-xs">
@@ -376,7 +460,6 @@ export default function PublicSharePage() {
           </Link>
         </div>
       </footer>
-
     </div>
   );
 }

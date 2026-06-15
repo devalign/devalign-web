@@ -7,16 +7,16 @@ import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  ChevronRight, 
-  Lightbulb, 
-  Sparkles, 
-  TrendingUp, 
-  X, 
-  Loader2, 
-  Map, 
+import {
+  ChevronRight,
+  Lightbulb,
+  Sparkles,
+  TrendingUp,
+  X,
+  Loader2,
+  Map,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -40,7 +40,12 @@ interface RoadmapPhase {
 
 const CLUSTER_SKILLS_MAP: Record<
   string,
-  { name: string; category: string; importance: 'critical' | 'high' | 'medium'; demandPercentage: number }[]
+  {
+    name: string;
+    category: string;
+    importance: 'critical' | 'high' | 'medium';
+    demandPercentage: number;
+  }[]
 > = {
   'Backend Java': [
     { name: 'Java', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
@@ -121,35 +126,40 @@ const KNOWN_SKILLS_TEMPLATES: Record<string, Omit<RoadmapStep, 'skill'>> = {
   docker: {
     impact: '+12% de Alineación',
     topics: ['Contenedores', 'Imágenes', 'Dockerfiles', 'Docker Compose'],
-    justification: 'Docker aparece en el 74% de las ofertas asociadas a tu especialidad. Su conocimiento es un prerrequisito para orquestación y despliegue cloud.',
+    justification:
+      'Docker aparece en el 74% de las ofertas asociadas a tu especialidad. Su conocimiento es un prerrequisito para orquestación y despliegue cloud.',
     rule: 'Java/Python -> Docker (Confianza: 74%)',
     trendData: [45, 52, 58, 62, 69, 74],
   },
   kubernetes: {
     impact: '+10% de Alineación',
     topics: ['Pods', 'Deployments', 'Services', 'ConfigMaps & Secrets'],
-    justification: 'Kubernetes es la herramienta estándar del mercado TI peruano para la administración de microservicios. Las ofertas modernas exigen orquestación automatizada.',
+    justification:
+      'Kubernetes es la herramienta estándar del mercado TI peruano para la administración de microservicios. Las ofertas modernas exigen orquestación automatizada.',
     rule: 'Docker -> Kubernetes (Confianza: 68%)',
     trendData: [35, 42, 49, 54, 60, 68],
   },
   microservicios: {
     impact: '+8% de Alineación',
     topics: ['API Gateways', 'Service Mesh', 'Eventos (Kafka/RabbitMQ)', 'Resiliencia'],
-    justification: 'La arquitectura de microservicios representa la mayor parte de la demanda en ofertas mid/senior. Entender la comunicación distribuida es crítico.',
+    justification:
+      'La arquitectura de microservicios representa la mayor parte de la demanda en ofertas mid/senior. Entender la comunicación distribuida es crítico.',
     rule: 'Spring Boot/Node -> Microservicios (Confianza: 82%)',
     trendData: [70, 72, 75, 78, 80, 82],
   },
   aws: {
     impact: '+8% de Alineación',
     topics: ['Amazon S3', 'EC2 & ECS', 'AWS Lambda', 'IAM Security'],
-    justification: 'AWS es el proveedor de nube dominante en el mercado local con alta demanda en ofertas TI. Ideal para orquestar infraestructuras y despliegues modernos.',
+    justification:
+      'AWS es el proveedor de nube dominante en el mercado local con alta demanda en ofertas TI. Ideal para orquestar infraestructuras y despliegues modernos.',
     rule: 'Docker + Kubernetes -> AWS (Confianza: 81%)',
     trendData: [40, 43, 48, 51, 55, 58],
   },
   'ci/cd': {
     impact: '+6% de Alineación',
     topics: ['GitHub Actions', 'Pipelines', 'Pruebas Automatizadas', 'Despliegue Continuo'],
-    justification: 'La integración y despliegue continuo garantizan entregas rápidas y seguras, reduciendo errores manuales a cero.',
+    justification:
+      'La integración y despliegue continuo garantizan entregas rápidas y seguras, reduciendo errores manuales a cero.',
     rule: 'Git + Docker -> CI/CD (Confianza: 70%)',
     trendData: [55, 58, 62, 65, 68, 70],
   },
@@ -228,13 +238,13 @@ function RoadmapContent() {
             salary_differential_percentage: 32,
             market_share_percentage: 23,
             total_demand: 145,
-            growth_percentage: 28
+            growth_percentage: 28,
           },
           compatible_roles: [
             { title: 'Backend Java Developer', match: 'Alta' as const },
             { title: 'Java Cloud Engineer', match: 'Alta' as const },
-            { title: 'Backend Microservices Developer', match: 'Media' as const }
-          ]
+            { title: 'Backend Microservices Developer', match: 'Media' as const },
+          ],
         },
         {
           cluster_id: '2',
@@ -246,13 +256,13 @@ function RoadmapContent() {
             salary_differential_percentage: 42,
             market_share_percentage: 20,
             total_demand: 125,
-            growth_percentage: 35
+            growth_percentage: 35,
           },
           compatible_roles: [
             { title: 'DevOps Engineer', match: 'Alta' as const },
             { title: 'Cloud Architect', match: 'Media' as const },
-            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const }
-          ]
+            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const },
+          ],
         },
         {
           cluster_id: '3',
@@ -264,31 +274,31 @@ function RoadmapContent() {
             salary_differential_percentage: 38,
             market_share_percentage: 24,
             total_demand: 148,
-            growth_percentage: 31
+            growth_percentage: 31,
           },
           compatible_roles: [
             { title: 'Data Engineer', match: 'Alta' as const },
             { title: 'Big Data Developer', match: 'Alta' as const },
-            { title: 'Analytics Engineer', match: 'Media' as const }
-          ]
+            { title: 'Analytics Engineer', match: 'Media' as const },
+          ],
         },
         {
           cluster_id: '4',
           cluster_name: 'Frontend React',
-          affinity_score: 0.30,
+          affinity_score: 0.3,
           is_primary: false,
           market_insights: {
             average_salary_pen: 7000,
             salary_differential_percentage: 15,
             market_share_percentage: 17,
             total_demand: 190,
-            growth_percentage: 18
+            growth_percentage: 18,
           },
           compatible_roles: [
             { title: 'Frontend Developer', match: 'Alta' as const },
             { title: 'React Developer', match: 'Alta' as const },
-            { title: 'UI Engineer', match: 'Media' as const }
-          ]
+            { title: 'UI Engineer', match: 'Media' as const },
+          ],
         },
         {
           cluster_id: '5',
@@ -300,14 +310,14 @@ function RoadmapContent() {
             salary_differential_percentage: 12,
             market_share_percentage: 14,
             total_demand: 84,
-            growth_percentage: 15
+            growth_percentage: 15,
           },
           compatible_roles: [
             { title: 'QA Automation Engineer', match: 'Alta' as const },
             { title: 'Software Development Engineer in Test (SDET)', match: 'Alta' as const },
-            { title: 'QA Analyst', match: 'Media' as const }
-          ]
-        }
+            { title: 'QA Analyst', match: 'Media' as const },
+          ],
+        },
       ];
     }
     return list.slice(0, 3);
@@ -318,7 +328,7 @@ function RoadmapContent() {
     if (allAffinities && allAffinities.length > 0) {
       if (clusterParam) {
         const found = allAffinities.find(
-          (a) => a.cluster_name.toLowerCase() === clusterParam.toLowerCase()
+          (a) => a.cluster_name.toLowerCase() === clusterParam.toLowerCase(),
         );
         if (found) return found;
       }
@@ -337,8 +347,8 @@ function RoadmapContent() {
           const draft = JSON.parse(draftStr);
           if (draft.detected_skills) {
             return draft.detected_skills
-              .filter((s: any) => s.skill_type === 'hard_skill')
-              .map((s: any) => s.name);
+              .filter((s: { skill_type: string; name: string }) => s.skill_type === 'hard_skill')
+              .map((s: { skill_type: string; name: string }) => s.name);
           }
         } catch (e) {
           console.error('Failed to parse offline profile draft:', e);
@@ -360,7 +370,13 @@ function RoadmapContent() {
     const key = getClusterKey(activeCluster.cluster_name);
     const clusterSkills = CLUSTER_SKILLS_MAP[key] || [];
 
-    const gaps: any[] = [];
+    interface SkillGap {
+      name: string;
+      skill_type: string;
+      market_importance: string;
+      market_demand_percentage: number;
+    }
+    const gaps: SkillGap[] = [];
     const userSkillsSet = new Set(techSkills.map((s: string) => s.toLowerCase()));
 
     clusterSkills.forEach((skill) => {
@@ -370,7 +386,7 @@ function RoadmapContent() {
           name: skill.name,
           skill_type: skill.category,
           market_importance: skill.importance,
-          market_demand_percentage: skill.demandPercentage
+          market_demand_percentage: skill.demandPercentage,
         });
       }
     });
@@ -386,9 +402,7 @@ function RoadmapContent() {
       {
         title: 'Fase 1: Fundamentos de Contenedores',
         description: 'Aprende a empaquetar tus aplicaciones de forma consistente.',
-        steps: [
-          { skill: 'Docker', ...KNOWN_SKILLS_TEMPLATES.docker },
-        ],
+        steps: [{ skill: 'Docker', ...KNOWN_SKILLS_TEMPLATES.docker }],
       },
       {
         title: 'Fase 2: Orquestación & Microservicios',
@@ -426,7 +440,11 @@ function RoadmapContent() {
       return {
         skill: gapName,
         impact: '+5% de Alineación',
-        topics: [`Fundamentos de ${gapName}`, 'Ecosistema y buenas prácticas', 'Integración en proyectos'],
+        topics: [
+          `Fundamentos de ${gapName}`,
+          'Ecosistema y buenas prácticas',
+          'Integración en proyectos',
+        ],
         justification: `${gapName} es una habilidad clave demandada por reclutadores en ofertas vinculadas a tu especialidad de ${activeCluster.cluster_name}.`,
         rule: `${activeCluster.cluster_name} -> ${gapName} (Confianza: 65%)`,
         trendData: [40, 43, 46, 50, 54, 60],
@@ -436,7 +454,7 @@ function RoadmapContent() {
     const phase1Steps = matchedSteps.slice(0, Math.ceil(matchedSteps.length / 3));
     const phase2Steps = matchedSteps.slice(
       phase1Steps.length,
-      phase1Steps.length + Math.ceil(matchedSteps.length / 3)
+      phase1Steps.length + Math.ceil(matchedSteps.length / 3),
     );
     const phase3Steps = matchedSteps.slice(phase1Steps.length + phase2Steps.length);
 
@@ -476,7 +494,9 @@ function RoadmapContent() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-xs text-muted-foreground font-semibold">Cargando tu Plan de Acción...</p>
+          <p className="text-xs text-muted-foreground font-semibold">
+            Cargando tu Plan de Acción...
+          </p>
         </div>
       </div>
     );
@@ -506,7 +526,9 @@ function RoadmapContent() {
                   Plan de Acción Personalizado
                 </h2>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Para trazar tu plan de estudio individual, primero necesitamos analizar tu currículum. Subiendo tu CV podremos mapear tus brechas de habilidades y diseñar tus fases de crecimiento.
+                  Para trazar tu plan de estudio individual, primero necesitamos analizar tu
+                  currículum. Subiendo tu CV podremos mapear tus brechas de habilidades y diseñar
+                  tus fases de crecimiento.
                 </p>
               </div>
               <Button
@@ -527,7 +549,9 @@ function RoadmapContent() {
                   Diseña tu Plan de Acción
                 </h2>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Ya tenemos listo tu diagnóstico de mercado. Ahora podemos diseñar un roadmap de aprendizaje secuencial y estructurado con temas a dominar para cerrar tus brechas técnicas de especialización.
+                  Ya tenemos listo tu diagnóstico de mercado. Ahora podemos diseñar un roadmap de
+                  aprendizaje secuencial y estructurado con temas a dominar para cerrar tus brechas
+                  técnicas de especialización.
                 </p>
               </div>
 
@@ -538,15 +562,24 @@ function RoadmapContent() {
                 <ul className="space-y-2 text-xs text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Fases de estudio:</strong> Ordenado lógicamente de lo más crítico a lo complementario.</span>
+                    <span>
+                      <strong>Fases de estudio:</strong> Ordenado lógicamente de lo más crítico a lo
+                      complementario.
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Métricas de impacto:</strong> Cuánto aumenta tu nivel de alineación al aprender cada habilidad.</span>
+                    <span>
+                      <strong>Métricas de impacto:</strong> Cuánto aumenta tu nivel de alineación al
+                      aprender cada habilidad.
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span><strong>Evidencia de mercado:</strong> Respaldo matemático con tendencias y reglas de asociación de ofertas reales.</span>
+                    <span>
+                      <strong>Evidencia de mercado:</strong> Respaldo matemático con tendencias y
+                      reglas de asociación de ofertas reales.
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -571,8 +604,8 @@ function RoadmapContent() {
               </div>
 
               <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary transition-all duration-300 ease-out" 
+                <div
+                  className="h-full bg-primary transition-all duration-300 ease-out"
                   style={{ width: `${(generationStep / 4) * 100}%` }}
                 />
               </div>
@@ -582,21 +615,21 @@ function RoadmapContent() {
                   { id: 1, text: 'Evaluando brechas críticas detectadas...' },
                   { id: 2, text: 'Secuenciando fases lógicas de aprendizaje...' },
                   { id: 3, text: 'Compilando justificaciones y reglas de asociación...' },
-                  { id: 4, text: 'Configurando panel y métricas de impacto...' }
+                  { id: 4, text: 'Configurando panel y métricas de impacto...' },
                 ].map((step) => {
                   const isDone = generationStep > step.id;
                   const isActive = generationStep === step.id;
 
                   return (
-                    <div 
-                      key={step.id} 
+                    <div
+                      key={step.id}
                       className={cn(
-                        "flex items-center gap-2.5 p-2 rounded-lg border transition-all text-xs",
-                        isDone 
-                          ? "border-emerald-200/50 bg-emerald-50/5 text-emerald-800 dark:border-emerald-950/20 dark:text-emerald-400" 
-                          : isActive 
-                            ? "border-primary/30 bg-primary/5 text-foreground font-semibold" 
-                            : "border-border/50 bg-transparent text-muted-foreground/60"
+                        'flex items-center gap-2.5 p-2 rounded-lg border transition-all text-xs',
+                        isDone
+                          ? 'border-emerald-200/50 bg-emerald-50/5 text-emerald-800 dark:border-emerald-950/20 dark:text-emerald-400'
+                          : isActive
+                            ? 'border-primary/30 bg-primary/5 text-foreground font-semibold'
+                            : 'border-border/50 bg-transparent text-muted-foreground/60',
                       )}
                     >
                       {isDone ? (
@@ -619,10 +652,12 @@ function RoadmapContent() {
       )}
 
       {/* Main Roadmap Content (Blurred if not generated yet) */}
-      <div className={cn(
-        "transition-all duration-700",
-        !isGenerated && "opacity-20 blur-xs pointer-events-none select-none scale-[0.99]"
-      )}>
+      <div
+        className={cn(
+          'transition-all duration-700',
+          !isGenerated && 'opacity-20 blur-xs pointer-events-none select-none scale-[0.99]',
+        )}
+      >
         {/* Header */}
         <div className="max-w-4xl mx-auto mb-8">
           <CVUpdateBanner />
@@ -637,7 +672,8 @@ function RoadmapContent() {
             Tu Plan de Acción
           </h1>
           <p className="text-muted-foreground text-sm mt-1 mb-4">
-            Una ruta secuencial optimizada mediante reglas de asociación para reducir tus brechas con el mercado.
+            Una ruta secuencial optimizada mediante reglas de asociación para reducir tus brechas
+            con el mercado.
           </p>
 
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
@@ -661,16 +697,20 @@ function RoadmapContent() {
                   }`}
                 >
                   {aff.is_primary && (
-                    <Sparkles className={`h-2.5 w-2.5 shrink-0 transition-colors duration-500 ${isSelected ? 'text-primary mr-1' : 'text-emerald-500 mr-1.5'}`} />
+                    <Sparkles
+                      className={`h-2.5 w-2.5 shrink-0 transition-colors duration-500 ${isSelected ? 'text-primary mr-1' : 'text-emerald-500 mr-1.5'}`}
+                    />
                   )}
-                  <span 
+                  <span
                     className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out ${
                       isSelected ? 'max-w-0 opacity-0 m-0' : 'max-w-[150px] opacity-100 mr-1.5'
                     }`}
                   >
                     {aff.cluster_name}
                   </span>
-                  <span className={`transition-all duration-500 ${isSelected ? 'opacity-100' : 'opacity-90'}`}>
+                  <span
+                    className={`transition-all duration-500 ${isSelected ? 'opacity-100' : 'opacity-90'}`}
+                  >
                     {Math.round(aff.affinity_score * 100)}%
                   </span>
                 </button>
@@ -724,7 +764,9 @@ function RoadmapContent() {
                               </span>
                             ))}
                             {step.topics.length > 3 && (
-                              <span className="text-[9px] text-muted-foreground">+{step.topics.length - 3}</span>
+                              <span className="text-[9px] text-muted-foreground">
+                                +{step.topics.length - 3}
+                              </span>
                             )}
                           </div>
                         </div>
@@ -759,7 +801,9 @@ function RoadmapContent() {
                   </span>
                 </div>
                 <p className="text-[10px] text-muted-foreground leading-normal">
-                  Las ofertas para el clúster <strong>{primarySpecialty}</strong> {isPositiveGrowth ? 'se han incrementado' : 'han disminuido'} en los últimos 6 meses en Lima metropolitana.
+                  Las ofertas para el clúster <strong>{primarySpecialty}</strong>{' '}
+                  {isPositiveGrowth ? 'se han incrementado' : 'han disminuido'} en los últimos 6
+                  meses en Lima metropolitana.
                 </p>
 
                 {/* Sparkline Graph */}
@@ -788,7 +832,16 @@ function RoadmapContent() {
                       INSIGHT IA
                     </h4>
                     <p className="text-[10px] text-muted-foreground leading-normal">
-                      Los perfiles <strong>{primarySpecialty}</strong> con dominio de habilidades críticas de nube e infraestructura tienen salarios promedios <strong>{salaryDiff !== null ? (isPositiveSalary ? `${salaryDiff}% más altos` : `${Math.abs(salaryDiff)}% más bajos`) : 'variables'}</strong> en el mercado peruano comparado con perfiles tradicionales.
+                      Los perfiles <strong>{primarySpecialty}</strong> con dominio de habilidades
+                      críticas de nube e infraestructura tienen salarios promedios{' '}
+                      <strong>
+                        {salaryDiff !== null
+                          ? isPositiveSalary
+                            ? `${salaryDiff}% más altos`
+                            : `${Math.abs(salaryDiff)}% más bajos`
+                          : 'variables'}
+                      </strong>{' '}
+                      en el mercado peruano comparado con perfiles tradicionales.
                     </p>
                   </div>
                 </div>
@@ -849,7 +902,9 @@ function RoadmapContent() {
                   {activeStep.rule}
                 </p>
                 <p className="text-[9px] text-muted-foreground leading-normal">
-                  Esta regla fue descubierta mediante el algoritmo <strong>FP-Growth</strong> analizando la base de conocimiento de ofertas reales del mercado peruano. Indica la confianza de demanda si ya manejas tecnologías del mismo cluster.
+                  Esta regla fue descubierta mediante el algoritmo <strong>FP-Growth</strong>{' '}
+                  analizando la base de conocimiento de ofertas reales del mercado peruano. Indica
+                  la confianza de demanda si ya manejas tecnologías del mismo cluster.
                 </p>
               </div>
 
@@ -866,8 +921,20 @@ function RoadmapContent() {
                     viewBox="0 0 100 40"
                     preserveAspectRatio="none"
                   >
-                    <line x1={0} y1={10} x2={100} y2={10} className="stroke-border/20 stroke-1 stroke-dasharray-[1,1]" />
-                    <line x1={0} y1={25} x2={100} y2={25} className="stroke-border/20 stroke-1 stroke-dasharray-[1,1]" />
+                    <line
+                      x1={0}
+                      y1={10}
+                      x2={100}
+                      y2={10}
+                      className="stroke-border/20 stroke-1 stroke-dasharray-[1,1]"
+                    />
+                    <line
+                      x1={0}
+                      y1={25}
+                      x2={100}
+                      y2={25}
+                      className="stroke-border/20 stroke-1 stroke-dasharray-[1,1]"
+                    />
 
                     {/* Area Fill */}
                     <path
@@ -899,7 +966,9 @@ function RoadmapContent() {
                 </div>
 
                 <p className="text-[9px] text-muted-foreground leading-normal">
-                  El porcentaje representa la frecuencia de aparición de <strong>{activeStep.skill}</strong> en ofertas del mercado local correspondientes a tu clúster.
+                  El porcentaje representa la frecuencia de aparición de{' '}
+                  <strong>{activeStep.skill}</strong> en ofertas del mercado local correspondientes
+                  a tu clúster.
                 </p>
               </div>
             </div>
@@ -927,7 +996,9 @@ export default function RoadmapPage() {
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-xs text-muted-foreground font-semibold">Cargando tu Plan de Acción...</p>
+            <p className="text-xs text-muted-foreground font-semibold">
+              Cargando tu Plan de Acción...
+            </p>
           </div>
         </div>
       }

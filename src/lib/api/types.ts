@@ -101,3 +101,11 @@ export interface UserProfileData {
   education: EducationItem[];
   certifications: CertificationItem[];
 }
+
+export interface Cluster {
+  id: string;
+  name: string;
+  description: string;
+  top_skills: string[];
+  job_offer_count: number;
+}

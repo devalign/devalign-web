@@ -10,7 +10,10 @@ interface CurrentDocumentProps {
   onGenerateCVClick?: () => void;
 }
 
-export default function CurrentDocument({ onUpdateClick, onGenerateCVClick }: CurrentDocumentProps) {
+export default function CurrentDocument({
+  onUpdateClick,
+  onGenerateCVClick,
+}: CurrentDocumentProps) {
   const { data: cvData, isLoading } = useUserCVs();
 
   if (isLoading) {

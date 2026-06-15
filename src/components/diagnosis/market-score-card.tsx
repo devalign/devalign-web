@@ -118,16 +118,20 @@ export function MarketScoreCard({
                     }`}
                   >
                     {aff.isPrimary && (
-                      <Sparkles className={`h-2.5 w-2.5 shrink-0 transition-colors duration-500 ${isSelected ? 'text-primary mr-1' : 'text-emerald-500 mr-1.5'}`} />
+                      <Sparkles
+                        className={`h-2.5 w-2.5 shrink-0 transition-colors duration-500 ${isSelected ? 'text-primary mr-1' : 'text-emerald-500 mr-1.5'}`}
+                      />
                     )}
-                    <span 
+                    <span
                       className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out ${
                         isSelected ? 'max-w-0 opacity-0 m-0' : 'max-w-[150px] opacity-100 mr-1.5'
                       }`}
                     >
                       {aff.name}
                     </span>
-                    <span className={`transition-all duration-500 ${isSelected ? 'opacity-100' : 'opacity-90'}`}>
+                    <span
+                      className={`transition-all duration-500 ${isSelected ? 'opacity-100' : 'opacity-90'}`}
+                    >
                       {aff.score}%
                     </span>
                   </button>

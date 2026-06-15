@@ -21,7 +21,10 @@ export function useCurrentUser() {
 
     async function fetchUser() {
       try {
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
         if (authError) throw authError;
 
         if (user && isMounted) {
@@ -46,20 +49,21 @@ export function useCurrentUser() {
     fetchUser();
 
     // Subscribe to auth state changes to update the user in real time
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          setData({
-            id: session.user.id,
-            email: session.user.email,
-            full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-            avatar_url: session.user.user_metadata?.avatar_url,
-          });
-        } else if (event === 'SIGNED_OUT') {
-          setData(null);
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setData({
+          id: session.user.id,
+          email: session.user.email,
+          full_name:
+            session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+          avatar_url: session.user.user_metadata?.avatar_url,
+        });
+      } else if (event === 'SIGNED_OUT') {
+        setData(null);
       }
-    );
+    });
 
     return () => {
       isMounted = false;

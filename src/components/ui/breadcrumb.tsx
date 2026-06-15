@@ -17,7 +17,10 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items, className }: BreadcrumbProps) {
   return (
-    <nav aria-label="Breadcrumb" className={cn('flex items-center space-x-1.5 text-xs text-muted-foreground', className)}>
+    <nav
+      aria-label="Breadcrumb"
+      className={cn('flex items-center space-x-1.5 text-xs text-muted-foreground', className)}
+    >
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
@@ -29,7 +32,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
               <span
                 className={cn(
                   'font-semibold text-foreground truncate max-w-[120px] sm:max-w-[200px]',
-                  isLast ? 'text-foreground font-extrabold' : 'text-muted-foreground'
+                  isLast ? 'text-foreground font-extrabold' : 'text-muted-foreground',
                 )}
               >
                 {item.label}

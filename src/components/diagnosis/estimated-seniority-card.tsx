@@ -34,7 +34,7 @@ export function EstimatedSeniorityCard({ seniority, yearsBasis, isEmpty = false 
                 Basado en {yearsBasis} años
               </span>
             </div>
-            
+
             <p className="text-[10px] text-muted-foreground leading-relaxed">
               Perfil inferido por IA a partir de tu CV y experiencia detectada.
             </p>

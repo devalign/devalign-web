@@ -406,261 +406,277 @@ export default function CVAtsPreviewModal({
 
         {/* Contenido Principal */}
         <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-            {/* Left Side: Paper CV Preview Sheet */}
-            <div className="flex-1 bg-zinc-100 dark:bg-zinc-950/70 p-6 overflow-y-auto flex justify-center items-start scrollbar-thin">
-              <div
-                ref={cvPrintRef}
-                className="bg-white text-zinc-900 p-8 shadow-lg border border-zinc-200 rounded-xs w-full max-w-[680px] min-h-[900px] font-sans leading-relaxed my-2"
-              >
-                {/* Header / Contact Details */}
-                <div className="text-center">
-                  <h1 className="text-lg font-bold text-zinc-900 tracking-tight">
-                    {profile.full_name?.toUpperCase() || 'DESARROLLADOR'}
-                  </h1>
-                  <div className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mt-1">
-                    {profile.current_job_role || 'Software Engineer'}
-                    {profile.primary_specialty && ` | ${profile.primary_specialty.toUpperCase()}`}
-                    {profile.seniority && ` | ${profile.seniority.toUpperCase()}`}
-                  </div>
-                  <div className="text-[9px] text-zinc-500 mt-2 pb-3 border-b border-zinc-300 flex justify-center gap-4 flex-wrap">
-                    {userEmail && (
-                      <span className="text-blue-600 underline font-medium">{userEmail}</span>
-                    )}
-                    {profile.location && (
-                      <>
-                        <span className="text-zinc-400 font-normal">&bull;</span>
-                        <span>{profile.location}</span>
-                      </>
-                    )}
-                    {profile.preferred_modality && (
-                      <>
-                        <span className="text-zinc-400 font-normal">&bull;</span>
-                        <span>{profile.preferred_modality}</span>
-                      </>
-                    )}
-                    {profile.availability && (
-                      <>
-                        <span className="text-zinc-400 font-normal">&bull;</span>
-                        <span>Disponibilidad: {profile.availability}</span>
-                      </>
-                    )}
-                  </div>
+          {/* Left Side: Paper CV Preview Sheet */}
+          <div className="flex-1 bg-zinc-100 dark:bg-zinc-950/70 p-6 overflow-y-auto flex justify-center items-start scrollbar-thin">
+            <div
+              ref={cvPrintRef}
+              className="bg-white text-zinc-900 p-8 shadow-lg border border-zinc-200 rounded-xs w-full max-w-[680px] min-h-[900px] font-sans leading-relaxed my-2"
+            >
+              {/* Header / Contact Details */}
+              <div className="text-center">
+                <h1 className="text-lg font-bold text-zinc-900 tracking-tight">
+                  {profile.full_name?.toUpperCase() || 'DESARROLLADOR'}
+                </h1>
+                <div className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mt-1">
+                  {profile.current_job_role || 'Software Engineer'}
+                  {profile.primary_specialty && ` | ${profile.primary_specialty.toUpperCase()}`}
+                  {profile.seniority && ` | ${profile.seniority.toUpperCase()}`}
                 </div>
-
-                {/* Profile Summary */}
-                <div className="mt-5">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
-                    Perfil Profesional
-                  </div>
-                  <p className="text-[9.5px] text-zinc-700 text-justify leading-relaxed">
-                    {defaultDescription}
-                  </p>
-                </div>
-
-                {/* Professional Experience */}
-                {profile.work_experience && profile.work_experience.length > 0 && (
-                  <div className="mt-5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-3">
-                      Experiencia Laboral
-                    </div>
-                    <div className="space-y-4">
-                      {profile.work_experience.map((exp, idx) => (
-                        <div key={idx} className="text-[9.5px]">
-                          <div className="flex justify-between items-baseline font-semibold text-zinc-900">
-                            <span className="text-[10.5px]">{exp.role}</span>
-                            <span className="text-zinc-500 font-normal text-[9.5px]">
-                              {exp.start_date} &ndash; {exp.current ? 'Presente' : exp.end_date || ''}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-baseline text-zinc-600 italic mt-0.5 text-[9.5px]">
-                            <span>{exp.company}</span>
-                            {profile.location && <span className="font-normal not-italic">{profile.location}</span>}
-                          </div>
-                          {exp.description && (
-                            <ul className="list-disc pl-4 mt-2 text-zinc-700 space-y-1 text-justify">
-                              {exp.description.split('\n').map((bullet, bIdx) => {
-                                const trimmed = bullet.replace(/^[-\s*•]+/, '').trim();
-                                if (!trimmed) return null;
-                                return <li key={bIdx} className="leading-relaxed">{trimmed}</li>;
-                              })}
-                            </ul>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Education */}
-                {profile.education && profile.education.length > 0 && (
-                  <div className="mt-5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-3">
-                      Educación
-                    </div>
-                    <div className="space-y-3">
-                      {profile.education.map((edu, idx) => (
-                        <div key={idx} className="text-[9.5px]">
-                          <div className="flex justify-between items-baseline font-semibold text-zinc-900">
-                            <span className="text-[10.5px]">{edu.degree}</span>
-                            <span className="text-zinc-500 font-normal text-[9.5px]">
-                              {edu.start_date} &ndash; {edu.end_date || 'Presente'}
-                            </span>
-                          </div>
-                          <div className="text-zinc-600 mt-0.5 text-[9.5px]">{edu.institution}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Technical, Tools, Methodologies and Soft Skills */}
-                {(technicalSkills.length > 0 || toolSkills.length > 0 || softSkills.length > 0 || methodologySkills.length > 0) && (
-                  <div className="mt-5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
-                      Habilidades
-                    </div>
-                    <div className="space-y-1.5 text-[9.5px] text-zinc-700">
-                      {technicalSkills.length > 0 && (
-                        <div className="leading-relaxed">
-                          <span className="font-semibold text-zinc-900">Habilidades Técnicas: </span>
-                          {technicalSkills.join(', ')}
-                        </div>
-                      )}
-                      {toolSkills.length > 0 && (
-                        <div className="leading-relaxed">
-                          <span className="font-semibold text-zinc-900">Herramientas y Tecnologías: </span>
-                          {toolSkills.join(', ')}
-                        </div>
-                      )}
-                      {softSkills.length > 0 && (
-                        <div className="leading-relaxed">
-                          <span className="font-semibold text-zinc-900">Habilidades Blandas: </span>
-                          {softSkills.join(', ')}
-                        </div>
-                      )}
-                      {methodologySkills.length > 0 && (
-                        <div className="leading-relaxed">
-                          <span className="font-semibold text-zinc-900">Metodologías: </span>
-                          {methodologySkills.join(', ')}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Certifications */}
-                {profile.certifications && profile.certifications.length > 0 && (
-                  <div className="mt-5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
-                      Certificaciones
-                    </div>
-                    <div className="space-y-1 text-[9.5px] text-zinc-700">
-                      {profile.certifications.map((cert, idx) => (
-                        <div key={idx} className="flex justify-between items-baseline">
-                          <div>
-                            <span className="font-semibold text-zinc-900">{cert.name}</span>
-                            {cert.issuer && <span className="text-zinc-500"> &mdash; {cert.issuer}</span>}
-                          </div>
-                          {cert.date && <span className="text-zinc-500 text-[9.5px]">{cert.date}</span>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Side: Control Sidebar */}
-            <div className="w-full md:w-[350px] shrink-0 border-t md:border-t-0 md:border-l border-border bg-card p-6 flex flex-col justify-between overflow-y-auto scrollbar-thin">
-              <div className="space-y-6">
-                <div className="space-y-2 pr-4">
-                  <div className="flex items-center gap-2 text-primary font-bold text-sm tracking-wider uppercase">
-                    <FileText className="h-4 w-4" />
-                    <span>CV ATS Generado</span>
-                  </div>
-                  <h2 className="text-xl font-extrabold text-foreground tracking-tight">
-                    Vista de Exportación
-                  </h2>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Este formato de una sola columna está diseñado y optimizado para ser fácilmente escaneado por las plataformas automáticas de reclutamiento (ATS).
-                  </p>
-                </div>
-
-                <div className="border-t border-border pt-6 space-y-4">
-                  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                    Configuración del Documento
-                  </h3>
-                  <div className="space-y-3">
-                    {/* Format Selector: PDF vs DOCX */}
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        Formato de Exportación
-                      </label>
-                      <div className="grid grid-cols-2 gap-1 bg-secondary/35 p-0.5 rounded-lg border border-border/50">
-                        <button
-                          type="button"
-                          onClick={() => setExportFormat('pdf')}
-                          className={cn(
-                            'flex items-center justify-center gap-1.5 py-1.5 px-1.5 text-[10px] font-semibold rounded-md transition-all duration-150 cursor-pointer',
-                            exportFormat === 'pdf'
-                              ? 'bg-card text-foreground shadow-xs'
-                              : 'text-muted-foreground hover:text-foreground',
-                          )}
-                        >
-                          <span>PDF (.pdf)</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setExportFormat('docx')}
-                          className={cn(
-                            'flex items-center justify-center gap-1.5 py-1.5 px-1.5 text-[10px] font-semibold rounded-md transition-all duration-150 cursor-pointer',
-                            exportFormat === 'docx'
-                              ? 'bg-card text-foreground shadow-xs'
-                              : 'text-muted-foreground hover:text-foreground',
-                          )}
-                        >
-                          <span>Word (.docx)</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between border-b border-border/40 pb-2 text-xs text-muted-foreground">
-                      <span>Idioma:</span>
-                      <span className="font-semibold text-foreground">Español</span>
-                    </div>
-                    <div className="flex justify-between border-b border-border/40 pb-2 text-xs text-muted-foreground">
-                      <span>Fuente base:</span>
-                      <span className="font-semibold text-foreground">Inter (Sans-Serif)</span>
-                    </div>
-                  </div>
+                <div className="text-[9px] text-zinc-500 mt-2 pb-3 border-b border-zinc-300 flex justify-center gap-4 flex-wrap">
+                  {userEmail && (
+                    <span className="text-blue-600 underline font-medium">{userEmail}</span>
+                  )}
+                  {profile.location && (
+                    <>
+                      <span className="text-zinc-400 font-normal">&bull;</span>
+                      <span>{profile.location}</span>
+                    </>
+                  )}
+                  {profile.preferred_modality && (
+                    <>
+                      <span className="text-zinc-400 font-normal">&bull;</span>
+                      <span>{profile.preferred_modality}</span>
+                    </>
+                  )}
+                  {profile.availability && (
+                    <>
+                      <span className="text-zinc-400 font-normal">&bull;</span>
+                      <span>Disponibilidad: {profile.availability}</span>
+                    </>
+                  )}
                 </div>
               </div>
 
-              <div className="border-t border-border pt-6 mt-6 space-y-2">
-                {exportFormat === 'pdf' ? (
-                  <Button
-                    onClick={handlePrint}
-                    className="w-full text-xs font-semibold cursor-pointer gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 justify-center py-5"
-                  >
-                    <Download className="h-4 w-4" />
-                    Descargar PDF
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleDownloadDocx}
-                    className="w-full text-xs font-semibold cursor-pointer gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 justify-center py-5"
-                  >
-                    <Download className="h-4 w-4" />
-                    Descargar Word
-                  </Button>
-                )}
-                <p className="text-[10px] text-center text-muted-foreground/60 leading-tight">
-                  {exportFormat === 'pdf'
-                    ? 'Genera el archivo PDF con texto seleccionable compatible con ATS.'
-                    : 'Descarga una versión editable de tu currículum en formato de Word.'}
+              {/* Profile Summary */}
+              <div className="mt-5">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
+                  Perfil Profesional
+                </div>
+                <p className="text-[9.5px] text-zinc-700 text-justify leading-relaxed">
+                  {defaultDescription}
                 </p>
               </div>
+
+              {/* Professional Experience */}
+              {profile.work_experience && profile.work_experience.length > 0 && (
+                <div className="mt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-3">
+                    Experiencia Laboral
+                  </div>
+                  <div className="space-y-4">
+                    {profile.work_experience.map((exp, idx) => (
+                      <div key={idx} className="text-[9.5px]">
+                        <div className="flex justify-between items-baseline font-semibold text-zinc-900">
+                          <span className="text-[10.5px]">{exp.role}</span>
+                          <span className="text-zinc-500 font-normal text-[9.5px]">
+                            {exp.start_date} &ndash; {exp.current ? 'Presente' : exp.end_date || ''}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-baseline text-zinc-600 italic mt-0.5 text-[9.5px]">
+                          <span>{exp.company}</span>
+                          {profile.location && (
+                            <span className="font-normal not-italic">{profile.location}</span>
+                          )}
+                        </div>
+                        {exp.description && (
+                          <ul className="list-disc pl-4 mt-2 text-zinc-700 space-y-1 text-justify">
+                            {exp.description.split('\n').map((bullet, bIdx) => {
+                              const trimmed = bullet.replace(/^[-\s*•]+/, '').trim();
+                              if (!trimmed) return null;
+                              return (
+                                <li key={bIdx} className="leading-relaxed">
+                                  {trimmed}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Education */}
+              {profile.education && profile.education.length > 0 && (
+                <div className="mt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-3">
+                    Educación
+                  </div>
+                  <div className="space-y-3">
+                    {profile.education.map((edu, idx) => (
+                      <div key={idx} className="text-[9.5px]">
+                        <div className="flex justify-between items-baseline font-semibold text-zinc-900">
+                          <span className="text-[10.5px]">{edu.degree}</span>
+                          <span className="text-zinc-500 font-normal text-[9.5px]">
+                            {edu.start_date} &ndash; {edu.end_date || 'Presente'}
+                          </span>
+                        </div>
+                        <div className="text-zinc-600 mt-0.5 text-[9.5px]">{edu.institution}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Technical, Tools, Methodologies and Soft Skills */}
+              {(technicalSkills.length > 0 ||
+                toolSkills.length > 0 ||
+                softSkills.length > 0 ||
+                methodologySkills.length > 0) && (
+                <div className="mt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
+                    Habilidades
+                  </div>
+                  <div className="space-y-1.5 text-[9.5px] text-zinc-700">
+                    {technicalSkills.length > 0 && (
+                      <div className="leading-relaxed">
+                        <span className="font-semibold text-zinc-900">Habilidades Técnicas: </span>
+                        {technicalSkills.join(', ')}
+                      </div>
+                    )}
+                    {toolSkills.length > 0 && (
+                      <div className="leading-relaxed">
+                        <span className="font-semibold text-zinc-900">
+                          Herramientas y Tecnologías:{' '}
+                        </span>
+                        {toolSkills.join(', ')}
+                      </div>
+                    )}
+                    {softSkills.length > 0 && (
+                      <div className="leading-relaxed">
+                        <span className="font-semibold text-zinc-900">Habilidades Blandas: </span>
+                        {softSkills.join(', ')}
+                      </div>
+                    )}
+                    {methodologySkills.length > 0 && (
+                      <div className="leading-relaxed">
+                        <span className="font-semibold text-zinc-900">Metodologías: </span>
+                        {methodologySkills.join(', ')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Certifications */}
+              {profile.certifications && profile.certifications.length > 0 && (
+                <div className="mt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
+                    Certificaciones
+                  </div>
+                  <div className="space-y-1 text-[9.5px] text-zinc-700">
+                    {profile.certifications.map((cert, idx) => (
+                      <div key={idx} className="flex justify-between items-baseline">
+                        <div>
+                          <span className="font-semibold text-zinc-900">{cert.name}</span>
+                          {cert.issuer && (
+                            <span className="text-zinc-500"> &mdash; {cert.issuer}</span>
+                          )}
+                        </div>
+                        {cert.date && (
+                          <span className="text-zinc-500 text-[9.5px]">{cert.date}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+          </div>
+
+          {/* Right Side: Control Sidebar */}
+          <div className="w-full md:w-[350px] shrink-0 border-t md:border-t-0 md:border-l border-border bg-card p-6 flex flex-col justify-between overflow-y-auto scrollbar-thin">
+            <div className="space-y-6">
+              <div className="space-y-2 pr-4">
+                <div className="flex items-center gap-2 text-primary font-bold text-sm tracking-wider uppercase">
+                  <FileText className="h-4 w-4" />
+                  <span>CV ATS Generado</span>
+                </div>
+                <h2 className="text-xl font-extrabold text-foreground tracking-tight">
+                  Vista de Exportación
+                </h2>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Este formato de una sola columna está diseñado y optimizado para ser fácilmente
+                  escaneado por las plataformas automáticas de reclutamiento (ATS).
+                </p>
+              </div>
+
+              <div className="border-t border-border pt-6 space-y-4">
+                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                  Configuración del Documento
+                </h3>
+                <div className="space-y-3">
+                  {/* Format Selector: PDF vs DOCX */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Formato de Exportación
+                    </label>
+                    <div className="grid grid-cols-2 gap-1 bg-secondary/35 p-0.5 rounded-lg border border-border/50">
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat('pdf')}
+                        className={cn(
+                          'flex items-center justify-center gap-1.5 py-1.5 px-1.5 text-[10px] font-semibold rounded-md transition-all duration-150 cursor-pointer',
+                          exportFormat === 'pdf'
+                            ? 'bg-card text-foreground shadow-xs'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                      >
+                        <span>PDF (.pdf)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat('docx')}
+                        className={cn(
+                          'flex items-center justify-center gap-1.5 py-1.5 px-1.5 text-[10px] font-semibold rounded-md transition-all duration-150 cursor-pointer',
+                          exportFormat === 'docx'
+                            ? 'bg-card text-foreground shadow-xs'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                      >
+                        <span>Word (.docx)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between border-b border-border/40 pb-2 text-xs text-muted-foreground">
+                    <span>Idioma:</span>
+                    <span className="font-semibold text-foreground">Español</span>
+                  </div>
+                  <div className="flex justify-between border-b border-border/40 pb-2 text-xs text-muted-foreground">
+                    <span>Fuente base:</span>
+                    <span className="font-semibold text-foreground">Inter (Sans-Serif)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-6 mt-6 space-y-2">
+              {exportFormat === 'pdf' ? (
+                <Button
+                  onClick={handlePrint}
+                  className="w-full text-xs font-semibold cursor-pointer gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 justify-center py-5"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar PDF
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleDownloadDocx}
+                  className="w-full text-xs font-semibold cursor-pointer gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 justify-center py-5"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar Word
+                </Button>
+              )}
+              <p className="text-[10px] text-center text-muted-foreground/60 leading-tight">
+                {exportFormat === 'pdf'
+                  ? 'Genera el archivo PDF con texto seleccionable compatible con ATS.'
+                  : 'Descarga una versión editable de tu currículum en formato de Word.'}
+              </p>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

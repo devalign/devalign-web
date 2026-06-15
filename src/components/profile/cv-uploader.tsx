@@ -106,9 +106,15 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         onClick={onButtonClick}
         className={cn(
           'relative flex flex-col items-center justify-center rounded-2xl transition-all duration-300',
-          !selectedFile ? 'border-2 border-dashed p-8 md:p-12 text-center cursor-pointer bg-card' : 'border-2 border-dashed border-border/50 bg-secondary/5 p-8 cursor-default',
-          dragActive && !selectedFile ? 'border-primary bg-primary/5 scale-[1.01] shadow-lg shadow-primary/5' : '',
-          !dragActive && !selectedFile ? 'border-border hover:border-primary/50 hover:bg-secondary/20' : '',
+          !selectedFile
+            ? 'border-2 border-dashed p-8 md:p-12 text-center cursor-pointer bg-card'
+            : 'border-2 border-dashed border-border/50 bg-secondary/5 p-8 cursor-default',
+          dragActive && !selectedFile
+            ? 'border-primary bg-primary/5 scale-[1.01] shadow-lg shadow-primary/5'
+            : '',
+          !dragActive && !selectedFile
+            ? 'border-border hover:border-primary/50 hover:bg-secondary/20'
+            : '',
           isUploading ? 'pointer-events-none opacity-60' : '',
         )}
       >
@@ -141,12 +147,14 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
                   <FileText className="h-7 w-7" />
                 </div>
                 <div className="space-y-1 text-center">
-                  <p className="text-sm font-semibold text-foreground">Archivo listo para análisis</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    Archivo listo para análisis
+                  </p>
                   <p className="text-xs text-muted-foreground font-mono truncate max-w-[200px] sm:max-w-[320px] mx-auto px-2">
                     {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                   </p>
                 </div>
-                
+
                 {selectedFile.type === 'application/pdf' && (
                   <Button
                     type="button"

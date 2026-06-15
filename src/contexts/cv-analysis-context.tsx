@@ -29,17 +29,17 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
     if (typeof window !== 'undefined') {
       localStorage.setItem(
         LOCAL_STORAGE_KEY,
-        JSON.stringify({ isAnalyzing: analyzing, isAnalysisReady: ready, analyzedCvId: cvId })
+        JSON.stringify({ isAnalyzing: analyzing, isAnalysisReady: ready, analyzedCvId: cvId }),
       );
     }
   };
 
   const runPolling = useCallback(async (cvId: string) => {
     if (pollingRef.current && targetCvIdRef.current === cvId) return;
-    
+
     pollingRef.current = true;
     targetCvIdRef.current = cvId;
-    
+
     let attempts = 0;
     const maxAttempts = 30;
     const pollInterval = 3000; // 3 seconds
@@ -54,7 +54,9 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
           setIsAnalysisReady(true);
           pollingRef.current = false;
           saveState(false, true, cvId);
-          toast.success('¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.');
+          toast.success(
+            '¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.',
+          );
           return;
         }
       } catch (error) {
@@ -70,7 +72,7 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
         targetCvIdRef.current = null;
         saveState(false, false, null);
         toast.warning(
-          'El análisis está tomando más de lo esperado. Puedes intentar actualizar tus datos en unos instantes.'
+          'El análisis está tomando más de lo esperado. Puedes intentar actualizar tus datos en unos instantes.',
         );
         return;
       }
@@ -81,16 +83,21 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
     poll();
   }, []);
 
-  const startAnalysis = useCallback((cvId: string) => {
-    setIsAnalyzing(true);
-    setIsAnalysisReady(false);
-    setAnalyzedCvId(cvId);
-    saveState(true, false, cvId);
-    
-    toast.info('El análisis de tu CV se está ejecutando en segundo plano. Puedes seguir navegando.');
-    
-    runPolling(cvId);
-  }, [runPolling]);
+  const startAnalysis = useCallback(
+    (cvId: string) => {
+      setIsAnalyzing(true);
+      setIsAnalysisReady(false);
+      setAnalyzedCvId(cvId);
+      saveState(true, false, cvId);
+
+      toast.info(
+        'El análisis de tu CV se está ejecutando en segundo plano. Puedes seguir navegando.',
+      );
+
+      runPolling(cvId);
+    },
+    [runPolling],
+  );
 
   const commitUpdate = useCallback(async () => {
     const toastId = toast.loading('Aplicando nuevos datos de análisis a tu perfil...');
@@ -98,9 +105,9 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
       // Invalidate queries to refresh UI with new profile & cvs
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['userProfile'] }),
-        queryClient.invalidateQueries({ queryKey: ['userCVs'] })
+        queryClient.invalidateQueries({ queryKey: ['userCVs'] }),
       ]);
-      
+
       setIsAnalyzing(false);
       setIsAnalysisReady(false);
       setAnalyzedCvId(null);

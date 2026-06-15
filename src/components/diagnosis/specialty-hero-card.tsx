@@ -13,7 +13,7 @@ export function SpecialtyHeroCard({ data }: Props) {
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 dark:bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/50 dark:bg-secondary/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-      
+
       <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
         <div className="flex-1 space-y-6">
           <div>
@@ -37,11 +37,17 @@ export function SpecialtyHeroCard({ data }: Props) {
             </h4>
             <div className="flex flex-wrap gap-2">
               {data.secondaryAffinities.map((aff) => (
-                <div key={aff.name} className="px-4 py-1.5 bg-secondary/40 dark:bg-slate-800 text-foreground dark:text-white rounded-full text-sm font-medium border border-border dark:border-slate-700">
+                <div
+                  key={aff.name}
+                  className="px-4 py-1.5 bg-secondary/40 dark:bg-slate-800 text-foreground dark:text-white rounded-full text-sm font-medium border border-border dark:border-slate-700"
+                >
                   {aff.name} {aff.percentage}%
                 </div>
               ))}
-              <Button variant="outline" className="h-[34px] rounded-full border-border dark:border-slate-700 bg-transparent hover:bg-secondary/50 dark:hover:bg-slate-800 hover:text-foreground dark:hover:text-white text-muted-foreground dark:text-slate-300">
+              <Button
+                variant="outline"
+                className="h-[34px] rounded-full border-border dark:border-slate-700 bg-transparent hover:bg-secondary/50 dark:hover:bg-slate-800 hover:text-foreground dark:hover:text-white text-muted-foreground dark:text-slate-300"
+              >
                 + Explorar más
               </Button>
             </div>
@@ -54,11 +60,11 @@ export function SpecialtyHeroCard({ data }: Props) {
               Alineación con el mercado
             </h3>
             <div className="text-5xl font-bold mb-2">{data.alignmentPercentage}%</div>
-            
+
             {/* Simple progress bar */}
             <div className="w-full lg:w-48 h-2 bg-secondary/50 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
-              <div 
-                className="h-full bg-primary rounded-full" 
+              <div
+                className="h-full bg-primary rounded-full"
                 style={{ width: `${data.alignmentPercentage}%` }}
               />
             </div>

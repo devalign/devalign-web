@@ -15,33 +15,26 @@ interface AffinityRadarChartProps {
   isLoading?: boolean;
 }
 
-export function AffinityRadarChart({ 
-  domainAffinities, 
-  techSkills, 
+const DOMAIN_CONFIGS = [
+  { key: 'Backend', label: 'BACKEND', marketDemand: 92 },
+  { key: 'Frontend', label: 'FRONTEND', marketDemand: 42 },
+  { key: 'Mobile', label: 'MOBILE', marketDemand: 45 },
+  { key: 'QA', label: 'QA', marketDemand: 55 },
+  { key: 'DevOps', label: 'DEVOPS', marketDemand: 64 },
+  { key: 'Cloud', label: 'CLOUD', marketDemand: 78 },
+  { key: 'Data', label: 'DATA', marketDemand: 64 },
+];
+
+export function AffinityRadarChart({
+  domainAffinities,
+  techSkills,
   fullName = 'Usuario',
   roleTitle = 'Desarrollador',
   seniority = 'Junior',
-  isLoading = false 
+  isLoading = false,
 }: AffinityRadarChartProps) {
   // DYNAMIC RADAR CHART COORDINATES CALCULATION
   const getRadarPoints = () => {
-    let dataVal = 20, backendVal = 20, cloudVal = 20, devopsVal = 20, frontendVal = 20;
-
-    if (domainAffinities && domainAffinities.length > 0) {
-      dataVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'Data')?.affinity_score || 0) * 80, 95);
-      backendVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'Backend')?.affinity_score || 0) * 80, 95);
-      cloudVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'Cloud')?.affinity_score || 0) * 80, 95);
-      devopsVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'DevOps')?.affinity_score || 0) * 80, 95);
-      frontendVal = Math.min(20 + (domainAffinities.find(d => d.domain === 'Frontend')?.affinity_score || 0) * 80, 85);
-    } else {
-      // Fallback
-      dataVal = Math.min(35 + techSkills.filter((s) => ['Databricks', 'Spark', 'Hadoop', 'SQL Server'].includes(s)).length * 15, 95);
-      backendVal = Math.min(35 + techSkills.filter((s) => ['Python', 'PostgreSQL', 'Microservicios'].includes(s)).length * 20, 95);
-      cloudVal = Math.min(20 + techSkills.filter((s) => ['AWS', 'Docker'].includes(s)).length * 35, 95);
-      devopsVal = Math.min(20 + techSkills.filter((s) => ['Kubernetes', 'CI/CD'].includes(s)).length * 35, 95);
-      frontendVal = Math.min(20 + techSkills.filter((s) => ['React', 'HTML', 'CSS', 'Power BI'].includes(s)).length * 20, 85);
-    }
-
     const convert = (val: number, angleDeg: number) => {
       const angleRad = (angleDeg - 90) * (Math.PI / 180);
       const r = (val / 100) * 80; // Map 100% to 80px radius
@@ -50,21 +43,107 @@ export function AffinityRadarChart({
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     };
 
+    const userPoints = DOMAIN_CONFIGS.map((config, index) => {
+      const score =
+        domainAffinities?.find((d) => d.domain.toLowerCase() === config.key.toLowerCase())
+          ?.affinity_score || 0;
+
+      let val = 20;
+      if (domainAffinities && domainAffinities.length > 0) {
+        val = Math.min(20 + score * 80, 95);
+      } else {
+        // Fallback calculations using techSkills
+        const skillsLower = techSkills.map((s) => s.toLowerCase());
+        if (config.key === 'Backend') {
+          val = Math.min(
+            35 +
+              skillsLower.filter((s) =>
+                ['python', 'postgresql', 'microservicios', 'java', 'springboot', 'c#', 'net'].some(
+                  (k) => s.includes(k),
+                ),
+              ).length *
+                20,
+            95,
+          );
+        } else if (config.key === 'Frontend') {
+          val = Math.min(
+            20 +
+              skillsLower.filter((s) =>
+                ['react', 'html', 'css', 'javascript', 'typescript', 'vue', 'angular'].some((k) =>
+                  s.includes(k),
+                ),
+              ).length *
+                20,
+            85,
+          );
+        } else if (config.key === 'Cloud') {
+          val = Math.min(
+            20 +
+              skillsLower.filter((s) =>
+                ['aws', 'docker', 'azure', 'gcp'].some((k) => s.includes(k)),
+              ).length *
+                35,
+            95,
+          );
+        } else if (config.key === 'DevOps') {
+          val = Math.min(
+            20 +
+              skillsLower.filter((s) =>
+                ['kubernetes', 'ci/cd', 'terraform', 'jenkins', 'actions'].some((k) =>
+                  s.includes(k),
+                ),
+              ).length *
+                35,
+            95,
+          );
+        } else if (config.key === 'Data') {
+          val = Math.min(
+            35 +
+              skillsLower.filter((s) =>
+                ['databricks', 'spark', 'hadoop', 'sql', 'mysql', 'snowflake', 'airflow'].some(
+                  (k) => s.includes(k),
+                ),
+              ).length *
+                15,
+            95,
+          );
+        } else if (config.key === 'QA') {
+          val = Math.min(
+            20 +
+              skillsLower.filter((s) =>
+                ['qa', 'selenium', 'cypress', 'playwright', 'testing', 'junit'].some((k) =>
+                  s.includes(k),
+                ),
+              ).length *
+                25,
+            95,
+          );
+        } else if (config.key === 'Mobile') {
+          val = Math.min(
+            20 +
+              skillsLower.filter((s) =>
+                ['flutter', 'react native', 'swift', 'kotlin', 'android', 'ios'].some((k) =>
+                  s.includes(k),
+                ),
+              ).length *
+                35,
+            95,
+          );
+        }
+      }
+
+      const angle = (index * 360) / DOMAIN_CONFIGS.length;
+      return convert(val, angle);
+    });
+
+    const marketPoints = DOMAIN_CONFIGS.map((config, index) => {
+      const angle = (index * 360) / DOMAIN_CONFIGS.length;
+      return convert(config.marketDemand, angle);
+    });
+
     return {
-      user: [
-        convert(backendVal, 0), // Backend
-        convert(frontendVal, 72), // Frontend
-        convert(cloudVal, 144), // Cloud
-        convert(devopsVal, 216), // DevOps
-        convert(dataVal, 288), // Data
-      ].join(' '),
-      market: [
-        convert(92, 0), // Backend market demand
-        convert(42, 72), // Frontend market demand
-        convert(78, 144), // Cloud market demand
-        convert(64, 216), // DevOps market demand
-        convert(64, 288), // Data market demand
-      ].join(' '),
+      user: userPoints.join(' '),
+      market: marketPoints.join(' '),
     };
   };
 
@@ -73,7 +152,7 @@ export function AffinityRadarChart({
   return (
     <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden flex flex-col h-full">
       <div className="h-2 bg-gradient-to-r from-primary/30 via-primary to-primary/60 shrink-0" />
-      
+
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -101,7 +180,7 @@ export function AffinityRadarChart({
             {roleTitle}
           </p>
         </div>
-        
+
         <div className="shrink-0">
           <Link href="/profile">
             <Button
@@ -133,27 +212,23 @@ export function AffinityRadarChart({
             {/* Background rings */}
             {[20, 40, 60, 80, 100].map((r) => {
               const rad = (r / 100) * 80;
-              const points = [0, 72, 144, 216, 288]
-                .map((angle) => {
-                  const a = (angle - 90) * (Math.PI / 180);
-                  return `${100 + rad * Math.cos(a)},${100 + rad * Math.sin(a)}`;
-                })
-                .join(' ');
+              const points = DOMAIN_CONFIGS.map((_, index) => {
+                const angle = (index * 360) / DOMAIN_CONFIGS.length;
+                const a = (angle - 90) * (Math.PI / 180);
+                return `${100 + rad * Math.cos(a)},${100 + rad * Math.sin(a)}`;
+              }).join(' ');
               return (
-                <polygon
-                  key={r}
-                  points={points}
-                  className="fill-none stroke-border/40 stroke-1"
-                />
+                <polygon key={r} points={points} className="fill-none stroke-border/40 stroke-1" />
               );
             })}
 
             {/* Axis lines */}
-            {[0, 72, 144, 216, 288].map((angle) => {
+            {DOMAIN_CONFIGS.map((_, index) => {
+              const angle = (index * 360) / DOMAIN_CONFIGS.length;
               const a = (angle - 90) * (Math.PI / 180);
               return (
                 <line
-                  key={angle}
+                  key={index}
                   x1={100}
                   y1={100}
                   x2={100 + 80 * Math.cos(a)}
@@ -163,16 +238,48 @@ export function AffinityRadarChart({
               );
             })}
 
-            {/* Labels */}
-            <text x={100} y={8} textAnchor="middle" className="fill-muted-foreground text-[8px] font-bold font-mono">BACKEND</text>
-            <text x={186} y={75} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">FRONTEND</text>
-            <text x={156} y={192} textAnchor="start" className="fill-muted-foreground text-[8px] font-bold font-mono">CLOUD</text>
-            <text x={44} y={192} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DEVOPS</text>
-            <text x={14} y={75} textAnchor="end" className="fill-muted-foreground text-[8px] font-bold font-mono">DATA</text>
+            {/* Dynamic Labels */}
+            {DOMAIN_CONFIGS.map((config, index) => {
+              const angle = (index * 360) / DOMAIN_CONFIGS.length;
+              const angleRad = (angle - 90) * (Math.PI / 180);
+              // Radius for labels is 94px from center (100, 100)
+              const r = 94;
+              const x = 100 + r * Math.cos(angleRad);
+              const y = 100 + r * Math.sin(angleRad);
+
+              // Text anchor adjustment based on side of the radar
+              let anchor: 'start' | 'end' | 'middle' = 'middle';
+              if (x > 105) anchor = 'start';
+              else if (x < 95) anchor = 'end';
+
+              // Slight vertical adjustment for text alignment
+              let dy = '0.35em';
+              if (y < 30) dy = '0';
+              else if (y > 175) dy = '0.7em';
+
+              return (
+                <text
+                  key={config.key}
+                  x={x}
+                  y={y}
+                  dy={dy}
+                  textAnchor={anchor}
+                  className="fill-muted-foreground text-[7.5px] font-bold font-mono"
+                >
+                  {config.label}
+                </text>
+              );
+            })}
 
             {/* Market and User polygons */}
-            <polygon points={radarPoints.market} className="fill-slate-800/10 stroke-slate-500/50 stroke-1.5" />
-            <polygon points={radarPoints.user} className="fill-primary/25 stroke-primary stroke-2 transition-all duration-300" />
+            <polygon
+              points={radarPoints.market}
+              className="fill-slate-800/10 stroke-slate-500/50 stroke-1.5"
+            />
+            <polygon
+              points={radarPoints.user}
+              className="fill-primary/25 stroke-primary stroke-2 transition-all duration-300"
+            />
 
             {/* Market dots */}
             {radarPoints.market.split(' ').map((p, idx) => {
@@ -183,7 +290,15 @@ export function AffinityRadarChart({
             {/* User dots */}
             {radarPoints.user.split(' ').map((p, idx) => {
               const [x, y] = p.split(',');
-              return <circle key={idx} cx={x} cy={y} r={3} className="fill-primary stroke-card stroke-1" />;
+              return (
+                <circle
+                  key={idx}
+                  cx={x}
+                  cy={y}
+                  r={3}
+                  className="fill-primary stroke-card stroke-1"
+                />
+              );
             })}
           </svg>
 

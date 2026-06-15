@@ -32,11 +32,13 @@ import {
   ShieldCheck,
   Upload,
   Loader2,
+  History,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
 import CVUploader from '@/components/profile/cv-uploader';
+import CVHistoryModal from '@/components/profile/cv-history-modal';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { UserProfileData } from '@/lib/api/types';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
@@ -67,7 +69,7 @@ function ProfileContent() {
   const { data: profile, isLoading: isProfileLoading, refetch: refetchProfile } = useUserProfile();
   const { data: cvData, isLoading: isCvLoading, refetch: refetchCVs } = useUserCVs();
   const { startAnalysis, isAnalysisReady, commitUpdate } = useCVAnalysis();
-  const currentCV = profile?.cv_id 
+  const currentCV = profile?.cv_id
     ? cvData?.cvs?.find((cv) => cv.cv_id === profile.cv_id) || cvData?.cvs?.[0]
     : cvData?.cvs?.[0];
   const updateProfileMutation = useUpdateUserProfile();
@@ -110,6 +112,7 @@ function ProfileContent() {
   const action = searchParams.get('action');
   const [isCVManagerOpen, setIsCVManagerOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -159,7 +162,9 @@ function ProfileContent() {
   useEffect(() => {
     const loadProfileData = () => {
       if (profile) {
-        setFullName(profile.full_name || user?.full_name || user?.email?.split('@')[0] || 'Desarrollador');
+        setFullName(
+          profile.full_name || user?.full_name || user?.email?.split('@')[0] || 'Desarrollador',
+        );
         setRoleTitle(profile.current_job_role || '');
         setSeniority(profile.seniority || 'mid');
 
@@ -267,11 +272,15 @@ function ProfileContent() {
     toast.success(`Habilidad "${skillName}" añadida localmente.`);
   };
 
-  const handleDeleteSkill = (skillName: string, type: 'tech' | 'soft' | 'tools' | 'methodologies') => {
+  const handleDeleteSkill = (
+    skillName: string,
+    type: 'tech' | 'soft' | 'tools' | 'methodologies',
+  ) => {
     if (type === 'tech') setTechSkills(techSkills.filter((s) => s !== skillName));
     if (type === 'soft') setSoftSkills(softSkills.filter((s) => s !== skillName));
     if (type === 'tools') setToolsSkills(toolsSkills.filter((s) => s !== skillName));
-    if (type === 'methodologies') setMethodologySkills(methodologySkills.filter((s) => s !== skillName));
+    if (type === 'methodologies')
+      setMethodologySkills(methodologySkills.filter((s) => s !== skillName));
     toast.info(`Habilidad "${skillName}" removida.`);
   };
 
@@ -352,10 +361,22 @@ function ProfileContent() {
   }));
 
   const detectedSkillsPayload = [
-    ...techSkills.map((s) => ({ name: s, skill_type: 'hard_skill', market_importance: 'consolidated' })),
-    ...softSkills.map((s) => ({ name: s, skill_type: 'soft_skill', market_importance: 'consolidated' })),
+    ...techSkills.map((s) => ({
+      name: s,
+      skill_type: 'hard_skill',
+      market_importance: 'consolidated',
+    })),
+    ...softSkills.map((s) => ({
+      name: s,
+      skill_type: 'soft_skill',
+      market_importance: 'consolidated',
+    })),
     ...toolsSkills.map((s) => ({ name: s, skill_type: 'tool', market_importance: 'consolidated' })),
-    ...methodologySkills.map((s) => ({ name: s, skill_type: 'methodology', market_importance: 'consolidated' })),
+    ...methodologySkills.map((s) => ({
+      name: s,
+      skill_type: 'methodology',
+      market_importance: 'consolidated',
+    })),
   ];
 
   // Construct dynamicProfile for ATS PDF Preview
@@ -601,7 +622,12 @@ function ProfileContent() {
                           className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg shrink-0"
                           title="Descargar PDF original"
                         >
-                          <a href={currentCV.download_url} download target="_blank" rel="noreferrer">
+                          <a
+                            href={currentCV.download_url}
+                            download
+                            target="_blank"
+                            rel="noreferrer"
+                          >
                             <Download className="h-4 w-4" />
                           </a>
                         </Button>
@@ -611,13 +637,17 @@ function ProfileContent() {
                     {/* Métricas de Confianza de Extracción */}
                     <div className="grid grid-cols-2 gap-2 mt-3 p-3 rounded-xl bg-secondary/10 border border-border/40 text-[11px]">
                       <div className="space-y-0.5">
-                        <span className="text-muted-foreground block text-[9px] uppercase font-bold tracking-wider">Confianza de Extracción</span>
+                        <span className="text-muted-foreground block text-[9px] uppercase font-bold tracking-wider">
+                          Confianza de Extracción
+                        </span>
                         <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                           <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Alta (94%)
                         </span>
                       </div>
                       <div className="space-y-0.5 border-l border-border/40 pl-3">
-                        <span className="text-muted-foreground block text-[9px] uppercase font-bold tracking-wider">Entidades reconocidas</span>
+                        <span className="text-muted-foreground block text-[9px] uppercase font-bold tracking-wider">
+                          Entidades reconocidas
+                        </span>
                         <span className="font-bold text-foreground flex items-center gap-1">
                           <FileText className="h-3.5 w-3.5 text-muted-foreground" /> 28 entidades
                         </span>
@@ -627,14 +657,17 @@ function ProfileContent() {
                 ) : (
                   <div className="rounded-xl border border-dashed border-border bg-secondary/5 p-4 text-center">
                     <FileText className="h-6 w-6 text-muted-foreground/50 mx-auto mb-2" />
-                    <p className="text-xs font-semibold text-foreground">No tienes ningún currículum activo</p>
+                    <p className="text-xs font-semibold text-foreground">
+                      No tienes ningún currículum activo
+                    </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
-                      Sube tu CV en PDF o Word para calcular tu diagnóstico técnico de forma automática.
+                      Sube tu CV en PDF o Word para calcular tu diagnóstico técnico de forma
+                      automática.
                     </p>
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-border/50">
+                <div className="pt-2 border-t border-border/50 flex flex-col gap-2">
                   <Button
                     type="button"
                     variant="outline"
@@ -644,6 +677,17 @@ function ProfileContent() {
                     <Upload className="w-4 h-4" />
                     Actualizar CV
                   </Button>
+                  {cvData?.cvs && cvData.cvs.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsHistoryModalOpen(true)}
+                      className="w-full text-xs font-semibold gap-1.5 h-9 cursor-pointer text-muted-foreground hover:text-foreground hover:bg-secondary/10 transition-colors"
+                    >
+                      <History className="w-4 h-4" />
+                      Historial de versiones
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -670,7 +714,13 @@ function ProfileContent() {
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      {tab === 'tech' ? 'Técnicas' : tab === 'soft' ? 'Blandas' : tab === 'methodologies' ? 'Metodologías' : 'Herramientas'}
+                      {tab === 'tech'
+                        ? 'Técnicas'
+                        : tab === 'soft'
+                          ? 'Blandas'
+                          : tab === 'methodologies'
+                            ? 'Metodologías'
+                            : 'Herramientas'}
                     </button>
                   ))}
                 </div>
@@ -690,15 +740,17 @@ function ProfileContent() {
                       No hay habilidades en esta categoría.
                     </p>
                   ) : (
-                    Array.from(new Set(
-                      activeTab === 'tech'
-                        ? techSkills
-                        : activeTab === 'soft'
-                          ? softSkills
-                          : activeTab === 'tools'
-                            ? toolsSkills
-                            : methodologySkills
-                    )).map((skill, idx) => (
+                    Array.from(
+                      new Set(
+                        activeTab === 'tech'
+                          ? techSkills
+                          : activeTab === 'soft'
+                            ? softSkills
+                            : activeTab === 'tools'
+                              ? toolsSkills
+                              : methodologySkills,
+                      ),
+                    ).map((skill, idx) => (
                       <div
                         key={`${skill}-${idx}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 transition-all hover:bg-primary/20 group"
@@ -1312,7 +1364,8 @@ function ProfileContent() {
               Actualizar Currículum
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Carga tu CV más reciente (PDF o Word) para actualizar tu diagnóstico técnico de forma automática.
+              Carga tu CV más reciente (PDF o Word) para actualizar tu diagnóstico técnico de forma
+              automática.
             </DialogDescription>
           </DialogHeader>
           <div className="pt-4">
@@ -1325,6 +1378,16 @@ function ProfileContent() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Historial de CVs Modal */}
+      <CVHistoryModal
+        isOpen={isHistoryModalOpen}
+        onOpenChange={setIsHistoryModalOpen}
+        activeCvId={profile?.cv_id}
+        onReanalyzeTriggered={(cvId: string) => {
+          startAnalysis(cvId);
+        }}
+      />
     </div>
   );
 }

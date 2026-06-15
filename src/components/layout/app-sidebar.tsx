@@ -2,7 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useUserProfile } from '@/hooks/use-user-profile';
+
 import {
   Hexagon,
   Activity,
@@ -36,8 +38,11 @@ import { toast } from 'sonner';
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: profile } = useUserProfile();
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const cluster = searchParams.get('cluster') || profile?.primary_specialty || '';
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
@@ -140,10 +145,14 @@ export default function AppSidebar() {
             );
           }
 
+          const itemHref = cluster
+            ? `${item.href}?cluster=${encodeURIComponent(cluster)}`
+            : item.href;
+
           return (
             <Link
               key={item.name}
-              href={item.href}
+              href={itemHref}
               className={cn(
                 'flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
                 isActive
@@ -162,7 +171,6 @@ export default function AppSidebar() {
             </Link>
           );
         })}
-
       </nav>
 
       {/* Security Info */}
@@ -307,8 +315,6 @@ export default function AppSidebar() {
                 </button>
               </div>
             </div>
-
-
 
             {/* Notificaciones */}
             <div className="space-y-3">

@@ -13,7 +13,12 @@ interface MarketImpactCardProps {
   isLoading?: boolean;
 }
 
-export function MarketImpactCard({ marketGaps = [], marketInsights, onViewAll, isLoading = false }: MarketImpactCardProps) {
+export function MarketImpactCard({
+  marketGaps = [],
+  marketInsights,
+  onViewAll,
+  isLoading = false,
+}: MarketImpactCardProps) {
   const salaryDiff = marketInsights?.salary_differential_percentage ?? null;
   const isPositive = salaryDiff !== null && salaryDiff >= 0;
 
@@ -38,10 +43,14 @@ export function MarketImpactCard({ marketGaps = [], marketInsights, onViewAll, i
                 </span>
               </div>
               <div className="flex items-baseline gap-1 pt-1">
-                <span className={`text-3xl font-extrabold tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}>
+                <span
+                  className={`text-3xl font-extrabold tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}
+                >
                   {salaryDiff !== null ? `${isPositive ? '+' : ''}${salaryDiff}%` : 'N/A'}
                 </span>
-                <span className={`text-[11px] font-semibold ${isPositive ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>
+                <span
+                  className={`text-[11px] font-semibold ${isPositive ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}
+                >
                   Diferencial Salarial
                 </span>
               </div>
@@ -49,11 +58,22 @@ export function MarketImpactCard({ marketGaps = [], marketInsights, onViewAll, i
 
             {/* Description */}
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Los profesionales que dominan este stack técnico perciben ingresos promedio <strong>{salaryDiff !== null ? (isPositive ? `${salaryDiff}% más altos` : `${Math.abs(salaryDiff)}% más bajos`) : 'variables'}</strong> (S/. {marketInsights?.average_salary_pen ?? 'N/A'}) respecto a la media del mercado.
+              Los profesionales que dominan este stack técnico perciben ingresos promedio{' '}
+              <strong>
+                {salaryDiff !== null
+                  ? isPositive
+                    ? `${salaryDiff}% más altos`
+                    : `${Math.abs(salaryDiff)}% más bajos`
+                  : 'variables'}
+              </strong>{' '}
+              (S/. {marketInsights?.average_salary_pen ?? 'N/A'}) respecto a la media del mercado.
             </p>
 
             {/* Footer action link */}
-            <button onClick={onViewAll} className="flex items-center gap-1 text-[10px] font-bold text-primary cursor-pointer hover:underline pt-2 group w-fit bg-transparent border-0 p-0 text-left">
+            <button
+              onClick={onViewAll}
+              className="flex items-center gap-1 text-[10px] font-bold text-primary cursor-pointer hover:underline pt-2 group w-fit bg-transparent border-0 p-0 text-left"
+            >
               <span>Ver detalle del insight</span>
               <ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>

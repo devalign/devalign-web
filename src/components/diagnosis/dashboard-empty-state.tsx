@@ -93,8 +93,8 @@ export function DashboardEmptyState({ onUploadSuccess }: DashboardEmptyStateProp
             Comienza tu Diagnóstico
           </h1>
           <p className="text-muted-foreground text-sm">
-            Sube tu currículum para que nuestro motor de Machine Learning extraiga tus
-            competencias e identifique tu alineación con el mercado IT.
+            Sube tu currículum para que nuestro motor de Machine Learning extraiga tus competencias
+            e identifique tu alineación con el mercado IT.
           </p>
         </div>
 
@@ -106,9 +106,7 @@ export function DashboardEmptyState({ onUploadSuccess }: DashboardEmptyStateProp
           {isUploading ? (
             <div className="w-full space-y-4 py-4">
               <Sparkles className="w-10 h-10 text-primary animate-pulse mx-auto" />
-              <div className="text-sm font-semibold text-foreground">
-                Analizando currículum...
-              </div>
+              <div className="text-sm font-semibold text-foreground">Analizando currículum...</div>
               <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary transition-all duration-150"
