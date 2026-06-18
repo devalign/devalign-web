@@ -1,5 +1,5 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { listUserCVs, reanalyzeCV } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { listUserCVs, reanalyzeCV, deleteCV } from '@/lib/api';
 
 export function useUserCVs() {
   return useQuery({
@@ -11,7 +11,22 @@ export function useUserCVs() {
 }
 
 export function useReanalyzeCV() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (cvId: string) => reanalyzeCV(cvId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+    },
+  });
+}
+
+export function useDeleteCV() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (cvId: string) => deleteCV(cvId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userCVs'] });
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+    },
   });
 }

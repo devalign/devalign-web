@@ -1,16 +1,12 @@
 import type { Metadata } from 'next';
-import AuthCard from '@/app/(auth)/login/auth-card';
-import AuthShell from '@/components/auth/auth-shell';
+import HomeClient from './home-client';
 
 export const metadata: Metadata = {
-  title: 'Devalign | Acceso',
-  description: 'Inicia sesión o crea una cuenta para entrar al MVP académico de Devalign.',
+  title: 'Devalign | Diagnóstico técnico con IA',
+  description:
+    'Analiza tu CV, descubre tu brecha técnica y recibe un roadmap personalizado con IA.',
 };
 
 export default function Home() {
-  return (
-    <AuthShell>
-      <AuthCard />
-    </AuthShell>
-  );
+  return <HomeClient />;
 }

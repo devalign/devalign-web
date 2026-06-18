@@ -82,7 +82,7 @@ export interface DomainAffinityItem {
 
 export interface UserProfileData {
   user_id: string;
-  cv_id: string;
+  cv_id: string | null;
   seniority: string;
   primary_specialty: string;
   alignment_score: number;

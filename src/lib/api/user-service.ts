@@ -38,6 +38,15 @@ export async function reanalyzeCV(cvId: string): Promise<CVUploadResult> {
 }
 
 /**
+ * Deletes a CV document from history.
+ */
+export async function deleteCV(cvId: string): Promise<void> {
+  return apiClient<void>(`/users/me/cvs/${cvId}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
  * Gets the detailed computed user profile and analysis.
  */
 export async function getUserProfile(): Promise<UserProfileData> {

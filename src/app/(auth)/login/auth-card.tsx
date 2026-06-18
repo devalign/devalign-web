@@ -66,7 +66,11 @@ const translateError = (message: string): string => {
   return message;
 };
 
-export default function AuthCard() {
+interface AuthCardProps {
+  onOpenChange?: (open: boolean) => void;
+}
+
+export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -96,13 +100,25 @@ export default function AuthCard() {
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
         setIsLoading(false);
+        setShowTerms(false);
+        setShowPrivacy(false);
+        onOpenChange?.(false);
+
+        // Radix UI DismissableLayer sets body.style.pointerEvents = "none"
+        // when a dialog is open. On bfcache restore this persists, killing
+        // every click on the page. Force-remove it immediately.
+        document.body.style.pointerEvents = '';
+        document.body.removeAttribute('data-scroll-locked');
+        document.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
+          el.removeAttribute('aria-hidden');
+        });
       }
     };
     window.addEventListener('pageshow', handlePageShow);
     return () => {
       window.removeEventListener('pageshow', handlePageShow);
     };
-  }, []);
+  }, [onOpenChange]);
 
   const handleModeChange = (newMode: AuthMode) => {
     setMode(newMode);

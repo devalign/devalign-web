@@ -6,9 +6,10 @@ import { Hexagon, Moon, Sun, Sparkles, Rocket } from 'lucide-react';
 
 type AuthShellProps = {
   children: ReactNode;
+  headerActions?: ReactNode;
 };
 
-export default function AuthShell({ children }: AuthShellProps) {
+export default function AuthShell({ children, headerActions }: AuthShellProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
@@ -41,18 +42,26 @@ export default function AuthShell({ children }: AuthShellProps) {
         </span>
       </div>
 
-      <button
-        onClick={toggleTheme}
-        className="absolute top-14 right-4 md:top-16 md:right-8 z-50 p-2.5 rounded-full border border-border bg-background/50 backdrop-blur-md text-foreground shadow-sm hover:bg-muted/80 transition-all cursor-pointer"
-        aria-label="Cambiar tema"
-        title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
-      >
-        {theme === 'light' ? (
-          <Moon className="w-5 h-5 text-slate-700" />
-        ) : (
-          <Sun className="w-5 h-5 text-yellow-400" />
-        )}
-      </button>
+      <div className="absolute top-14 left-4 md:top-16 md:left-8 z-50 flex items-center gap-4">
+        <button
+          onClick={toggleTheme}
+          className="p-2.5 rounded-full border border-border bg-background/50 backdrop-blur-md text-foreground shadow-sm hover:bg-muted/80 transition-all cursor-pointer"
+          aria-label="Cambiar tema"
+          title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
+        >
+          {theme === 'light' ? (
+            <Moon className="w-5 h-5 text-slate-700" />
+          ) : (
+            <Sun className="w-5 h-5 text-yellow-400" />
+          )}
+        </button>
+      </div>
+
+      {headerActions && (
+        <div className="absolute top-14 right-4 md:top-16 md:right-8 z-50">
+          {headerActions}
+        </div>
+      )}
 
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-30 flex items-center justify-center">
         <div className="w-200 h-200 border border-border rounded-full absolute" />
@@ -79,7 +88,7 @@ export default function AuthShell({ children }: AuthShellProps) {
           </p>
         </div>
 
-        <div className="w-full max-w-md">{children}</div>
+        <div className="w-full max-w-4xl px-4">{children}</div>
       </main>
 
       <footer className="py-6 text-center text-xs font-bold text-slate-500 tracking-widest relative z-10 flex flex-wrap justify-center gap-6">

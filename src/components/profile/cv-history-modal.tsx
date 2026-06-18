@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useUserCVs, useReanalyzeCV } from '@/hooks/use-user-cvs';
+import { useUserCVs, useReanalyzeCV, useDeleteCV } from '@/hooks/use-user-cvs';
 import {
   Dialog,
   DialogContent,
@@ -20,13 +20,14 @@ import {
   CheckCircle,
   Loader2,
   ChevronLeft,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CVHistoryModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  activeCvId?: string;
+  activeCvId?: string | null;
   onReanalyzeTriggered: (cvId: string) => void;
 }
 
@@ -38,14 +39,18 @@ export default function CVHistoryModal({
 }: CVHistoryModalProps) {
   const { data: cvData, isLoading, refetch } = useUserCVs();
   const reanalyzeMutation = useReanalyzeCV();
+  const deleteMutation = useDeleteCV();
 
-  // State to track if user clicked "Re-analizar" and which CV they selected
+  // State to track actions
   const [confirmingCvId, setConfirmingCvId] = useState<string | null>(null);
+  const [deletingCvId, setDeletingCvId] = useState<string | null>(null);
 
   const selectedCv = cvData?.cvs?.find((cv) => cv.cv_id === confirmingCvId);
+  const deletingCv = cvData?.cvs?.find((cv) => cv.cv_id === deletingCvId);
 
   const handleClose = () => {
     setConfirmingCvId(null);
+    setDeletingCvId(null);
     onOpenChange(false);
   };
 
@@ -69,6 +74,22 @@ export default function CVHistoryModal({
     }
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!deletingCvId) return;
+
+    const toastId = toast.loading('Eliminando currículum...');
+    try {
+      await deleteMutation.mutateAsync(deletingCvId);
+      toast.dismiss(toastId);
+      toast.success('Currículum eliminado exitosamente.');
+      setDeletingCvId(null);
+    } catch (error) {
+      console.error('Error deleting CV:', error);
+      toast.dismiss(toastId);
+      toast.error('Ocurrió un error al intentar eliminar el currículum.');
+    }
+  };
+
   const cvsList = cvData?.cvs || [];
 
   return (
@@ -81,7 +102,7 @@ export default function CVHistoryModal({
     >
       <DialogContent className="sm:max-w-[500px] border-border bg-card shadow-2xl p-6">
         {confirmingCvId && selectedCv ? (
-          // Confirmation View
+          // Confirmation View for Re-analysis
           <div className="space-y-5">
             <DialogHeader>
               <div className="flex items-center gap-2 text-amber-500 mb-1">
@@ -156,6 +177,88 @@ export default function CVHistoryModal({
               </Button>
             </div>
           </div>
+        ) : deletingCvId && deletingCv ? (
+          // Confirmation View for Deletion
+          <div className="space-y-5">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-destructive mb-1">
+                <AlertTriangle className="h-5 w-5 animate-pulse" />
+                <DialogTitle className="text-sm font-extrabold uppercase tracking-wider text-foreground">
+                  Confirmar Eliminación
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Estás a punto de eliminar de forma permanente una versión de tu currículum.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="bg-secondary/10 p-3.5 rounded-xl border border-border/40 space-y-1.5">
+              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                Documento a Eliminar
+              </span>
+              <div className="flex items-center gap-2.5">
+                <FileText className="h-4 w-4 text-red-500" />
+                <span
+                  className="text-xs font-semibold text-foreground truncate"
+                  title={deletingCv.original_filename}
+                >
+                  {deletingCv.original_filename}
+                </span>
+              </div>
+            </div>
+
+            {deletingCv.cv_id === activeCvId ? (
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive dark:text-red-300 p-4 rounded-xl text-xs space-y-1.5 leading-relaxed">
+                <p className="font-bold flex items-center gap-1.5">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  ¡Advertencia Crítica!
+                </p>
+                <p>
+                  Este currículum es tu **documento activo**. Si lo eliminas, tu perfil ya no estará
+                  vinculado a ningún archivo CV. Tu información de perfil y habilidades guardadas se
+                  mantendrán, pero no podrás volver a consultar este documento.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-muted p-4 rounded-xl text-xs text-muted-foreground leading-relaxed">
+                Esta acción no se puede deshacer. El archivo y sus datos se eliminarán
+                permanentemente de los servidores.
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-border/50">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setDeletingCvId(null)}
+                className="text-xs font-semibold border-border hover:bg-muted"
+                disabled={deleteMutation.isPending}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteConfirm}
+                className="text-xs font-bold"
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    Eliminando...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                    Sí, eliminar
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         ) : (
           // History List View
           <div className="space-y-4">
@@ -208,7 +311,7 @@ export default function CVHistoryModal({
                         </div>
                         <div className="space-y-1 min-w-0">
                           <p
-                            className="text-xs font-bold text-foreground truncate max-w-[200px] sm:max-w-[220px]"
+                            className="text-xs font-bold text-foreground truncate max-w-[150px]"
                             title={cv.original_filename}
                           >
                             {cv.original_filename}
@@ -249,6 +352,17 @@ export default function CVHistoryModal({
                             </a>
                           </Button>
                         )}
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeletingCvId(cv.cv_id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer rounded-lg border border-border/30 hover:border-destructive/30"
+                          title="Eliminar esta versión"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
 
                         {isActive ? (
                           <div className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">

@@ -81,13 +81,14 @@ function TopologyContent() {
   const { data: clusters = [], isLoading, error } = useMarketClusters();
   const { data: profile } = useUserProfile();
 
-  const activeCluster = activeClusterParam || profile?.primary_specialty || '';
+  const initialCluster = activeClusterParam || profile?.primary_specialty || '';
+  const [selectedCluster, setSelectedCluster] = React.useState(initialCluster);
 
   // Find if active cluster matches any of our topology clusters
   const isSelectedCluster = (clusterName: string) => {
-    if (!activeCluster) return false;
+    if (!selectedCluster) return false;
     const nameLow = clusterName.toLowerCase();
-    const paramLow = activeCluster.toLowerCase();
+    const paramLow = selectedCluster.toLowerCase();
     return nameLow === paramLow || nameLow.includes(paramLow) || paramLow.includes(nameLow);
   };
 
@@ -141,7 +142,7 @@ function TopologyContent() {
               size="sm"
               onClick={() =>
                 router.push(
-                  `/dashboard${activeCluster ? `?cluster=${encodeURIComponent(activeCluster)}` : ''}`,
+                  `/dashboard${selectedCluster ? `?cluster=${encodeURIComponent(selectedCluster)}` : ''}`,
                 )
               }
               className="h-8 px-2 -ml-2 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer gap-1"
@@ -255,22 +256,21 @@ function TopologyContent() {
           </Card>
 
           {/* Active context panel */}
-          {activeCluster && (
+          {selectedCluster && (
             <Card className="shadow-lg shadow-black/5 border-primary/20 bg-primary/5">
               <CardContent className="py-4 space-y-2">
                 <div className="flex items-center gap-1.5 text-primary">
                   <Sparkles className="h-4 w-4" />
                   <span className="text-xs font-bold font-mono uppercase tracking-wider">
-                    Contexto de Análisis Activo
+                    Especialidad Seleccionada
                   </span>
                 </div>
                 <p className="text-xs text-foreground/80 leading-normal">
-                  Actualmente estás comparando tu perfil con la especialidad de:{' '}
-                  <strong className="text-primary font-semibold">{activeCluster}</strong>.
+                  Has seleccionado la especialidad de:{' '}
+                  <strong className="text-primary font-semibold">{selectedCluster}</strong>.
                 </p>
                 <p className="text-[10px] text-muted-foreground leading-normal">
-                  Puedes hacer clic en cualquier cluster para volver al diagnóstico con esa
-                  especialidad seleccionada.
+                  Haz clic en "Ver Diagnóstico" para analizar tu perfil con esta especialidad.
                 </p>
               </CardContent>
             </Card>
@@ -291,22 +291,25 @@ function TopologyContent() {
               return (
                 <div
                   key={cluster.id}
-                  onClick={() =>
-                    router.push(`/dashboard?cluster=${encodeURIComponent(cluster.name)}`)
-                  }
+                  onClick={() => setSelectedCluster(cluster.name)}
                   className={`group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[260px] ${
                     isSelected
                       ? 'bg-primary/5 border-primary shadow-md scale-[1.01]'
                       : 'bg-card border-border/80 hover:border-primary/40 hover:bg-secondary/15 hover:shadow-xs'
                   }`}
                 >
-                  {/* Select Badge Indicator */}
-                  {isSelected && (
-                    <span className="absolute top-4 right-4 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-primary text-primary-foreground border border-primary/20 animate-pulse uppercase tracking-wider">
-                      <Sparkles className="h-2 w-2" />
-                      Evaluando
-                    </span>
-                  )}
+                  {/* Radio Selection Indicator */}
+                  <div className="absolute top-4 right-4">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                      isSelected
+                        ? 'border-primary bg-primary'
+                        : 'border-muted-foreground/30 bg-transparent'
+                    }`}>
+                      {isSelected && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
+                      )}
+                    </div>
+                  </div>
 
                   <div className="space-y-3">
                     {/* Icon and Name */}
@@ -365,16 +368,21 @@ function TopologyContent() {
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 flex justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-[10px] font-bold h-7 gap-1 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                    >
-                      <ArrowLeft className="w-3 h-3 rotate-180" />
-                      Ver Detalles
-                    </Button>
-                  </div>
+                  {isSelected && (
+                    <div className="mt-4 pt-3 flex justify-end">
+                      <Button
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/dashboard?cluster=${encodeURIComponent(cluster.name)}`);
+                        }}
+                        className="text-[10px] font-bold h-7 gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        <ArrowLeft className="w-3 h-3 rotate-180" />
+                        Ver Diagnostico
+                      </Button>
+                    </div>
+                  )}
                 </div>
               );
             })}

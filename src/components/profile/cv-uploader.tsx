@@ -96,7 +96,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
   const isUploading = uploadMutation.isPending;
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 bg-card p-6 rounded-2xl border border-border">
       {/* Zona de Drop */}
       <div
         onDragEnter={handleDrag}
