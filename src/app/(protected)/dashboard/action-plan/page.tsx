@@ -22,6 +22,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { HeaderBar } from '@/components/layout/header-bar';
+import { CLUSTER_SKILLS_MAP, getClusterKey } from '@/lib/constants/clusters';
 
 interface RoadmapStep {
   skill: string;
@@ -37,89 +39,6 @@ interface RoadmapPhase {
   description: string;
   steps: RoadmapStep[];
 }
-
-const CLUSTER_SKILLS_MAP: Record<
-  string,
-  {
-    name: string;
-    category: string;
-    importance: 'critical' | 'high' | 'medium';
-    demandPercentage: number;
-  }[]
-> = {
-  'Backend Java': [
-    { name: 'Java', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
-    { name: 'Spring Boot', category: 'hard_skill', importance: 'critical', demandPercentage: 88 },
-    { name: 'REST APIs', category: 'hard_skill', importance: 'high', demandPercentage: 80 },
-    { name: 'Microservicios', category: 'hard_skill', importance: 'high', demandPercentage: 82 },
-    { name: 'PostgreSQL', category: 'hard_skill', importance: 'high', demandPercentage: 74 },
-    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 62 },
-    { name: 'Docker', category: 'tool', importance: 'high', demandPercentage: 70 },
-    { name: 'Kubernetes', category: 'tool', importance: 'medium', demandPercentage: 55 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 90 },
-  ],
-  'Backend Python': [
-    { name: 'Python', category: 'hard_skill', importance: 'critical', demandPercentage: 95 },
-    { name: 'FastAPI', category: 'hard_skill', importance: 'critical', demandPercentage: 82 },
-    { name: 'REST APIs', category: 'hard_skill', importance: 'high', demandPercentage: 85 },
-    { name: 'PostgreSQL', category: 'hard_skill', importance: 'high', demandPercentage: 78 },
-    { name: 'MongoDB', category: 'hard_skill', importance: 'high', demandPercentage: 60 },
-    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 68 },
-    { name: 'Docker', category: 'tool', importance: 'high', demandPercentage: 75 },
-    { name: 'Redis', category: 'hard_skill', importance: 'medium', demandPercentage: 55 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 92 },
-  ],
-  'Frontend React': [
-    { name: 'React', category: 'hard_skill', importance: 'critical', demandPercentage: 96 },
-    { name: 'Next.js', category: 'hard_skill', importance: 'critical', demandPercentage: 85 },
-    { name: 'JavaScript', category: 'hard_skill', importance: 'critical', demandPercentage: 94 },
-    { name: 'TypeScript', category: 'hard_skill', importance: 'high', demandPercentage: 88 },
-    { name: 'HTML5', category: 'hard_skill', importance: 'high', demandPercentage: 90 },
-    { name: 'CSS3', category: 'hard_skill', importance: 'high', demandPercentage: 90 },
-    { name: 'Tailwind CSS', category: 'tool', importance: 'medium', demandPercentage: 82 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 92 },
-  ],
-  'DevOps Cloud': [
-    { name: 'Docker', category: 'tool', importance: 'critical', demandPercentage: 94 },
-    { name: 'Kubernetes', category: 'tool', importance: 'critical', demandPercentage: 88 },
-    { name: 'Terraform', category: 'tool', importance: 'critical', demandPercentage: 80 },
-    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 85 },
-    { name: 'Linux', category: 'hard_skill', importance: 'high', demandPercentage: 78 },
-    { name: 'CI/CD', category: 'methodology', importance: 'high', demandPercentage: 90 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 95 },
-  ],
-  'Data Engineering': [
-    { name: 'Python', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
-    { name: 'Spark', category: 'hard_skill', importance: 'critical', demandPercentage: 88 },
-    { name: 'SQL', category: 'hard_skill', importance: 'critical', demandPercentage: 90 },
-    { name: 'Kafka', category: 'tool', importance: 'high', demandPercentage: 75 },
-    { name: 'Airflow', category: 'tool', importance: 'high', demandPercentage: 80 },
-    { name: 'Snowflake', category: 'tool', importance: 'high', demandPercentage: 65 },
-    { name: 'NoSQL', category: 'hard_skill', importance: 'medium', demandPercentage: 70 },
-    { name: 'Docker', category: 'tool', importance: 'medium', demandPercentage: 60 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 85 },
-  ],
-  'QA & Automation': [
-    { name: 'QA', category: 'hard_skill', importance: 'critical', demandPercentage: 90 },
-    { name: 'Selenium', category: 'tool', importance: 'critical', demandPercentage: 85 },
-    { name: 'Cypress', category: 'tool', importance: 'high', demandPercentage: 78 },
-    { name: 'SQL', category: 'hard_skill', importance: 'high', demandPercentage: 80 },
-    { name: 'Postman', category: 'tool', importance: 'high', demandPercentage: 75 },
-    { name: 'Python', category: 'hard_skill', importance: 'medium', demandPercentage: 70 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 88 },
-  ],
-};
-
-const getClusterKey = (name: string): string => {
-  const n = name.toLowerCase();
-  if (n.includes('java')) return 'Backend Java';
-  if (n.includes('python')) return 'Backend Python';
-  if (n.includes('frontend') || n.includes('react')) return 'Frontend React';
-  if (n.includes('devops') || n.includes('cloud')) return 'DevOps Cloud';
-  if (n.includes('data')) return 'Data Engineering';
-  if (n.includes('qa') || n.includes('automation')) return 'QA & Automation';
-  return name;
-};
 
 // Predefined detailed templates for common gaps
 const KNOWN_SKILLS_TEMPLATES: Record<string, Omit<RoadmapStep, 'skill'>> = {
@@ -173,7 +92,7 @@ function RoadmapContent() {
   const { isLoading: isUserLoading } = useCurrentUser();
   const { data: profile, isLoading: isProfileLoading } = useUserProfile();
   const { data: cvData, isLoading: isCVLoading } = useUserCVs();
-  const { isAnalysisReady, commitUpdate } = useCVAnalysis();
+  const { isAnalyzing, isAnalysisReady, commitUpdate } = useCVAnalysis();
 
   // Generator simulation state
   const [isGenerated, setIsGenerated] = useState(false);
@@ -391,8 +310,13 @@ function RoadmapContent() {
       }
     });
 
-    // Sort by demand percentage descending
-    gaps.sort((a, b) => b.market_demand_percentage - a.market_demand_percentage);
+    // Sort by importance desc, secondary by demand desc
+    const impOrder: Record<string, number> = { critical: 3, high: 2, medium: 1 };
+    gaps.sort((a, b) => {
+      const impDiff = (impOrder[b.market_importance] || 0) - (impOrder[a.market_importance] || 0);
+      if (impDiff !== 0) return impDiff;
+      return b.market_demand_percentage - a.market_demand_percentage;
+    });
     return gaps;
   }, [activeCluster, techSkills]);
 
@@ -511,13 +435,36 @@ function RoadmapContent() {
   const salaryDiff = marketInsights?.salary_differential_percentage ?? null;
   const isPositiveSalary = salaryDiff !== null && salaryDiff >= 0;
 
+  const currentCV = cvData?.cvs?.[0];
+  const formattedDate = currentCV?.uploaded_at
+    ? new Date(currentCV.uploaded_at).toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : 'Recientemente';
+
   return (
-    <div className="min-h-screen bg-background p-6">
+    <>
+      <HeaderBar
+        clusters={allAffinities}
+        activeCluster={activeCluster}
+        onSelectCluster={(name) => {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('cluster', name);
+          router.push(`?${params.toString()}`);
+        }}
+        isAnalyzing={isAnalyzing}
+        isAnalysisReady={isAnalysisReady}
+        lastAnalysisDate={formattedDate}
+      />
+
+      <div className="py-6">
       {/* Action required banner when roadmap is not generated */}
       {!isGenerated && (
         <div className="max-w-xl mx-auto py-12 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10">
           {!hasCV ? (
-            <Card className="border border-border bg-card p-6 shadow-md text-center space-y-6">
+            <Card className="card-elevated text-center space-y-6">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary">
                 <Map className="h-6 w-6" />
               </div>
@@ -540,7 +487,7 @@ function RoadmapContent() {
               </Button>
             </Card>
           ) : !isGenerating ? (
-            <Card className="border border-border bg-card p-6 sm:p-8 shadow-md text-center space-y-6">
+            <Card className="card-elevated sm:p-8 text-center space-y-6">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary">
                 <Sparkles className="h-6 w-6" />
               </div>
@@ -593,7 +540,7 @@ function RoadmapContent() {
               </Button>
             </Card>
           ) : (
-            <Card className="border border-border bg-card p-6 sm:p-8 shadow-md text-left space-y-6">
+            <Card className="card-elevated sm:p-8 text-left space-y-6">
               <div className="text-center space-y-2">
                 <div className="relative mx-auto h-8 w-8 flex items-center justify-center">
                   <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -675,48 +622,6 @@ function RoadmapContent() {
             Una ruta secuencial optimizada mediante reglas de asociación para reducir tus brechas
             con el mercado.
           </p>
-
-          <div className="flex flex-wrap items-center gap-1.5 mt-2">
-            <span className="text-[10px] text-muted-foreground mr-1 font-bold uppercase tracking-wider">
-              {activeCluster?.cluster_name || 'Especialidad'}:
-            </span>
-            {allAffinities.map((aff) => {
-              const isSelected = aff.cluster_name === activeCluster?.cluster_name;
-              return (
-                <button
-                  key={aff.cluster_name}
-                  onClick={() => {
-                    const params = new URLSearchParams(searchParams.toString());
-                    params.set('cluster', aff.cluster_name);
-                    router.push(`?${params.toString()}`);
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-primary/10 border-primary/30 text-primary scale-105 shadow-sm'
-                      : 'bg-secondary border-transparent text-muted-foreground hover:border-border hover:bg-secondary/80'
-                  }`}
-                >
-                  {aff.is_primary && (
-                    <Sparkles
-                      className={`h-2.5 w-2.5 shrink-0 transition-colors duration-500 ${isSelected ? 'text-primary mr-1' : 'text-emerald-500 mr-1.5'}`}
-                    />
-                  )}
-                  <span
-                    className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out ${
-                      isSelected ? 'max-w-0 opacity-0 m-0' : 'max-w-[150px] opacity-100 mr-1.5'
-                    }`}
-                  >
-                    {aff.cluster_name}
-                  </span>
-                  <span
-                    className={`transition-all duration-500 ${isSelected ? 'opacity-100' : 'opacity-90'}`}
-                  >
-                    {Math.round(aff.affinity_score * 100)}%
-                  </span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* Grid Layout (Roadmap + Market Insights) */}
@@ -782,7 +687,7 @@ function RoadmapContent() {
           {/* MARKET INSIGHTS (Right Column - 1/3 width) */}
           <div className="space-y-6">
             {/* Demanda del Cluster */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-primary" />
@@ -823,7 +728,7 @@ function RoadmapContent() {
             </Card>
 
             {/* Insight IA Box */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardContent className="space-y-3">
                 <div className="flex items-start gap-2.5">
                   <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
@@ -985,7 +890,8 @@ function RoadmapContent() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -162,7 +162,7 @@ export default function SkillsCard({
   };
 
   return (
-    <Card className="border-border bg-card">
+    <Card className="card-standard">
       <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-2 tracking-wider uppercase">
           <Sparkles className="h-4 w-4 text-primary" />

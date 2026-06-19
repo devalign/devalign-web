@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import {
   FileText,
-  Download,
+  Eye,
   RefreshCw,
   AlertTriangle,
   Calendar,
@@ -345,10 +345,10 @@ export default function CVHistoryModal({
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg border border-border/30 hover:border-border/80"
-                            title="Descargar archivo original"
+                            title="Vista previa del CV"
                           >
-                            <a href={cv.download_url} download target="_blank" rel="noreferrer">
-                              <Download className="h-3.5 w-3.5" />
+                            <a href={cv.download_url} target="_blank" rel="noreferrer">
+                              <Eye className="h-3.5 w-3.5" />
                             </a>
                           </Button>
                         )}

@@ -133,24 +133,9 @@ function TopologyContent() {
 
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Header and Back Button */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                router.push(
-                  `/dashboard${selectedCluster ? `?cluster=${encodeURIComponent(selectedCluster)}` : ''}`,
-                )
-              }
-              className="h-8 px-2 -ml-2 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer gap-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Volver al Diagnóstico
-            </Button>
-          </div>
           <h1 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2 mt-1">
             <Network className="w-6 h-6 text-primary shrink-0" />
             Topología del Mercado IT
@@ -167,7 +152,7 @@ function TopologyContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Technical details & metadata */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="shadow-lg shadow-black/5 border-border bg-card overflow-hidden">
+          <Card className="card-standard overflow-hidden">
             <CardHeader className="border-b border-border/40 pb-4 bg-muted/20">
               <div className="flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-primary" />
@@ -257,7 +242,7 @@ function TopologyContent() {
 
           {/* Active context panel */}
           {selectedCluster && (
-            <Card className="shadow-lg shadow-black/5 border-primary/20 bg-primary/5">
+            <Card className="card-tinted">
               <CardContent className="py-4 space-y-2">
                 <div className="flex items-center gap-1.5 text-primary">
                   <Sparkles className="h-4 w-4" />

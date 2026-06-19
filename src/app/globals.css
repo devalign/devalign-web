@@ -213,3 +213,19 @@ button:hover {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--border)) transparent;
 }
+
+/* ======================== */
+/* Card Design Utilities    */
+/* ======================== */
+
+@utility card-standard {
+  @apply bg-card border border-border rounded-xl;
+}
+
+@utility card-elevated {
+  @apply border border-border bg-card p-6 rounded-xl;
+}
+
+@utility card-tinted {
+  @apply bg-primary/5 border-primary/20 rounded-xl;
+}

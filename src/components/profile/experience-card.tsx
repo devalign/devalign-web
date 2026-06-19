@@ -128,7 +128,7 @@ export default function ExperienceCard({
   };
 
   return (
-    <Card className="border-border bg-card flex flex-col justify-between">
+    <Card className="card-standard flex flex-col justify-between">
       <div>
         <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-2 tracking-wider uppercase">

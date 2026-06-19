@@ -261,7 +261,7 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
   const headerInfo = getHeaderInfo();
 
   return (
-    <Card className="w-full shadow-2xl shadow-black/5 border-border/50 bg-card/95 backdrop-blur-xl">
+    <Card className="w-full shadow-2xl shadow-black/5 border-border/50 bg-card/95 backdrop-blur-xl py-8!">
       <CardHeader className="text-center space-y-2 pb-6">
         <CardTitle className="text-xl font-bold tracking-tight">{headerInfo.title}</CardTitle>
         <CardDescription className="text-muted-foreground font-medium">

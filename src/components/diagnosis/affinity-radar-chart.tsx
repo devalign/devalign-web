@@ -150,7 +150,7 @@ export function AffinityRadarChart({
   const radarPoints = getRadarPoints();
 
   return (
-    <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden flex flex-col h-full">
+    <Card className="card-standard relative overflow-hidden flex flex-col h-full">
       <div className="h-2 bg-gradient-to-r from-primary/30 via-primary to-primary/60 shrink-0" />
 
       {isLoading && (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserProfile, useUpdateUserProfile } from '@/hooks/use-user-profile';
@@ -29,17 +29,20 @@ import {
   FileText,
   HardDrive,
   Download,
+  Eye,
   ShieldCheck,
+  Info,
   Upload,
   Loader2,
   History,
 } from 'lucide-react';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
 import CVUploader from '@/components/profile/cv-uploader';
 import CVHistoryModal from '@/components/profile/cv-history-modal';
-import { useUserCVs } from '@/hooks/use-user-cvs';
+import { useUserCVs, useReanalyzeCV } from '@/hooks/use-user-cvs';
 import { UserProfileData } from '@/lib/api/types';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
@@ -107,6 +110,23 @@ function ProfileContent() {
   const [newSkillText, setNewSkillText] = useState('');
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isRecalculationReady, setIsRecalculationReady] = useState(false);
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false);
+
+  const initialSnapshotRef = useRef<{
+    fullName: string;
+    roleTitle: string;
+    seniority: string;
+    educationList: Education[];
+    experiences: Experience[];
+    certifications: Certification[];
+    techSkills: string[];
+    softSkills: string[];
+    toolsSkills: string[];
+    methodologySkills: string[];
+  } | null>(null);
+
+  const reanalyzeMutation = useReanalyzeCV();
 
   // Modal actions from query parameters
   const action = searchParams.get('action');
@@ -162,76 +182,84 @@ function ProfileContent() {
   useEffect(() => {
     const loadProfileData = () => {
       if (profile) {
-        setFullName(
-          profile.full_name || user?.full_name || user?.email?.split('@')[0] || 'Desarrollador',
-        );
-        setRoleTitle(profile.current_job_role || '');
-        setSeniority(profile.seniority || 'mid');
+        const newFullName =
+          profile.full_name || user?.full_name || user?.email?.split('@')[0] || 'Desarrollador';
+        const newRoleTitle = profile.current_job_role || '';
+        const newSeniority = profile.seniority || 'mid';
 
-        if (profile.education && profile.education.length > 0) {
-          setEducationList(
-            profile.education.map((edu) => ({
+        const newEducationList = profile.education?.length
+          ? profile.education.map((edu) => ({
               degree: edu.degree,
               institution: edu.institution,
               start_date: edu.start_date || '2021',
               end_date: edu.end_date || '2026',
-            })),
-          );
-        } else {
-          setEducationList([]);
-        }
+            }))
+          : [];
 
-        if (profile.work_experience && profile.work_experience.length > 0) {
-          setExperiences(
-            profile.work_experience.map((exp) => ({
+        const newExperiences = profile.work_experience?.length
+          ? profile.work_experience.map((exp) => ({
               role: exp.role,
               company: exp.company,
               period: `${exp.start_date} — ${exp.current ? 'Presente' : exp.end_date || ''}`,
               description: exp.description || '',
-            })),
-          );
-        } else {
-          setExperiences([]);
-        }
+            }))
+          : [];
 
-        if (profile.certifications && profile.certifications.length > 0) {
-          setCertifications(
-            profile.certifications.map((c) => ({
+        const newCertifications = profile.certifications?.length
+          ? profile.certifications.map((c) => ({
               name: c.name,
               issuer: c.issuer || '',
               date: c.date || '',
-            })),
-          );
-        } else {
-          setCertifications([]);
-        }
+            }))
+          : [];
 
-        if (profile.detected_skills && profile.detected_skills.length > 0) {
-          const tech = profile.detected_skills
+        let newTechSkills: string[] = [];
+        let newSoftSkills: string[] = [];
+        let newToolsSkills: string[] = [];
+        let newMethodologySkills: string[] = [];
+
+        if (profile.detected_skills?.length) {
+          newTechSkills = profile.detected_skills
             .filter((s) => s.skill_type === 'hard_skill')
             .map((s) => s.name);
-          const soft = profile.detected_skills
+          newSoftSkills = profile.detected_skills
             .filter((s) => s.skill_type === 'soft_skill')
             .map((s) => s.name);
-          const tools = profile.detected_skills
+          newToolsSkills = profile.detected_skills
             .filter((s) => s.skill_type === 'tool')
             .map((s) => s.name);
-          const methodologies = profile.detected_skills
+          newMethodologySkills = profile.detected_skills
             .filter((s) => s.skill_type === 'methodology')
             .map((s) => s.name);
-
-          setTechSkills(tech);
-          setSoftSkills(soft);
-          setToolsSkills(tools);
-          setMethodologySkills(methodologies);
-        } else {
-          setTechSkills([]);
-          setSoftSkills([]);
-          setToolsSkills([]);
-          setMethodologySkills([]);
         }
+
+        setFullName(newFullName);
+        setRoleTitle(newRoleTitle);
+        setSeniority(newSeniority);
+        setEducationList(newEducationList);
+        setExperiences(newExperiences);
+        setCertifications(newCertifications);
+        setTechSkills(newTechSkills);
+        setSoftSkills(newSoftSkills);
+        setToolsSkills(newToolsSkills);
+        setMethodologySkills(newMethodologySkills);
+
+        initialSnapshotRef.current = {
+          fullName: newFullName,
+          roleTitle: newRoleTitle,
+          seniority: newSeniority,
+          educationList: newEducationList,
+          experiences: newExperiences,
+          certifications: newCertifications,
+          techSkills: newTechSkills,
+          softSkills: newSoftSkills,
+          toolsSkills: newToolsSkills,
+          methodologySkills: newMethodologySkills,
+        };
       } else if (user) {
-        setFullName(user.full_name || user.email?.split('@')[0] || 'Desarrollador');
+        const newFullName = user.full_name || user.email?.split('@')[0] || 'Desarrollador';
+
+        setFullName(newFullName);
         setRoleTitle('');
         setSeniority('mid');
         setEducationList([]);
@@ -241,12 +269,54 @@ function ProfileContent() {
         setSoftSkills([]);
         setToolsSkills([]);
         setMethodologySkills([]);
+
+        initialSnapshotRef.current = {
+          fullName: newFullName,
+          roleTitle: '',
+          seniority: 'mid',
+          educationList: [],
+          experiences: [],
+          certifications: [],
+          techSkills: [],
+          softSkills: [],
+          toolsSkills: [],
+          methodologySkills: [],
+        };
       }
     };
 
     const timeoutId = setTimeout(loadProfileData, 0);
     return () => clearTimeout(timeoutId);
   }, [profile, user]);
+
+  // Detect pending changes against initial snapshot
+  const hasChanges = useMemo(() => {
+    if (!initialSnapshotRef.current) return false;
+    const snap = initialSnapshotRef.current;
+    return (
+      snap.fullName !== fullName ||
+      snap.roleTitle !== roleTitle ||
+      snap.seniority !== seniority ||
+      JSON.stringify(snap.educationList) !== JSON.stringify(educationList) ||
+      JSON.stringify(snap.experiences) !== JSON.stringify(experiences) ||
+      JSON.stringify(snap.certifications) !== JSON.stringify(certifications) ||
+      JSON.stringify(snap.techSkills) !== JSON.stringify(techSkills) ||
+      JSON.stringify(snap.softSkills) !== JSON.stringify(softSkills) ||
+      JSON.stringify(snap.toolsSkills) !== JSON.stringify(toolsSkills) ||
+      JSON.stringify(snap.methodologySkills) !== JSON.stringify(methodologySkills)
+    );
+  }, [
+    fullName,
+    roleTitle,
+    seniority,
+    educationList,
+    experiences,
+    certifications,
+    techSkills,
+    softSkills,
+    toolsSkills,
+    methodologySkills,
+  ]);
 
   // Skill Handling Actions
   const handleAddSkill = (e: React.FormEvent) => {
@@ -406,7 +476,6 @@ function ProfileContent() {
     const toastId = toast.loading('Guardando perfil y recalculando diagnóstico...');
 
     try {
-      // Execute Mutation with API
       await updateProfileMutation.mutateAsync({
         full_name: fullName,
         current_job_role: roleTitle,
@@ -417,34 +486,71 @@ function ProfileContent() {
         detected_skills: detectedSkillsPayload,
       });
 
-      // Simulation delay for ML Engine Recalculation (1.5 seconds)
-      setTimeout(() => {
-        toast.dismiss(toastId);
-        toast.success('¡Perfil guardado! Motor ML recalculó el diagnóstico con éxito.');
-        router.push('/dashboard?recalculate=true');
-      }, 1500);
+      toast.dismiss(toastId);
+
+      if (currentCV?.cv_id) {
+        try {
+          await reanalyzeMutation.mutateAsync(currentCV.cv_id);
+        } catch {
+          console.warn('Reanalysis trigger failed, showing sync banner anyway');
+        }
+      }
+
+      setIsRecalculationReady(true);
+      toast.success('¡Perfil guardado! La recalibración está lista para sincronizar.');
     } catch (error) {
-      console.warn('API error updating profile, falling back to local simulation:', error);
+      console.warn('API error updating profile:', error);
+      toast.dismiss(toastId);
+      toast.error('Error al guardar el perfil. Intenta de nuevo.');
+    }
 
-      // Fallback local simulation if backend API is not responding/stubbed
-      setTimeout(() => {
-        toast.dismiss(toastId);
-        toast.success('¡Perfil guardado localmente! Redirigiendo a vista Diagnóstico...');
+    setIsSaving(false);
+  };
 
-        // Save to localStorage so that page.tsx can read it in MVP if backend is mocked
-        const localData = {
-          fullName,
-          roleTitle,
-          seniority,
-          work_experience: workExperiencePayload,
-          education: educationPayload,
-          certifications: certificationsPayload,
-          detected_skills: detectedSkillsPayload,
-        };
-        localStorage.setItem('devalign_profile_draft', JSON.stringify(localData));
+  const handleDiscardChanges = () => {
+    if (!initialSnapshotRef.current) return;
+    const snap = initialSnapshotRef.current;
+    setFullName(snap.fullName);
+    setRoleTitle(snap.roleTitle);
+    setSeniority(snap.seniority);
+    setEducationList(snap.educationList);
+    setExperiences(snap.experiences);
+    setCertifications(snap.certifications);
+    setTechSkills(snap.techSkills);
+    setSoftSkills(snap.softSkills);
+    setToolsSkills(snap.toolsSkills);
+    setMethodologySkills(snap.methodologySkills);
+    setShowDiscardDialog(false);
+    toast.info('Cambios descartados');
+  };
 
-        router.push('/dashboard?recalculate=true');
-      }, 1500);
+  const handleSyncRecalculation = async () => {
+    const toastId = toast.loading('Sincronizando cambios...');
+    try {
+      await refetchProfile();
+      await refetchCVs();
+
+      setIsRecalculationReady(false);
+      initialSnapshotRef.current = {
+        fullName,
+        roleTitle,
+        seniority,
+        educationList,
+        experiences,
+        certifications,
+        techSkills,
+        softSkills,
+        toolsSkills,
+        methodologySkills,
+      };
+
+      toast.dismiss(toastId);
+      toast.success('¡Perfil y diagnóstico actualizados con éxito!');
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Error syncing recalculation:', error);
+      toast.dismiss(toastId);
+      toast.error('Error al sincronizar los cambios.');
     }
   };
 
@@ -465,6 +571,13 @@ function ProfileContent() {
       <div className="max-w-7xl mx-auto px-6 py-6 relative">
         {/* Banner de Sincronización Diferida */}
         <CVUpdateBanner />
+        {isRecalculationReady && (
+          <CVUpdateBanner
+            source="profile-recalculation"
+            show={true}
+            onSync={handleSyncRecalculation}
+          />
+        )}
 
         {/* Back Button & CV Export Action */}
         <div className="flex items-center justify-between mb-6">
@@ -492,7 +605,7 @@ function ProfileContent() {
           {/* Left Column (Info Principal, Habilidades, Educación) - Width 5/12 */}
           <div className="lg:col-span-5 space-y-6">
             {/* 1. Información Principal */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
                   Información Profesional
@@ -570,16 +683,24 @@ function ProfileContent() {
             </Card>
 
             {/* Currículum Base Card */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
                   Currículum Base
                 </CardTitle>
                 {currentCV && (
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/5 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                    Analizado
-                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/5 border border-emerald-500/20 px-2.5 py-0.5 rounded-full cursor-help">
+                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                        Alta (94%)
+                        <Info className="h-3 w-3 text-emerald-500/60" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-[11px] max-w-[220px]">
+                      Calidad de la información extraída automáticamente de tu CV.
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
@@ -620,38 +741,13 @@ function ProfileContent() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg shrink-0"
-                          title="Descargar PDF original"
+                          title="Vista previa del CV"
                         >
-                          <a
-                            href={currentCV.download_url}
-                            download
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <Download className="h-4 w-4" />
+                          <a href={currentCV.download_url} target="_blank" rel="noreferrer">
+                            <Eye className="h-4 w-4" />
                           </a>
                         </Button>
                       )}
-                    </div>
-
-                    {/* Métricas de Confianza de Extracción */}
-                    <div className="grid grid-cols-2 gap-2 mt-3 p-3 rounded-xl bg-secondary/10 border border-border/40 text-[11px]">
-                      <div className="space-y-0.5">
-                        <span className="text-muted-foreground block text-[9px] uppercase font-bold tracking-wider">
-                          Confianza de Extracción
-                        </span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Alta (94%)
-                        </span>
-                      </div>
-                      <div className="space-y-0.5 border-l border-border/40 pl-3">
-                        <span className="text-muted-foreground block text-[9px] uppercase font-bold tracking-wider">
-                          Entidades reconocidas
-                        </span>
-                        <span className="font-bold text-foreground flex items-center gap-1">
-                          <FileText className="h-3.5 w-3.5 text-muted-foreground" /> 28 entidades
-                        </span>
-                      </div>
                     </div>
                   </div>
                 ) : (
@@ -692,12 +788,12 @@ function ProfileContent() {
               </CardContent>
             </Card>
 
-            {/* 2. Habilidades e Idiomas */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            {/* 2. Habilidades */}
+            <Card className="card-standard">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
-                    Habilidades e Idiomas
+                    Habilidades
                   </CardTitle>
                 </div>
 
@@ -789,7 +885,7 @@ function ProfileContent() {
             </Card>
 
             {/* 3. Educación Académica (Movido aquí para balancear el scroll) */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-4.5 h-4.5 text-primary" />
@@ -967,7 +1063,7 @@ function ProfileContent() {
           {/* Right Column (Experience & Certifications) - Width 7/12 */}
           <div className="lg:col-span-7 space-y-6">
             {/* 1. Experiencia Laboral (Diseño Minimalista y Compacto) */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-primary" />
@@ -1144,7 +1240,7 @@ function ProfileContent() {
             </Card>
 
             {/* 2. Certificaciones (Diseño Minimalista y Compacto) */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-primary" />
@@ -1299,49 +1395,84 @@ function ProfileContent() {
               </CardContent>
             </Card>
 
-            {/* Global Actions Card */}
-            <Card className="sticky bottom-6 z-10 border-primary/20 bg-primary/5 shadow-lg shadow-primary/10 backdrop-blur-xl">
-              <CardContent className="py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-center sm:text-left">
-                  <h4 className="text-xs font-bold text-foreground flex items-center justify-center sm:justify-start gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span>Calibración de Diagnóstico por IA</span>
-                  </h4>
-                  <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
-                    Al guardar, el motor recalculará tu porcentaje de afinidad con el mercado.
-                  </p>
-                </div>
+            {/* Global Actions Card - only shows when there are pending changes */}
+            {hasChanges && !isRecalculationReady && (
+              <Card className="sticky bottom-6 z-10 border-primary/20 bg-primary/5 shadow-lg shadow-primary/10 backdrop-blur-xl">
+                <CardContent className="py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-center sm:text-left">
+                    <h4 className="text-xs font-bold text-foreground flex items-center justify-center sm:justify-start gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span>Calibración de Diagnóstico por IA</span>
+                    </h4>
+                    <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                      Al guardar, el motor recalculará tu porcentaje de afinidad con el mercado.
+                    </p>
+                  </div>
 
-                <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                  <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowDiscardDialog(true)}
+                      className="flex-1 sm:flex-initial text-xs h-9 cursor-pointer"
+                    >
+                      Descartar
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleSaveProfile}
+                      disabled={isSaving}
+                      className="flex-1 sm:flex-initial text-xs h-9 font-bold bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer gap-1.5"
+                    >
+                      {isSaving ? (
+                        <>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                          <span>Recalculando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          <span>Guardar y Recalcular</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Descartar Changes Confirmation Dialog */}
+            <Dialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
+              <DialogContent className="sm:max-w-[400px] border-none shadow-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-sm font-extrabold uppercase tracking-wider text-foreground">
+                    Descartar cambios
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-muted-foreground pt-1">
+                    ¿Estás seguro de descartar los cambios realizados? Los datos nuevos agregados
+                    se perderán y no podrás recuperarlos.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex gap-2 justify-end pt-2">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => router.push('/dashboard')}
-                    className="flex-1 sm:flex-initial text-xs h-9 cursor-pointer"
+                    onClick={() => setShowDiscardDialog(false)}
+                    className="text-xs h-9 cursor-pointer"
                   >
-                    Descartar
+                    Cancelar
                   </Button>
                   <Button
                     type="button"
-                    onClick={handleSaveProfile}
-                    disabled={isSaving}
-                    className="flex-1 sm:flex-initial text-xs h-9 font-bold bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer gap-1.5"
+                    variant="destructive"
+                    onClick={handleDiscardChanges}
+                    className="text-xs h-9 cursor-pointer"
                   >
-                    {isSaving ? (
-                      <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                        <span>Recalculando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        <span>Guardar y Recalcular</span>
-                      </>
-                    )}
+                    Sí, descartar
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>

@@ -20,7 +20,7 @@ export function ProfileSkillsCard({
   isLoading = false,
 }: ProfileSkillsCardProps) {
   return (
-    <Card className="shadow-lg shadow-black/5 border-border bg-card overflow-hidden relative h-full flex flex-col justify-between">
+    <Card className="card-standard overflow-hidden relative h-full flex flex-col justify-between">
       <div className="h-2 bg-gradient-to-r from-primary/30 via-primary to-primary/60" />
 
       {isLoading && (

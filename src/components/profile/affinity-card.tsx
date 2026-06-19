@@ -78,7 +78,7 @@ export default function AffinityCard({
     .sort((a, b) => b.score - a.score);
 
   return (
-    <Card className="border-border bg-card">
+    <Card className="card-standard">
       <CardHeader className="pb-3">
         <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-2 tracking-wider uppercase">
           <Shield className="h-4 w-4 text-primary" />

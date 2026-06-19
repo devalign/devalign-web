@@ -353,7 +353,7 @@ export function RoadmapDashboard() {
       {!isGenerated && (
         <div className="w-full max-w-xl mx-auto animate-in fade-in slide-in-from-top-4 duration-500 z-10 relative">
           {!hasCV ? (
-            <Card className="border border-border bg-card p-6 shadow-md text-center space-y-6">
+            <Card className="card-elevated text-center space-y-6">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary-foreground border border-primary/20">
                 <Map className="h-6 w-6 text-primary" />
               </div>
@@ -376,7 +376,7 @@ export function RoadmapDashboard() {
               </Button>
             </Card>
           ) : !isDiagnosisGenerated ? (
-            <Card className="border border-border bg-card p-6 shadow-md text-center space-y-6">
+            <Card className="card-elevated text-center space-y-6">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary-foreground border border-primary/20">
                 <Activity className="h-6 w-6 text-primary" />
               </div>
@@ -398,7 +398,7 @@ export function RoadmapDashboard() {
               </Button>
             </Card>
           ) : !isGenerating ? (
-            <Card className="border border-border bg-card p-6 sm:p-8 shadow-md text-center space-y-6">
+            <Card className="card-elevated sm:p-8 text-center space-y-6">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary-foreground border border-primary/20">
                 <Map className="h-6 w-6 text-primary fill-primary/10" />
               </div>
@@ -451,7 +451,7 @@ export function RoadmapDashboard() {
               </Button>
             </Card>
           ) : (
-            <Card className="border border-border bg-card p-6 sm:p-8 shadow-md text-left space-y-6">
+            <Card className="card-elevated sm:p-8 text-left space-y-6">
               <div className="text-center space-y-2">
                 <div className="relative mx-auto h-10 w-10 flex items-center justify-center">
                   <Loader2 className="h-8 w-8 text-primary animate-spin" />
@@ -516,7 +516,7 @@ export function RoadmapDashboard() {
         )}
       >
         {/* Header and Progress Tracker */}
-        <Card className="border border-border bg-card shadow-xs overflow-hidden">
+        <Card className="card-standard overflow-hidden">
           <CardContent className="p-6 sm:p-8 space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-1.5 text-left">
@@ -566,7 +566,7 @@ export function RoadmapDashboard() {
             return (
               <Card
                 key={phase.id}
-                className={`border border-border bg-card transition-all ${isExpanded ? 'shadow-md border-primary/30' : 'hover:border-border/80 shadow-xs'}`}
+                className={`card-standard transition-all ${isExpanded ? 'shadow-md border-primary/30' : 'hover:border-border/80 shadow-xs'}`}
               >
                 <button
                   onClick={() => setExpandedPhase(isExpanded ? null : phase.id)}

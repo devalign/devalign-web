@@ -1,15 +1,11 @@
 'use client';
 
-import CVUploader from '@/components/profile/cv-uploader';
+import AuthCard from '@/app/(auth)/login/auth-card';
 
-interface LandingContentProps {
-  onOpenAuth: () => void;
-}
-
-export default function LandingContent({ onOpenAuth }: LandingContentProps) {
+export default function LandingContent() {
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <CVUploader onUploadSuccess={() => onOpenAuth()} />
+    <div className="w-full max-w-md mx-auto">
+      <AuthCard />
     </div>
   );
 }

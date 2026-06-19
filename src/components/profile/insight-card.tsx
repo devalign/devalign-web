@@ -24,7 +24,7 @@ export default function InsightCard({
       : '¡Excelente alineación técnica! Tu perfil cumple con todas las demandas del clúster.';
 
   return (
-    <Card className="border-border bg-primary/5 relative overflow-hidden">
+    <Card className="card-tinted relative overflow-hidden">
       <CardContent className="p-5 flex gap-3.5">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary-foreground">
           <Lightbulb className="h-5 w-5 text-primary fill-primary/10" />

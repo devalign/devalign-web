@@ -19,7 +19,7 @@ export function ClusterDemandCard({
   const growth = marketInsights?.growth_percentage ?? null;
   const isPositive = growth !== null && growth >= 0;
   return (
-    <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col justify-between h-full min-h-[220px]">
+    <Card className="card-standard flex flex-col justify-between h-full min-h-[220px]">
       <CardContent className="p-5 flex flex-col justify-between h-full gap-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3 h-full">

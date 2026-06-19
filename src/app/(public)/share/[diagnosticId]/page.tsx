@@ -166,7 +166,7 @@ export default function PublicSharePage() {
           {/* LEFT PANEL: verified developer profile */}
           <div className="space-y-6">
             {/* Developer credentials */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-primary/10 text-primary border border-primary/20">
@@ -186,7 +186,7 @@ export default function PublicSharePage() {
             </Card>
 
             {/* Education */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-4 h-4 text-primary" />
@@ -202,7 +202,7 @@ export default function PublicSharePage() {
             </Card>
 
             {/* Verified Skills */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-primary" />
@@ -226,7 +226,7 @@ export default function PublicSharePage() {
             </Card>
 
             {/* Certifications */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-primary" />
@@ -254,7 +254,7 @@ export default function PublicSharePage() {
           {/* RIGHT PANEL: Alignment metrics */}
           <div className="space-y-6">
             {/* Score & specialty */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardContent className="pt-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                   <div className="text-center sm:text-left space-y-1">
@@ -287,7 +287,7 @@ export default function PublicSharePage() {
             </Card>
 
             {/* Radar Chart */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-primary" />
@@ -414,7 +414,7 @@ export default function PublicSharePage() {
             </Card>
 
             {/* Compatible Roles */}
-            <Card className="shadow-lg shadow-black/5 border-border bg-card">
+            <Card className="card-standard">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-primary" />

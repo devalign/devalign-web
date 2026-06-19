@@ -11,16 +11,11 @@ import {
   Map,
   Network,
   Settings,
-  Lock,
-  ShieldCheck,
   LogOut,
   Sun,
   Moon,
-  ChevronLeft,
-  ChevronRight,
   type LucideIcon,
 } from 'lucide-react';
-import { useSidebar } from './sidebar-context';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -35,12 +30,23 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
+interface NavItem {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  disabled?: boolean;
+}
+
+const navItems: NavItem[] = [
+  { name: 'Evaluación', href: '/dashboard', icon: Activity },
+  { name: 'Plan de Acción', href: '/dashboard/action-plan', icon: Map },
+];
+
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: profile } = useUserProfile();
-  const { isCollapsed, setIsCollapsed } = useSidebar();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const cluster = searchParams.get('cluster') || profile?.primary_specialty || '';
 
@@ -50,7 +56,6 @@ export default function AppSidebar() {
 
   const supabase = createClient();
 
-  // Sync theme state with DOM
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const isDark = document.documentElement.classList.contains('dark');
@@ -77,70 +82,35 @@ export default function AppSidebar() {
     router.refresh();
   };
 
-  const navItems: { name: string; href: string; icon: LucideIcon; disabled?: boolean }[] = [
-    { name: 'Evaluación', href: '/dashboard', icon: Activity },
-    { name: 'Plan de Acción', href: '/dashboard/action-plan', icon: Map },
-  ];
+  const marketHref = `/market?cluster=${encodeURIComponent(cluster)}`;
+  const onMarket = pathname.startsWith('/market');
 
   return (
     <aside
-      className={cn(
-        'relative flex h-screen flex-col border-r border-border bg-card transition-all duration-300 ease-in-out z-30',
-        isCollapsed ? 'w-16' : 'w-64',
-      )}
+      suppressHydrationWarning
+      className="relative flex h-full flex-col border border-border transition-all duration-300 ease-in-out z-30 shrink-0 w-16"
     >
-      {/* Toggle Collapse Button */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute top-5 -right-3.5 z-40 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-xs hover:bg-secondary hover:text-foreground transition-all duration-200 cursor-pointer focus:outline-hidden"
-        title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
-      >
-        {isCollapsed ? (
-          <ChevronRight className="h-3.5 w-3.5" />
-        ) : (
-          <ChevronLeft className="h-3.5 w-3.5" />
-        )}
-      </button>
-      {/* Header / Logo */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-border">
-        {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <Hexagon className="h-6 w-6 text-primary fill-primary/20 animate-pulse" />
-            <div className="flex flex-col">
-              <span className="font-bold tracking-tight text-foreground text-sm">Devalign</span>
-              <span className="text-[10px] text-muted-foreground font-mono">v0.1.0</span>
-            </div>
-          </div>
-        )}
-        {isCollapsed && <Hexagon className="mx-auto h-6 w-6 text-primary fill-primary/20" />}
+      <div className="flex h-14 items-center justify-center px-4 border-b border-border">
+        <Hexagon className="h-6 w-6 text-primary fill-primary/20" />
       </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 space-y-1.5 px-3 py-4 overflow-y-auto">
-        {!isCollapsed && (
-          <p className="px-2 text-[10px] font-semibold text-muted-foreground tracking-wider uppercase mb-2">
-            Diagnóstico
-          </p>
-        )}
+      <nav className="flex-1 space-y-1.5 px-3 py-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
           if (item.disabled) {
             return (
-              <div
-                key={item.name}
-                className={cn(
-                  'flex items-center justify-between rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground/60 cursor-not-allowed select-none group',
-                  isCollapsed ? 'justify-center' : '',
-                )}
-                title={`${item.name} (Próximamente)`}
-              >
-                <div className="flex items-center gap-2.5">
+              <div key={item.name} className="relative group">
+                <div
+                  className="flex items-center justify-center rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground/60 cursor-not-allowed select-none"
+                  title={`${item.name} (Próximamente)`}
+                >
                   <Icon className="h-4 w-4 shrink-0 text-muted-foreground/40" />
-                  {!isCollapsed && <span>{item.name}</span>}
                 </div>
-                {!isCollapsed && <Lock className="h-3 w-3 text-muted-foreground/40 shrink-0" />}
+                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                  {item.name} (Próximamente)
+                </div>
               </div>
             );
           }
@@ -150,126 +120,94 @@ export default function AppSidebar() {
             : item.href;
 
           return (
-            <Link
-              key={item.name}
-              href={itemHref}
-              className={cn(
-                'flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
-                isActive
-                  ? 'bg-secondary text-foreground font-extrabold shadow-xs'
-                  : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
-                isCollapsed ? 'justify-center' : '',
-              )}
-            >
-              <Icon
+            <div key={item.name} className="relative group">
+              <Link
+                href={itemHref}
                 className={cn(
-                  'h-4 w-4 shrink-0',
-                  isActive ? 'text-primary' : 'text-muted-foreground/70',
+                  'flex items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
+                  isActive
+                    ? 'bg-secondary text-foreground font-extrabold shadow-xs'
+                    : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
                 )}
-              />
-              {!isCollapsed && <span>{item.name}</span>}
-            </Link>
+              >
+                <Icon
+                  className={cn(
+                    'h-4 w-4 shrink-0',
+                    isActive ? 'text-primary' : 'text-muted-foreground/70',
+                  )}
+                />
+              </Link>
+              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                {item.name}
+              </div>
+            </div>
           );
         })}
       </nav>
 
-      {/* Security Info */}
-      {!isCollapsed && (
-        <div className="m-3 p-2.5 text-[10px] text-muted-foreground flex items-start gap-2 border border-border/50 rounded-lg bg-transparent">
-          <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
-          <p className="leading-tight">Tus datos están seguros. No compartimos tu información.</p>
-        </div>
-      )}
-
-      {/* Sidebar Footer */}
-      <div className="p-3 border-t border-border bg-card space-y-2">
-        {/* Collapsed User Info Trigger for Collapsed View */}
-        {isCollapsed && (
-          <div className="flex flex-col gap-2.5 items-center pt-1">
-            {/* Collapsed Settings Button (Opens Settings Modal Directly) */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsSettingsOpen(true)}
-              className="h-8 w-8 rounded-md hover:bg-muted text-muted-foreground cursor-pointer"
-              title="Ajustes de cuenta"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-
-            {/* Collapsed Avatar Link (Navigates directly to /profile) */}
-            <Link
-              href="/profile"
-              className="h-8 w-8 rounded-full overflow-hidden hover:ring-2 hover:ring-primary transition-all duration-200 focus:outline-hidden cursor-pointer block"
-              title="Mi Perfil"
-            >
-              {isUserLoading ? (
-                <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
-              ) : user?.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.avatar_url} alt="User" className="h-8 w-8 object-cover" />
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center bg-primary/20 text-primary-foreground font-semibold text-xs uppercase">
-                  {user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                </div>
-              )}
-            </Link>
-          </div>
-        )}
-
-        {/* User Information with Options Button (Expanded View) */}
-        {!isCollapsed && (
-          <div className="px-3 py-2 flex items-center justify-between gap-2.5 overflow-hidden mt-1 bg-secondary/10 rounded-lg relative">
-            {isUserLoading ? (
-              <div className="flex items-center gap-2 animate-pulse w-full py-0.5">
-                <div className="h-8 w-8 rounded-full bg-muted" />
-                <div className="h-3 w-16 rounded bg-muted" />
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <Link href="/profile" className="shrink-0 hover:opacity-80 transition-opacity">
-                    {user?.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={user.avatar_url}
-                        alt="Avatar"
-                        className="h-8 w-8 rounded-full object-cover ring-1 ring-border"
-                      />
-                    ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary-foreground font-semibold text-xs uppercase">
-                        {user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                      </div>
-                    )}
-                  </Link>
-                  <Link
-                    href="/profile"
-                    className="text-xs font-bold text-foreground hover:text-primary transition-colors flex items-center gap-1 group truncate min-w-0"
-                  >
-                    <span>Mi Perfil</span>
-                    <span className="inline-block transition-transform group-hover:translate-x-0.5 shrink-0">
-                      &rarr;
-                    </span>
-                  </Link>
-                </div>
-
-                {/* Options Button (Settings icon) */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsSettingsOpen(true)}
-                  className="h-7 w-7 rounded-md hover:bg-muted text-muted-foreground shrink-0 cursor-pointer"
-                  title="Ajustes de cuenta"
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </>
+      <div className="px-3 py-2 space-y-1.5 items-center">
+        <div className="relative group">
+          <Link
+            href={marketHref}
+            className={cn(
+              'flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
+              onMarket
+                ? 'bg-secondary text-foreground font-extrabold shadow-xs'
+                : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
             )}
+          >
+            <Network
+              className={cn(
+                'h-4 w-4 shrink-0',
+                onMarket ? 'text-primary' : 'text-muted-foreground/70',
+              )}
+            />
+          </Link>
+          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+            Ver Mercado
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Settings Modal Dialog */}
+      <div className="p-3 border-t border-border space-y-2.5 flex flex-col justify-center items-center">
+        <div className="relative group">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSettingsOpen(true)}
+            className="h-8 w-8 rounded-md hover:bg-muted text-muted-foreground cursor-pointer"
+            title="Ajustes de cuenta"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+            Ajustes
+          </div>
+        </div>
+
+        <div className="relative group">
+          <Link
+            href="/profile"
+            className="h-8 w-8 rounded-full overflow-hidden hover:ring-2 hover:ring-primary transition-all duration-200 focus:outline-hidden cursor-pointer block"
+            title="Mi Perfil"
+          >
+            {isUserLoading ? (
+              <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+            ) : user?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.avatar_url} alt="User" className="h-8 w-8 object-cover" />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center bg-primary/20 text-primary-foreground font-semibold text-xs uppercase">
+                {user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+              </div>
+            )}
+          </Link>
+          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+            Mi Perfil
+          </div>
+        </div>
+      </div>
+
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <DialogContent className="sm:max-w-md border-border bg-card">
           <DialogHeader>
@@ -283,7 +221,6 @@ export default function AppSidebar() {
           </DialogHeader>
 
           <div className="py-4 space-y-5">
-            {/* Apariencia / Tema */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Apariencia
@@ -316,7 +253,6 @@ export default function AppSidebar() {
               </div>
             </div>
 
-            {/* Notificaciones */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Notificaciones
@@ -341,7 +277,6 @@ export default function AppSidebar() {
               </div>
             </div>
 
-            {/* Datos & Cuenta */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Datos de la Cuenta
@@ -366,7 +301,6 @@ export default function AppSidebar() {
               </div>
             </div>
 
-            {/* Sesión */}
             <div className="space-y-3">
               <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Sesión
@@ -417,7 +351,6 @@ export default function AppSidebar() {
         </DialogContent>
       </Dialog>
 
-      {/* Logout Confirmation Dialog */}
       <Dialog open={isLogoutConfirmOpen} onOpenChange={setIsLogoutConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

@@ -9,6 +9,7 @@ export interface StrengthItem {
   level: string;
   score: number;
   demandPercentage: number;
+  category?: string;
 }
 
 interface StrengthsCardProps {
@@ -17,9 +18,16 @@ interface StrengthsCardProps {
   isLoading?: boolean;
 }
 
+const categoryLabel = (cat: string) => {
+  if (cat === 'hard_skill') return 'Habilidad';
+  if (cat === 'tool') return 'Herramienta';
+  if (cat === 'methodology') return 'Metodología';
+  return cat;
+};
+
 export function StrengthsCard({ strengths, onViewAll, isLoading = false }: StrengthsCardProps) {
   return (
-    <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col h-full relative overflow-hidden min-h-[280px]">
+    <Card className="card-standard flex flex-col h-full relative overflow-hidden min-h-[280px]">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -57,7 +65,14 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
                       {s.demandPercentage}% DEMANDA
                     </span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground mt-1">{s.level}</span>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground">{s.level}</span>
+                    {s.category && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+                        {categoryLabel(s.category)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

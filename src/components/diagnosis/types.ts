@@ -7,12 +7,14 @@ export interface SkillStrength {
   level: SkillLevel;
   score: number; // 1 to 4 for rendering dots
   demandPercentage?: number; // percentage of market demand in cluster
+  category?: string; // 'hard_skill' | 'tool' | 'methodology'
 }
 
 export interface SkillGap {
   name: string;
   criticality: Criticality;
   demandPercentage?: number; // percentage of market demand in cluster
+  category?: string; // 'hard_skill' | 'tool' | 'methodology'
 }
 
 export interface DomainAffinity {

@@ -3,45 +3,20 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, Map } from 'lucide-react';
-
-interface AffinityItem {
-  name: string;
-  score: number;
-  isPrimary?: boolean;
-}
+import { Loader2, Map } from 'lucide-react';
 
 interface MarketScoreCardProps {
   currentScore: number;
   primarySpecialty?: string;
-  secondaryAffinities?: AffinityItem[];
   isLoading?: boolean;
-  onNext?: () => void;
-  onPrev?: () => void;
-  onSelectSpecialty?: (name: string) => void;
   onViewRoadmap?: () => void;
-  onViewTopology?: () => void;
-  currentIndex?: number;
-  totalClusters?: number;
-  isPrimaryCluster?: boolean;
 }
 
 export function MarketScoreCard({
   currentScore,
   primarySpecialty = 'Data Engineering',
-  secondaryAffinities = [
-    { name: 'DevOps', score: 63 },
-    { name: 'Data Engineering', score: 41 },
-  ],
   isLoading = false,
-  onNext,
-  onPrev,
-  onSelectSpecialty,
   onViewRoadmap,
-  onViewTopology,
-  currentIndex = 0,
-  totalClusters = 1,
-  isPrimaryCluster = true,
 }: MarketScoreCardProps) {
   const getScoreState = (score: number) => {
     if (score >= 75)
@@ -60,7 +35,7 @@ export function MarketScoreCard({
   const scoreState = getScoreState(currentScore);
 
   return (
-    <Card className="shadow-lg shadow-black/5 border-border bg-card relative overflow-hidden flex flex-col h-full">
+    <Card className="card-standard relative overflow-hidden flex flex-col h-full">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -93,7 +68,7 @@ export function MarketScoreCard({
             </div>
           </div>
 
-          {/* Right Side: Specialty Evaluation, Selectors & Button */}
+          {/* Right Side: Specialty Evaluation & Button */}
           <div className="flex-1 text-center sm:text-right space-y-4 border-t sm:border-t-0 sm:border-l border-border pt-6 sm:pt-0 sm:pl-6 flex flex-col justify-between">
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -102,41 +77,6 @@ export function MarketScoreCard({
               <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
                 {primarySpecialty}
               </h3>
-            </div>
-
-            <div className="flex flex-wrap justify-center sm:justify-end gap-1.5 py-1">
-              {secondaryAffinities.map((aff) => {
-                const isSelected = aff.name === primarySpecialty;
-                return (
-                  <button
-                    key={aff.name}
-                    onClick={() => onSelectSpecialty?.(aff.name)}
-                    className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-bold border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-primary/10 border-primary/30 text-primary scale-105 shadow-sm'
-                        : 'bg-secondary border-transparent text-muted-foreground hover:border-border hover:bg-secondary/80'
-                    }`}
-                  >
-                    {aff.isPrimary && (
-                      <Sparkles
-                        className={`h-2.5 w-2.5 shrink-0 transition-colors duration-500 ${isSelected ? 'text-primary mr-1' : 'text-emerald-500 mr-1.5'}`}
-                      />
-                    )}
-                    <span
-                      className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out ${
-                        isSelected ? 'max-w-0 opacity-0 m-0' : 'max-w-[150px] opacity-100 mr-1.5'
-                      }`}
-                    >
-                      {aff.name}
-                    </span>
-                    <span
-                      className={`transition-all duration-500 ${isSelected ? 'opacity-100' : 'opacity-90'}`}
-                    >
-                      {aff.score}%
-                    </span>
-                  </button>
-                );
-              })}
             </div>
 
             {onViewRoadmap && (

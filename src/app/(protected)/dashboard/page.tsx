@@ -33,6 +33,8 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Lightbulb } from 'lucide-react';
+import { HeaderBar } from '@/components/layout/header-bar';
+import { CLUSTER_SKILLS_MAP, getClusterKey } from '@/lib/constants/clusters';
 
 // Refactored modular subcomponents
 import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
@@ -45,94 +47,11 @@ import { AiInsightCard } from '@/components/diagnosis/ai-insight-card';
 import { ClusterDemandCard } from '@/components/diagnosis/cluster-demand-card';
 import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
 
-const CLUSTER_SKILLS_MAP: Record<
-  string,
-  {
-    name: string;
-    category: string;
-    importance: 'critical' | 'high' | 'medium';
-    demandPercentage: number;
-  }[]
-> = {
-  'Backend Java': [
-    { name: 'Java', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
-    { name: 'Spring Boot', category: 'hard_skill', importance: 'critical', demandPercentage: 88 },
-    { name: 'REST APIs', category: 'hard_skill', importance: 'high', demandPercentage: 80 },
-    { name: 'Microservicios', category: 'hard_skill', importance: 'high', demandPercentage: 82 },
-    { name: 'PostgreSQL', category: 'hard_skill', importance: 'high', demandPercentage: 74 },
-    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 62 },
-    { name: 'Docker', category: 'tool', importance: 'high', demandPercentage: 70 },
-    { name: 'Kubernetes', category: 'tool', importance: 'medium', demandPercentage: 55 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 90 },
-  ],
-  'Backend Python': [
-    { name: 'Python', category: 'hard_skill', importance: 'critical', demandPercentage: 95 },
-    { name: 'FastAPI', category: 'hard_skill', importance: 'critical', demandPercentage: 82 },
-    { name: 'REST APIs', category: 'hard_skill', importance: 'high', demandPercentage: 85 },
-    { name: 'PostgreSQL', category: 'hard_skill', importance: 'high', demandPercentage: 78 },
-    { name: 'MongoDB', category: 'hard_skill', importance: 'high', demandPercentage: 60 },
-    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 68 },
-    { name: 'Docker', category: 'tool', importance: 'high', demandPercentage: 75 },
-    { name: 'Redis', category: 'hard_skill', importance: 'medium', demandPercentage: 55 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 92 },
-  ],
-  'Frontend React': [
-    { name: 'React', category: 'hard_skill', importance: 'critical', demandPercentage: 96 },
-    { name: 'Next.js', category: 'hard_skill', importance: 'critical', demandPercentage: 85 },
-    { name: 'JavaScript', category: 'hard_skill', importance: 'critical', demandPercentage: 94 },
-    { name: 'TypeScript', category: 'hard_skill', importance: 'high', demandPercentage: 88 },
-    { name: 'HTML5', category: 'hard_skill', importance: 'high', demandPercentage: 90 },
-    { name: 'CSS3', category: 'hard_skill', importance: 'high', demandPercentage: 90 },
-    { name: 'Tailwind CSS', category: 'tool', importance: 'medium', demandPercentage: 82 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 92 },
-  ],
-  'DevOps Cloud': [
-    { name: 'Docker', category: 'tool', importance: 'critical', demandPercentage: 94 },
-    { name: 'Kubernetes', category: 'tool', importance: 'critical', demandPercentage: 88 },
-    { name: 'Terraform', category: 'tool', importance: 'critical', demandPercentage: 80 },
-    { name: 'AWS', category: 'hard_skill', importance: 'high', demandPercentage: 85 },
-    { name: 'Linux', category: 'hard_skill', importance: 'high', demandPercentage: 78 },
-    { name: 'CI/CD', category: 'methodology', importance: 'high', demandPercentage: 90 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 95 },
-  ],
-  'Data Engineering': [
-    { name: 'Python', category: 'hard_skill', importance: 'critical', demandPercentage: 92 },
-    { name: 'Spark', category: 'hard_skill', importance: 'critical', demandPercentage: 88 },
-    { name: 'SQL', category: 'hard_skill', importance: 'critical', demandPercentage: 90 },
-    { name: 'Kafka', category: 'tool', importance: 'high', demandPercentage: 75 },
-    { name: 'Airflow', category: 'tool', importance: 'high', demandPercentage: 80 },
-    { name: 'Snowflake', category: 'tool', importance: 'high', demandPercentage: 65 },
-    { name: 'NoSQL', category: 'hard_skill', importance: 'medium', demandPercentage: 70 },
-    { name: 'Docker', category: 'tool', importance: 'medium', demandPercentage: 60 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 85 },
-  ],
-  'QA & Automation': [
-    { name: 'QA', category: 'hard_skill', importance: 'critical', demandPercentage: 90 },
-    { name: 'Selenium', category: 'tool', importance: 'critical', demandPercentage: 85 },
-    { name: 'Cypress', category: 'tool', importance: 'high', demandPercentage: 78 },
-    { name: 'SQL', category: 'hard_skill', importance: 'high', demandPercentage: 80 },
-    { name: 'Postman', category: 'tool', importance: 'high', demandPercentage: 75 },
-    { name: 'Python', category: 'hard_skill', importance: 'medium', demandPercentage: 70 },
-    { name: 'Git', category: 'tool', importance: 'medium', demandPercentage: 88 },
-  ],
-};
-
-const getClusterKey = (name: string): string => {
-  const n = name.toLowerCase();
-  if (n.includes('java')) return 'Backend Java';
-  if (n.includes('python')) return 'Backend Python';
-  if (n.includes('frontend') || n.includes('react')) return 'Frontend React';
-  if (n.includes('devops') || n.includes('cloud')) return 'DevOps Cloud';
-  if (n.includes('data')) return 'Data Engineering';
-  if (n.includes('qa') || n.includes('automation')) return 'QA & Automation';
-  return name;
-};
-
 function DashboardContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: cvData, isLoading: isCVLoading, refetch: refetchCVs } = useUserCVs();
   const { data: profile, refetch: refetchProfile } = useUserProfile();
-  const { startAnalysis, isAnalysisReady, commitUpdate } = useCVAnalysis();
+  const { startAnalysis, isAnalysisReady, isAnalyzing, commitUpdate } = useCVAnalysis();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -526,6 +445,7 @@ function DashboardContent() {
       level: string;
       score: number;
       demandPercentage: number;
+      category: string;
     }
     interface SkillGap {
       name: string;
@@ -547,6 +467,7 @@ function DashboardContent() {
           level: skill.importance === 'critical' ? 'Avanzado' : 'Intermedio',
           score: skill.importance === 'critical' ? 3 : 2,
           demandPercentage: skill.demandPercentage,
+          category: skill.category,
         });
       } else {
         gaps.push({
@@ -558,10 +479,20 @@ function DashboardContent() {
       }
     });
 
-    // Sort strengths by demand percentage descending
-    strengths.sort((a, b) => b.demandPercentage - a.demandPercentage);
-    // Sort gaps by demand percentage descending
-    gaps.sort((a, b) => b.market_demand_percentage - a.market_demand_percentage);
+    // Sort strengths: by demand desc, secondary by level (Avanzado > Intermedio)
+    const levelOrder: Record<string, number> = { Avanzado: 3, Intermedio: 2, Básico: 1 };
+    strengths.sort((a, b) => {
+      const demandDiff = b.demandPercentage - a.demandPercentage;
+      if (demandDiff !== 0) return demandDiff;
+      return (levelOrder[b.level] || 0) - (levelOrder[a.level] || 0);
+    });
+    // Sort gaps: by importance desc, secondary by demand desc
+    const impOrder: Record<string, number> = { critical: 3, high: 2, medium: 1 };
+    gaps.sort((a, b) => {
+      const impDiff = (impOrder[b.market_importance] || 0) - (impOrder[a.market_importance] || 0);
+      if (impDiff !== 0) return impDiff;
+      return b.market_demand_percentage - a.market_demand_percentage;
+    });
 
     return { strengths, gaps };
   }, [activeCluster, techSkills]);
@@ -620,10 +551,31 @@ function DashboardContent() {
     );
   }
 
+  // Get formatted date for header
+  const currentCV = cvData?.cvs?.[0];
+  const formattedDate = currentCV?.uploaded_at
+    ? new Date(currentCV.uploaded_at).toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : 'Recientemente';
+
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 py-8 relative">
+    <>
+      <HeaderBar
+        clusters={allAffinities}
+        activeCluster={activeCluster}
+        onSelectCluster={(name) => {
+          const idx = allAffinities.findIndex((a) => a.cluster_name === name);
+          if (idx !== -1) handleSelectCluster(idx);
+        }}
+        isAnalyzing={isAnalyzing}
+        isAnalysisReady={isAnalysisReady}
+        lastAnalysisDate={formattedDate}
+      />
+
+      <div className="py-6">
         {/* Banner de Sincronización Diferida */}
         <CVUpdateBanner />
 
@@ -645,31 +597,10 @@ function DashboardContent() {
             <MarketScoreCard
               currentScore={activeScore}
               primarySpecialty={activeCluster?.cluster_name || 'Software Engineering'}
-              secondaryAffinities={allAffinities.map((a) => ({
-                name: a.cluster_name,
-                score: Math.round(a.affinity_score * 100),
-                isPrimary: a.is_primary,
-              }))}
               isLoading={isRecalculating}
-              currentIndex={activeClusterIndex}
-              totalClusters={allAffinities.length}
-              isPrimaryCluster={activeCluster?.is_primary}
-              onNext={() =>
-                handleSelectCluster(Math.min(allAffinities.length - 1, activeClusterIndex + 1))
-              }
-              onPrev={() => handleSelectCluster(Math.max(0, activeClusterIndex - 1))}
-              onSelectSpecialty={(name) => {
-                const idx = allAffinities.findIndex((a) => a.cluster_name === name);
-                if (idx !== -1) handleSelectCluster(idx);
-              }}
               onViewRoadmap={() => {
                 router.push(
                   `/dashboard/action-plan?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`,
-                );
-              }}
-              onViewTopology={() => {
-                router.push(
-                  `/market?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`,
                 );
               }}
             />
@@ -806,7 +737,20 @@ function DashboardContent() {
                         {strength.demandPercentage}% DEMANDA
                       </span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground mt-1">{strength.level}</span>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[10px] text-muted-foreground">{strength.level}</span>
+                      {strength.category && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+                          {strength.category === 'hard_skill'
+                            ? 'Habilidad'
+                            : strength.category === 'tool'
+                              ? 'Herramienta'
+                              : strength.category === 'methodology'
+                                ? 'Metodología'
+                                : strength.category}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -870,6 +814,10 @@ function DashboardContent() {
                       : crit === 'medium'
                         ? 'Media'
                         : crit;
+                const tagClass =
+                  crit === 'critical'
+                    ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
 
                 return (
                   <div
@@ -884,9 +832,20 @@ function DashboardContent() {
                         {demand}% DEMANDA
                       </span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground mt-1">
-                      Brecha ({critLabel})
-                    </span>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className={`text-[10px] font-medium ${textClass}`}>{critLabel}</span>
+                      {gap.skill_type && (
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tagClass}`}>
+                          {gap.skill_type === 'hard_skill'
+                            ? 'Habilidad'
+                            : gap.skill_type === 'tool'
+                              ? 'Herramienta'
+                              : gap.skill_type === 'methodology'
+                                ? 'Metodología'
+                                : gap.skill_type}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -987,7 +946,7 @@ function DashboardContent() {
           </div>
         </SheetContent>
       </Sheet>
-    </div>
+    </>
   );
 }
 

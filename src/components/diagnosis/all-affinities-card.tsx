@@ -76,7 +76,7 @@ export function AllAffinitiesCard({
 
   return (
     <>
-      <Card className="shadow-lg shadow-black/5 border-border bg-card flex flex-col h-full min-h-[220px] relative overflow-hidden">
+      <Card className="card-standard flex flex-col h-full min-h-[220px] relative overflow-hidden">
         {isLoading && (
           <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
             <Loader2 className="h-6 w-6 text-primary animate-spin" />

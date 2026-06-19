@@ -10,7 +10,7 @@ interface Props {
 
 export function EstimatedSeniorityCard({ seniority, yearsBasis, isEmpty = false }: Props) {
   return (
-    <Card className="border-border bg-card shadow-sm">
+    <Card className="card-standard shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-2 tracking-wider uppercase">
           <Award className="h-4 w-4 text-primary" />
