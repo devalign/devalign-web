@@ -229,3 +229,7 @@ button:hover {
 @utility card-tinted {
   @apply bg-primary/5 border-primary/20 rounded-xl;
 }
+
+@utility card-glass {
+  @apply bg-background/60 backdrop-blur-md border border-border rounded-2xl;
+}

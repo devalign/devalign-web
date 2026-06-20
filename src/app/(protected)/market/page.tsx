@@ -12,6 +12,7 @@ import {
   Binary,
   Info,
   ArrowLeft,
+  ChevronLeft,
   Server,
   CloudLightning,
   Monitor,
@@ -133,6 +134,19 @@ function TopologyContent() {
 
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+      {/* Back Button */}
+      <div className="flex items-center justify-between mb-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/overview')}
+          className="text-muted-foreground hover:text-foreground hover:bg-secondary/40 text-xs gap-1 h-8 cursor-pointer pl-2 pr-3"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Volver al Overview
+        </Button>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-1">
@@ -211,10 +225,10 @@ function TopologyContent() {
                       Algoritmo Utilizado
                     </h4>
                     <p className="text-xs font-bold text-foreground mt-0.5">
-                      Clustering K-Modes Multivariado
+                      Clustering HDBSCAN sobre UMAP
                     </p>
                     <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
-                      Optimizado para datos categóricos (presencia/ausencia de habilidades).
+                      Clustering jerárquico basado en densidad optimizado con reducción dimensional para capturar afinidades complejas de habilidades.
                     </p>
                   </div>
                 </div>

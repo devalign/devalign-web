@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ChevronDown, Sparkles, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ClusterAffinityItem } from '@/lib/api/types';
@@ -18,6 +19,7 @@ export function BreadcrumbClusterDropdown({
   onSelect,
   className,
 }: BreadcrumbClusterDropdownProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +42,23 @@ export function BreadcrumbClusterDropdown({
     );
   }
 
-  const score = Math.round(activeCluster.affinity_score * 100);
+  // Filter displayed clusters: Top 3 (primary + 2 highest secondaries) + active cluster if not in top 3
+  const primaryCluster = clusters.find((c) => c.is_primary);
+  const otherClusters = clusters
+    .filter((c) => !c.is_primary)
+    .sort((a, b) => b.affinity_score - a.affinity_score);
+  const topSecondaries = otherClusters.slice(0, 2);
+
+  const displayedClusters: ClusterAffinityItem[] = [];
+  if (primaryCluster) {
+    displayedClusters.push(primaryCluster);
+  }
+  displayedClusters.push(...topSecondaries);
+
+  // If activeCluster is not in displayedClusters, append it
+  if (activeCluster && !displayedClusters.some((c) => c.cluster_id === activeCluster.cluster_id)) {
+    displayedClusters.push(activeCluster);
+  }
 
   return (
     <div ref={dropdownRef} className={cn('relative inline-flex items-center', className)}>
@@ -65,7 +83,7 @@ export function BreadcrumbClusterDropdown({
       {isOpen && (
         <div className="absolute top-full left-0 mt-1.5 w-56 bg-card border border-border rounded-lg shadow-lg overflow-hidden z-50">
           <div className="p-1">
-            {clusters.map((cluster) => {
+            {displayedClusters.map((cluster) => {
               const isSelected = cluster.cluster_name === activeCluster.cluster_name;
               const clusterScore = Math.round(cluster.affinity_score * 100);
 
@@ -107,6 +125,18 @@ export function BreadcrumbClusterDropdown({
                 </button>
               );
             })}
+
+            <div className="border-t border-border/60 my-1" />
+            <button
+              onClick={() => {
+                router.push('/market');
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-left text-primary hover:bg-primary/10 transition-colors font-semibold text-xs cursor-pointer"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 animate-pulse" />
+              <span>Explorar más especialidades...</span>
+            </button>
           </div>
         </div>
       )}

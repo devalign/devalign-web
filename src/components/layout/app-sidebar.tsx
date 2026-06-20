@@ -14,6 +14,7 @@ import {
   LogOut,
   Sun,
   Moon,
+  TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -38,6 +39,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  { name: 'Overview', href: '/overview', icon: Network },
+  { name: 'Mercado', href: '/market', icon: TrendingUp },
   { name: 'Evaluación', href: '/dashboard', icon: Activity },
   { name: 'Plan de Acción', href: '/dashboard/action-plan', icon: Map },
 ];
@@ -82,9 +85,6 @@ export default function AppSidebar() {
     router.refresh();
   };
 
-  const marketHref = `/market?cluster=${encodeURIComponent(cluster)}`;
-  const onMarket = pathname.startsWith('/market');
-
   return (
     <aside
       suppressHydrationWarning
@@ -94,10 +94,11 @@ export default function AppSidebar() {
         <Hexagon className="h-6 w-6 text-primary fill-primary/20" />
       </div>
 
-      <nav className="flex-1 space-y-1.5 px-3 py-4">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
+      <nav className="flex-1 flex flex-col justify-between px-3 py-4">
+        <div className="space-y-1.5">
+          {navItems.filter(item => item.name !== 'Mercado').map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
 
           if (item.disabled) {
             return (
@@ -143,31 +144,43 @@ export default function AppSidebar() {
             </div>
           );
         })}
-      </nav>
-
-      <div className="px-3 py-2 space-y-1.5 items-center">
-        <div className="relative group">
-          <Link
-            href={marketHref}
-            className={cn(
-              'flex items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
-              onMarket
-                ? 'bg-secondary text-foreground font-extrabold shadow-xs'
-                : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
-            )}
-          >
-            <Network
-              className={cn(
-                'h-4 w-4 shrink-0',
-                onMarket ? 'text-primary' : 'text-muted-foreground/70',
-              )}
-            />
-          </Link>
-          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
-            Ver Mercado
-          </div>
         </div>
-      </div>
+
+        <div className="space-y-1.5">
+          {navItems.filter(item => item.name === 'Mercado').map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+
+            const itemHref = cluster
+              ? `${item.href}?cluster=${encodeURIComponent(cluster)}`
+              : item.href;
+
+            return (
+              <div key={item.name} className="relative group">
+                <Link
+                  href={itemHref}
+                  className={cn(
+                    'flex items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
+                    isActive
+                      ? 'bg-secondary text-foreground font-extrabold shadow-xs'
+                      : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
+                  )}
+                >
+                  <Icon
+                    className={cn(
+                      'h-4 w-4 shrink-0',
+                      isActive ? 'text-primary' : 'text-muted-foreground/70',
+                    )}
+                  />
+                </Link>
+                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                  {item.name}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </nav>
 
       <div className="p-3 border-t border-border space-y-2.5 flex flex-col justify-center items-center">
         <div className="relative group">
@@ -250,30 +263,6 @@ export default function AppSidebar() {
                   <Moon className="h-3 w-3" />
                   <span>Oscuro</span>
                 </button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Notificaciones
-              </h4>
-              <div className="space-y-3 rounded-lg border border-border p-3.5 bg-secondary/10">
-                <label className="flex items-start justify-between gap-4 cursor-pointer">
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-semibold text-foreground">
-                      Reportes Semanales
-                    </span>
-                    <p className="text-[10px] text-muted-foreground leading-normal">
-                      Recibe correos con el estado actualizado del mercado de desarrollo de
-                      software.
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    defaultChecked={false}
-                    className="h-4 w-4 rounded-sm border-border text-primary focus:ring-primary cursor-pointer accent-primary"
-                  />
-                </label>
               </div>
             </div>
 

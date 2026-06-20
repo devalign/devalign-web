@@ -49,6 +49,8 @@ export async function updateSession(request: NextRequest) {
   const isDashboardRoute =
     request.nextUrl.pathname.startsWith('/dashboard') ||
     request.nextUrl.pathname.startsWith('/profile') ||
+    request.nextUrl.pathname.startsWith('/overview') ||
+    request.nextUrl.pathname.startsWith('/market') ||
     request.nextUrl.pathname.startsWith('/upload') ||
     request.nextUrl.pathname.startsWith('/analysis') ||
     request.nextUrl.pathname.startsWith('/roadmap');
@@ -65,9 +67,9 @@ export async function updateSession(request: NextRequest) {
   const hasResetMode = request.nextUrl.searchParams.get('mode') === 'reset-password';
 
   if (isAuthRoute && user && !hasResetMode) {
-    // Redirect logged-in users away from the home/login screen to profile
+    // Redirect logged-in users away from the home/login screen to overview
     const url = request.nextUrl.clone();
-    url.pathname = '/profile';
+    url.pathname = '/overview';
     return NextResponse.redirect(url);
   }
 

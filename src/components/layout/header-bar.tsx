@@ -45,6 +45,11 @@ export function HeaderBar({
       if (clusterName) {
         items.push({ label: clusterName, isClusterSelector: true });
       }
+    } else if (pathname.startsWith('/overview')) {
+      items.push({ label: 'Overview' });
+      if (clusterName) {
+        items.push({ label: clusterName, isClusterSelector: true });
+      }
     } else if (pathname.startsWith('/profile')) {
       items.push({ label: 'Perfil Profesional' });
     }
@@ -53,7 +58,7 @@ export function HeaderBar({
   };
 
   return (
-    <header className="flex h-auto min-h-12 sm:h-14 shrink-0 items-center justify-between border border-border rounded-xl px-3 sm:px-4 lg:px-6 bg-card backdrop-blur-md sticky top-0 z-20 gap-2">
+    <header className="card-glass flex h-auto min-h-12 sm:h-14 shrink-0 items-center justify-between px-3 sm:px-4 lg:px-6 sticky top-0 z-20 gap-2">
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
         <Breadcrumb
           items={getBreadcrumbs()}

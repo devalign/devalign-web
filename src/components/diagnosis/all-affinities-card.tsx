@@ -200,7 +200,7 @@ export function AllAffinitiesCard({
                 </span>
                 <span className="text-foreground font-semibold flex items-center gap-1">
                   <Cpu className="h-3 w-3 text-muted-foreground" />
-                  K-Modes Multivariado
+                  HDBSCAN + UMAP
                 </span>
               </div>
               <div className="flex flex-col gap-0.5 mt-1 border-l border-border/60 pl-3">

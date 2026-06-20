@@ -73,6 +73,8 @@ export interface ClusterAffinityItem {
   is_primary: boolean;
   market_insights?: MarketInsights;
   compatible_roles?: CompatibleRoleItem[];
+  detected_skills?: SkillItem[];
+  skill_gaps?: SkillItem[];
 }
 
 export interface DomainAffinityItem {

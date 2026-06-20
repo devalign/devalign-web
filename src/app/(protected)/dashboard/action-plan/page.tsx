@@ -23,7 +23,6 @@ import { toast } from 'sonner';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import { HeaderBar } from '@/components/layout/header-bar';
-import { CLUSTER_SKILLS_MAP, getClusterKey } from '@/lib/constants/clusters';
 
 interface RoadmapStep {
   skill: string;
@@ -257,7 +256,7 @@ function RoadmapContent() {
     return null;
   }, [allAffinities, clusterParam]);
 
-  // Retrieve user hard skills (supports profile hook and offline localStorage draft)
+  // Retrieve user technical & conceptual skills (supports profile hook and offline localStorage draft)
   const techSkills = useMemo<string[]>(() => {
     if (typeof window !== 'undefined') {
       const draftStr = localStorage.getItem('devalign_profile_draft');
@@ -266,7 +265,10 @@ function RoadmapContent() {
           const draft = JSON.parse(draftStr);
           if (draft.detected_skills) {
             return draft.detected_skills
-              .filter((s: { skill_type: string; name: string }) => s.skill_type === 'hard_skill')
+              .filter((s: { skill_type: string; name: string }) => {
+                const t = s.skill_type ? s.skill_type.toLowerCase() : '';
+                return t !== 'soft' && t !== 'soft_skill';
+              })
               .map((s: { skill_type: string; name: string }) => s.name);
           }
         } catch (e) {
@@ -277,17 +279,18 @@ function RoadmapContent() {
 
     if (profile?.detected_skills) {
       return profile.detected_skills
-        .filter((s) => s.skill_type === 'hard_skill')
+        .filter((s) => {
+          const t = s.skill_type ? s.skill_type.toLowerCase() : '';
+          return t !== 'soft' && t !== 'soft_skill';
+        })
         .map((s) => s.name);
     }
     return [];
   }, [profile]);
 
-  // Calculate gaps dynamically based on active cluster and techSkills
+  // Calculate gaps dynamically based on active cluster
   const dynamicGaps = useMemo(() => {
     if (!activeCluster) return [];
-    const key = getClusterKey(activeCluster.cluster_name);
-    const clusterSkills = CLUSTER_SKILLS_MAP[key] || [];
 
     interface SkillGap {
       name: string;
@@ -295,20 +298,13 @@ function RoadmapContent() {
       market_importance: string;
       market_demand_percentage: number;
     }
-    const gaps: SkillGap[] = [];
-    const userSkillsSet = new Set(techSkills.map((s: string) => s.toLowerCase()));
 
-    clusterSkills.forEach((skill) => {
-      const isOwned = userSkillsSet.has(skill.name.toLowerCase());
-      if (!isOwned) {
-        gaps.push({
-          name: skill.name,
-          skill_type: skill.category,
-          market_importance: skill.importance,
-          market_demand_percentage: skill.demandPercentage,
-        });
-      }
-    });
+    const gaps: SkillGap[] = (activeCluster.skill_gaps || []).map((g) => ({
+      name: g.name,
+      skill_type: g.skill_type,
+      market_importance: g.market_importance ?? 'medium',
+      market_demand_percentage: g.market_demand_percentage ?? 100,
+    }));
 
     // Sort by importance desc, secondary by demand desc
     const impOrder: Record<string, number> = { critical: 3, high: 2, medium: 1 };
@@ -318,7 +314,7 @@ function RoadmapContent() {
       return b.market_demand_percentage - a.market_demand_percentage;
     });
     return gaps;
-  }, [activeCluster, techSkills]);
+  }, [activeCluster]);
 
   // Compute phases dynamically based on dynamic gaps
   const phases: RoadmapPhase[] = useMemo(() => {
@@ -446,20 +442,22 @@ function RoadmapContent() {
 
   return (
     <>
-      <HeaderBar
-        clusters={allAffinities}
-        activeCluster={activeCluster}
-        onSelectCluster={(name) => {
-          const params = new URLSearchParams(searchParams.toString());
-          params.set('cluster', name);
-          router.push(`?${params.toString()}`);
-        }}
-        isAnalyzing={isAnalyzing}
-        isAnalysisReady={isAnalysisReady}
-        lastAnalysisDate={formattedDate}
-      />
+      <div className="w-full px-4 md:px-6 pt-4">
+        <HeaderBar
+          clusters={allAffinities}
+          activeCluster={activeCluster}
+          onSelectCluster={(name) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set('cluster', name);
+            router.push(`?${params.toString()}`);
+          }}
+          isAnalyzing={isAnalyzing}
+          isAnalysisReady={isAnalysisReady}
+          lastAnalysisDate={formattedDate}
+        />
+      </div>
 
-      <div className="py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
       {/* Action required banner when roadmap is not generated */}
       {!isGenerated && (
         <div className="max-w-xl mx-auto py-12 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10">

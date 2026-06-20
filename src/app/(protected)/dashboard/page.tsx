@@ -34,7 +34,6 @@ import {
 } from '@/components/ui/sheet';
 import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Lightbulb } from 'lucide-react';
 import { HeaderBar } from '@/components/layout/header-bar';
-import { CLUSTER_SKILLS_MAP, getClusterKey } from '@/lib/constants/clusters';
 
 // Refactored modular subcomponents
 import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
@@ -42,10 +41,12 @@ import { PriorityGapsCard } from '@/components/diagnosis/priority-gaps-card';
 import { MarketScoreCard } from '@/components/diagnosis/market-score-card';
 import { StrengthsCard } from '@/components/diagnosis/strengths-card';
 import { AffinityRadarChart } from '@/components/diagnosis/affinity-radar-chart';
+import { UserProfileCard } from '@/components/diagnosis/user-profile-card';
 import { CompatibleRolesCard } from '@/components/diagnosis/compatible-roles-card';
 import { AiInsightCard } from '@/components/diagnosis/ai-insight-card';
 import { ClusterDemandCard } from '@/components/diagnosis/cluster-demand-card';
 import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
+import { KnowledgeGraphCard } from '@/components/profile/KnowledgeGraphCard';
 
 function DashboardContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
@@ -80,8 +81,8 @@ function DashboardContent() {
 
   // Skills Lists
   const [techSkills, setTechSkills] = useState<string[]>([]);
+  const [conceptSkills, setConceptSkills] = useState<string[]>([]);
   const [softSkills, setSoftSkills] = useState<string[]>([]);
-  const [toolsSkills, setToolsSkills] = useState<string[]>([]);
 
   // ML Gap items (skills the user DOES NOT have but the market demands)
   const [marketGaps, setMarketGaps] = useState<SkillItem[]>([]);
@@ -199,19 +200,19 @@ function DashboardContent() {
           if (draft.certifications) setCertifications(draft.certifications);
 
           if (draft.detected_skills) {
-            const tech = draft.detected_skills
-              .filter((s: { name: string; skill_type: string }) => s.skill_type === 'hard_skill')
-              .map((s: { name: string; skill_type: string }) => s.name);
-            const soft = draft.detected_skills
-              .filter((s: { name: string; skill_type: string }) => s.skill_type === 'soft_skill')
-              .map((s: { name: string; skill_type: string }) => s.name);
-            const tools = draft.detected_skills
-              .filter((s: { name: string; skill_type: string }) => s.skill_type === 'tool')
-              .map((s: { name: string; skill_type: string }) => s.name);
+            const tech: string[] = [];
+            const concept: string[] = [];
+            const soft: string[] = [];
+            draft.detected_skills.forEach((s: { name: string; skill_type: string }) => {
+              const t = s.skill_type ? s.skill_type.toLowerCase() : '';
+              if (t === 'soft' || t === 'soft_skill') soft.push(s.name);
+              else if (t === 'concept' || t === 'methodology') concept.push(s.name);
+              else tech.push(s.name);
+            });
 
-            if (tech.length > 0) setTechSkills(tech);
-            if (soft.length > 0) setSoftSkills(soft);
-            if (tools.length > 0) setToolsSkills(tools);
+            setTechSkills(tech);
+            setConceptSkills(concept);
+            setSoftSkills(soft);
 
             // Dynamically adjust gaps: remove skills that are now in technical skills
             const originalGaps = [
@@ -225,10 +226,10 @@ function DashboardContent() {
               'NoSQL',
             ];
             const newGaps: SkillItem[] = originalGaps
-              .filter((gap) => !tech.includes(gap))
+              .filter((gap) => !tech.includes(gap) && !concept.includes(gap))
               .map((name, idx) => ({
                 name,
-                skill_type: 'hard_skill',
+                skill_type: 'tech',
                 market_importance: idx < 3 ? 'critical' : 'high',
                 market_demand_percentage: Math.max(74 - idx * 4, 38),
               }));
@@ -261,19 +262,19 @@ function DashboardContent() {
         }
 
         if (profile.detected_skills && profile.detected_skills.length > 0) {
-          const tech = profile.detected_skills
-            .filter((s) => s.skill_type === 'hard_skill')
-            .map((s) => s.name);
-          const soft = profile.detected_skills
-            .filter((s) => s.skill_type === 'soft_skill')
-            .map((s) => s.name);
-          const tools = profile.detected_skills
-            .filter((s) => s.skill_type === 'tool' || s.skill_type === 'methodology')
-            .map((s) => s.name);
+          const tech: string[] = [];
+          const concept: string[] = [];
+          const soft: string[] = [];
+          profile.detected_skills.forEach((s) => {
+            const t = s.skill_type ? s.skill_type.toLowerCase() : '';
+            if (t === 'soft' || t === 'soft_skill') soft.push(s.name);
+            else if (t === 'concept' || t === 'methodology') concept.push(s.name);
+            else tech.push(s.name);
+          });
 
-          if (tech.length > 0) setTechSkills(tech);
-          if (soft.length > 0) setSoftSkills(soft);
-          if (tools.length > 0) setToolsSkills(tools);
+          setTechSkills(tech);
+          setConceptSkills(concept);
+          setSoftSkills(soft);
         }
 
         if (profile.skill_gaps && profile.skill_gaps.length > 0) {
@@ -287,8 +288,8 @@ function DashboardContent() {
         setEducationList([]);
         setCertifications([]);
         setTechSkills([]);
+        setConceptSkills([]);
         setSoftSkills([]);
-        setToolsSkills([]);
         setMarketGaps([]);
       }
     };
@@ -437,8 +438,6 @@ function DashboardContent() {
   // Dynamically calculate strengths and gaps based on active cluster
   const { strengths: activeStrengths, gaps: activeGaps } = React.useMemo(() => {
     if (!activeCluster) return { strengths: [], gaps: [] };
-    const key = getClusterKey(activeCluster.cluster_name);
-    const clusterSkills = CLUSTER_SKILLS_MAP[key] || [];
 
     interface TechStrength {
       name: string;
@@ -453,31 +452,24 @@ function DashboardContent() {
       market_importance: string;
       market_demand_percentage: number;
     }
-    const strengths: TechStrength[] = [];
-    const gaps: SkillGap[] = [];
 
-    // Normalize user tech skills for case-insensitive lookup
-    const userSkillsSet = new Set(techSkills.map((s) => s.toLowerCase()));
-
-    clusterSkills.forEach((skill) => {
-      const isOwned = userSkillsSet.has(skill.name.toLowerCase());
-      if (isOwned) {
-        strengths.push({
-          name: skill.name,
-          level: skill.importance === 'critical' ? 'Avanzado' : 'Intermedio',
-          score: skill.importance === 'critical' ? 3 : 2,
-          demandPercentage: skill.demandPercentage,
-          category: skill.category,
-        });
-      } else {
-        gaps.push({
-          name: skill.name,
-          skill_type: skill.category,
-          market_importance: skill.importance,
-          market_demand_percentage: skill.demandPercentage,
-        });
-      }
+    const strengths: TechStrength[] = (activeCluster.detected_skills || []).map((s) => {
+      const level = s.market_importance === 'critical' ? 'Avanzado' : 'Intermedio';
+      return {
+        name: s.name,
+        level,
+        score: level === 'Avanzado' ? 3 : 2,
+        demandPercentage: s.market_demand_percentage ?? 100,
+        category: s.skill_type,
+      };
     });
+
+    const gaps: SkillGap[] = (activeCluster.skill_gaps || []).map((g) => ({
+      name: g.name,
+      skill_type: g.skill_type,
+      market_importance: g.market_importance ?? 'medium',
+      market_demand_percentage: g.market_demand_percentage ?? 100,
+    }));
 
     // Sort strengths: by demand desc, secondary by level (Avanzado > Intermedio)
     const levelOrder: Record<string, number> = { Avanzado: 3, Intermedio: 2, Básico: 1 };
@@ -486,6 +478,7 @@ function DashboardContent() {
       if (demandDiff !== 0) return demandDiff;
       return (levelOrder[b.level] || 0) - (levelOrder[a.level] || 0);
     });
+
     // Sort gaps: by importance desc, secondary by demand desc
     const impOrder: Record<string, number> = { critical: 3, high: 2, medium: 1 };
     gaps.sort((a, b) => {
@@ -495,7 +488,7 @@ function DashboardContent() {
     });
 
     return { strengths, gaps };
-  }, [activeCluster, techSkills]);
+  }, [activeCluster]);
 
   // Construct profile payload for ATS Modal preview
   const dynamicProfile: UserProfileData = {
@@ -514,9 +507,9 @@ function DashboardContent() {
     all_affinities: allAffinities,
     domain_affinities: profile?.domain_affinities || [],
     detected_skills: [
-      ...techSkills.map((name) => ({ name, skill_type: 'hard_skill' })),
-      ...softSkills.map((name) => ({ name, skill_type: 'soft_skill' })),
-      ...toolsSkills.map((name) => ({ name, skill_type: 'tool' })),
+      ...techSkills.map((name) => ({ name, skill_type: 'tech' })),
+      ...softSkills.map((name) => ({ name, skill_type: 'soft' })),
+      ...conceptSkills.map((name) => ({ name, skill_type: 'concept' })),
     ],
     skill_gaps: activeGaps,
     education: educationList,
@@ -563,31 +556,31 @@ function DashboardContent() {
 
   return (
     <>
-      <HeaderBar
-        clusters={allAffinities}
-        activeCluster={activeCluster}
-        onSelectCluster={(name) => {
-          const idx = allAffinities.findIndex((a) => a.cluster_name === name);
-          if (idx !== -1) handleSelectCluster(idx);
-        }}
-        isAnalyzing={isAnalyzing}
-        isAnalysisReady={isAnalysisReady}
-        lastAnalysisDate={formattedDate}
-      />
+      <div className="w-full px-4 md:px-6 pt-4">
+        <HeaderBar
+          clusters={allAffinities}
+          activeCluster={activeCluster}
+          onSelectCluster={(name) => {
+            const idx = allAffinities.findIndex((a) => a.cluster_name === name);
+            if (idx !== -1) handleSelectCluster(idx);
+          }}
+          isAnalyzing={isAnalyzing}
+          isAnalysisReady={isAnalysisReady}
+          lastAnalysisDate={formattedDate}
+        />
+      </div>
 
-      <div className="py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         {/* Banner de Sincronización Diferida */}
         <CVUpdateBanner />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Columna Izquierda: Perfil y Radar */}
           <div className="lg:col-span-1 flex flex-col gap-6">
+            <UserProfileCard fullName={fullName} roleTitle={roleTitle} seniority={seniority} />
             <AffinityRadarChart
               domainAffinities={dynamicProfile.domain_affinities}
               techSkills={techSkills}
-              fullName={fullName}
-              roleTitle={roleTitle}
-              seniority={seniority}
               isLoading={isRecalculating}
             />
           </div>
@@ -835,7 +828,9 @@ function DashboardContent() {
                     <div className="flex items-center justify-between mt-1">
                       <span className={`text-[10px] font-medium ${textClass}`}>{critLabel}</span>
                       {gap.skill_type && (
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tagClass}`}>
+                        <span
+                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tagClass}`}
+                        >
                           {gap.skill_type === 'hard_skill'
                             ? 'Habilidad'
                             : gap.skill_type === 'tool'

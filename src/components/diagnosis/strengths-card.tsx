@@ -19,9 +19,11 @@ interface StrengthsCardProps {
 }
 
 const categoryLabel = (cat: string) => {
-  if (cat === 'hard_skill') return 'Habilidad';
-  if (cat === 'tool') return 'Herramienta';
-  if (cat === 'methodology') return 'Metodología';
+  const c = cat ? cat.toLowerCase() : '';
+  if (c === 'hard_skill' || c === 'tech') return 'Tecnología';
+  if (c === 'tool') return 'Herramienta';
+  if (c === 'methodology' || c === 'concept') return 'Concepto';
+  if (c === 'soft') return 'Blanda';
   return cat;
 };
 

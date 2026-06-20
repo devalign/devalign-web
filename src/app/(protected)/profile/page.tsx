@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useUserProfile, useUpdateUserProfile } from '@/hooks/use-user-profile';
+import { useUserProfile, useUpdateUserProfile, useUpdateUserSkills } from '@/hooks/use-user-profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -76,6 +76,7 @@ function ProfileContent() {
     ? cvData?.cvs?.find((cv) => cv.cv_id === profile.cv_id) || cvData?.cvs?.[0]
     : cvData?.cvs?.[0];
   const updateProfileMutation = useUpdateUserProfile();
+  const updateSkillsMutation = useUpdateUserSkills();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -101,12 +102,11 @@ function ProfileContent() {
 
   // Skills Lists
   const [techSkills, setTechSkills] = useState<string[]>([]);
+  const [conceptSkills, setConceptSkills] = useState<string[]>([]);
   const [softSkills, setSoftSkills] = useState<string[]>([]);
-  const [toolsSkills, setToolsSkills] = useState<string[]>([]);
-  const [methodologySkills, setMethodologySkills] = useState<string[]>([]);
 
   // Active Tab for Skills editing
-  const [activeTab, setActiveTab] = useState<'tech' | 'soft' | 'tools' | 'methodologies'>('tech');
+  const [activeTab, setActiveTab] = useState<'tech' | 'concept' | 'soft'>('tech');
   const [newSkillText, setNewSkillText] = useState('');
 
   const [isSaving, setIsSaving] = useState(false);
@@ -121,9 +121,8 @@ function ProfileContent() {
     experiences: Experience[];
     certifications: Certification[];
     techSkills: string[];
+    conceptSkills: string[];
     softSkills: string[];
-    toolsSkills: string[];
-    methodologySkills: string[];
   } | null>(null);
 
   const reanalyzeMutation = useReanalyzeCV();
@@ -214,23 +213,20 @@ function ProfileContent() {
           : [];
 
         let newTechSkills: string[] = [];
+        let newConceptSkills: string[] = [];
         let newSoftSkills: string[] = [];
-        let newToolsSkills: string[] = [];
-        let newMethodologySkills: string[] = [];
 
         if (profile.detected_skills?.length) {
-          newTechSkills = profile.detected_skills
-            .filter((s) => s.skill_type === 'hard_skill')
-            .map((s) => s.name);
-          newSoftSkills = profile.detected_skills
-            .filter((s) => s.skill_type === 'soft_skill')
-            .map((s) => s.name);
-          newToolsSkills = profile.detected_skills
-            .filter((s) => s.skill_type === 'tool')
-            .map((s) => s.name);
-          newMethodologySkills = profile.detected_skills
-            .filter((s) => s.skill_type === 'methodology')
-            .map((s) => s.name);
+          profile.detected_skills.forEach((s) => {
+            const typeLower = s.skill_type ? s.skill_type.toLowerCase() : '';
+            if (typeLower === 'soft' || typeLower === 'soft_skill') {
+              newSoftSkills.push(s.name);
+            } else if (typeLower === 'concept' || typeLower === 'methodology') {
+              newConceptSkills.push(s.name);
+            } else {
+              newTechSkills.push(s.name);
+            }
+          });
         }
 
         setFullName(newFullName);
@@ -240,9 +236,8 @@ function ProfileContent() {
         setExperiences(newExperiences);
         setCertifications(newCertifications);
         setTechSkills(newTechSkills);
+        setConceptSkills(newConceptSkills);
         setSoftSkills(newSoftSkills);
-        setToolsSkills(newToolsSkills);
-        setMethodologySkills(newMethodologySkills);
 
         initialSnapshotRef.current = {
           fullName: newFullName,
@@ -252,9 +247,8 @@ function ProfileContent() {
           experiences: newExperiences,
           certifications: newCertifications,
           techSkills: newTechSkills,
+          conceptSkills: newConceptSkills,
           softSkills: newSoftSkills,
-          toolsSkills: newToolsSkills,
-          methodologySkills: newMethodologySkills,
         };
       } else if (user) {
         const newFullName = user.full_name || user.email?.split('@')[0] || 'Desarrollador';
@@ -266,9 +260,8 @@ function ProfileContent() {
         setExperiences([]);
         setCertifications([]);
         setTechSkills([]);
+        setConceptSkills([]);
         setSoftSkills([]);
-        setToolsSkills([]);
-        setMethodologySkills([]);
 
         initialSnapshotRef.current = {
           fullName: newFullName,
@@ -278,9 +271,8 @@ function ProfileContent() {
           experiences: [],
           certifications: [],
           techSkills: [],
+          conceptSkills: [],
           softSkills: [],
-          toolsSkills: [],
-          methodologySkills: [],
         };
       }
     };
@@ -301,9 +293,8 @@ function ProfileContent() {
       JSON.stringify(snap.experiences) !== JSON.stringify(experiences) ||
       JSON.stringify(snap.certifications) !== JSON.stringify(certifications) ||
       JSON.stringify(snap.techSkills) !== JSON.stringify(techSkills) ||
-      JSON.stringify(snap.softSkills) !== JSON.stringify(softSkills) ||
-      JSON.stringify(snap.toolsSkills) !== JSON.stringify(toolsSkills) ||
-      JSON.stringify(snap.methodologySkills) !== JSON.stringify(methodologySkills)
+      JSON.stringify(snap.conceptSkills) !== JSON.stringify(conceptSkills) ||
+      JSON.stringify(snap.softSkills) !== JSON.stringify(softSkills)
     );
   }, [
     fullName,
@@ -313,9 +304,8 @@ function ProfileContent() {
     experiences,
     certifications,
     techSkills,
+    conceptSkills,
     softSkills,
-    toolsSkills,
-    methodologySkills,
   ]);
 
   // Skill Handling Actions
@@ -330,12 +320,9 @@ function ProfileContent() {
     } else if (activeTab === 'soft') {
       if (softSkills.includes(skillName)) return toast.error('Habilidad ya añadida');
       setSoftSkills([...softSkills, skillName]);
-    } else if (activeTab === 'tools') {
-      if (toolsSkills.includes(skillName)) return toast.error('Habilidad ya añadida');
-      setToolsSkills([...toolsSkills, skillName]);
     } else {
-      if (methodologySkills.includes(skillName)) return toast.error('Habilidad ya añadida');
-      setMethodologySkills([...methodologySkills, skillName]);
+      if (conceptSkills.includes(skillName)) return toast.error('Habilidad ya añadida');
+      setConceptSkills([...conceptSkills, skillName]);
     }
 
     setNewSkillText('');
@@ -344,13 +331,11 @@ function ProfileContent() {
 
   const handleDeleteSkill = (
     skillName: string,
-    type: 'tech' | 'soft' | 'tools' | 'methodologies',
+    type: 'tech' | 'soft' | 'concept',
   ) => {
     if (type === 'tech') setTechSkills(techSkills.filter((s) => s !== skillName));
     if (type === 'soft') setSoftSkills(softSkills.filter((s) => s !== skillName));
-    if (type === 'tools') setToolsSkills(toolsSkills.filter((s) => s !== skillName));
-    if (type === 'methodologies')
-      setMethodologySkills(methodologySkills.filter((s) => s !== skillName));
+    if (type === 'concept') setConceptSkills(conceptSkills.filter((s) => s !== skillName));
     toast.info(`Habilidad "${skillName}" removida.`);
   };
 
@@ -405,7 +390,8 @@ function ProfileContent() {
 
   // Construct payload formatted for backend/API
   const workExperiencePayload = experiences.map((exp) => {
-    const parts = exp.period.split('—').map((p) => p.trim());
+    // Split by any common dash: em-dash, en-dash, or simple hyphen
+    const parts = exp.period.split(/[—–-]/).map((p) => p.trim());
     const isCurrent = parts[1]?.toLowerCase().includes('presente') || false;
     return {
       company: exp.company,
@@ -433,18 +419,17 @@ function ProfileContent() {
   const detectedSkillsPayload = [
     ...techSkills.map((s) => ({
       name: s,
-      skill_type: 'hard_skill',
+      skill_type: 'tech',
       market_importance: 'consolidated',
     })),
     ...softSkills.map((s) => ({
       name: s,
-      skill_type: 'soft_skill',
+      skill_type: 'soft',
       market_importance: 'consolidated',
     })),
-    ...toolsSkills.map((s) => ({ name: s, skill_type: 'tool', market_importance: 'consolidated' })),
-    ...methodologySkills.map((s) => ({
+    ...conceptSkills.map((s) => ({
       name: s,
-      skill_type: 'methodology',
+      skill_type: 'concept',
       market_importance: 'consolidated',
     })),
   ];
@@ -476,6 +461,7 @@ function ProfileContent() {
     const toastId = toast.loading('Guardando perfil y recalculando diagnóstico...');
 
     try {
+      // 1. Save profile fields (PATCH /profile/me)
       await updateProfileMutation.mutateAsync({
         full_name: fullName,
         current_job_role: roleTitle,
@@ -483,21 +469,30 @@ function ProfileContent() {
         work_experience: workExperiencePayload,
         education: educationPayload,
         certifications: certificationsPayload,
-        detected_skills: detectedSkillsPayload,
       });
+
+      // 2. Save skills list (PUT /profile/skills)
+      await updateSkillsMutation.mutateAsync(detectedSkillsPayload);
+
+      // Invalidate queries & refetch directly to sync data immediately
+      await refetchProfile();
 
       toast.dismiss(toastId);
 
-      if (currentCV?.cv_id) {
-        try {
-          await reanalyzeMutation.mutateAsync(currentCV.cv_id);
-        } catch {
-          console.warn('Reanalysis trigger failed, showing sync banner anyway');
-        }
-      }
+      // Update snapshot so save button gets disabled immediately (no unsaved changes)
+      initialSnapshotRef.current = {
+        fullName,
+        roleTitle,
+        seniority,
+        educationList,
+        experiences,
+        certifications,
+        techSkills,
+        conceptSkills,
+        softSkills,
+      };
 
-      setIsRecalculationReady(true);
-      toast.success('¡Perfil guardado! La recalibración está lista para sincronizar.');
+      toast.success('¡Perfil guardado y diagnóstico recalculado con éxito!');
     } catch (error) {
       console.warn('API error updating profile:', error);
       toast.dismiss(toastId);
@@ -518,8 +513,7 @@ function ProfileContent() {
     setCertifications(snap.certifications);
     setTechSkills(snap.techSkills);
     setSoftSkills(snap.softSkills);
-    setToolsSkills(snap.toolsSkills);
-    setMethodologySkills(snap.methodologySkills);
+    setConceptSkills(snap.conceptSkills);
     setShowDiscardDialog(false);
     toast.info('Cambios descartados');
   };
@@ -539,14 +533,13 @@ function ProfileContent() {
         experiences,
         certifications,
         techSkills,
+        conceptSkills,
         softSkills,
-        toolsSkills,
-        methodologySkills,
       };
 
       toast.dismiss(toastId);
       toast.success('¡Perfil y diagnóstico actualizados con éxito!');
-      router.push('/dashboard');
+      router.push('/overview');
     } catch (error) {
       console.error('Error syncing recalculation:', error);
       toast.dismiss(toastId);
@@ -584,11 +577,11 @@ function ProfileContent() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/overview')}
             className="text-muted-foreground hover:text-foreground hover:bg-secondary/40 text-xs gap-1 h-8 cursor-pointer pl-2 pr-3"
           >
             <ChevronLeft className="w-4 h-4" />
-            Volver al Diagnóstico
+            Volver al Overview
           </Button>
 
           <Button
@@ -798,8 +791,8 @@ function ProfileContent() {
                 </div>
 
                 {/* Tabs */}
-                <div className="grid grid-cols-4 gap-1 bg-secondary/35 p-0.5 rounded-lg border border-border/50 mt-3">
-                  {(['tech', 'soft', 'tools', 'methodologies'] as const).map((tab) => (
+                <div className="grid grid-cols-3 gap-1 bg-secondary/35 p-0.5 rounded-lg border border-border/50 mt-3">
+                  {(['tech', 'concept', 'soft'] as const).map((tab) => (
                     <button
                       key={tab}
                       type="button"
@@ -811,12 +804,10 @@ function ProfileContent() {
                       }`}
                     >
                       {tab === 'tech'
-                        ? 'Técnicas'
-                        : tab === 'soft'
-                          ? 'Blandas'
-                          : tab === 'methodologies'
-                            ? 'Metodologías'
-                            : 'Herramientas'}
+                        ? 'Tecnologías'
+                        : tab === 'concept'
+                          ? 'Conceptos'
+                          : 'Blandas'}
                     </button>
                   ))}
                 </div>
@@ -828,9 +819,7 @@ function ProfileContent() {
                     ? techSkills
                     : activeTab === 'soft'
                       ? softSkills
-                      : activeTab === 'tools'
-                        ? toolsSkills
-                        : methodologySkills
+                      : conceptSkills
                   ).length === 0 ? (
                     <p className="text-[10px] text-muted-foreground m-auto">
                       No hay habilidades en esta categoría.
@@ -842,9 +831,7 @@ function ProfileContent() {
                           ? techSkills
                           : activeTab === 'soft'
                             ? softSkills
-                            : activeTab === 'tools'
-                              ? toolsSkills
-                              : methodologySkills,
+                            : conceptSkills,
                       ),
                     ).map((skill, idx) => (
                       <div

@@ -30,14 +30,14 @@ export default function SkillsCard({
   isPlaceholder = false,
 }: SkillsCardProps) {
   const [activeTab, setActiveTab] = useState<
-    'tecnicas' | 'blandas' | 'herramientas' | 'metodologias'
-  >('tecnicas');
+    'tecnologias' | 'conceptos' | 'blandas'
+  >('tecnologias');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editSkillsList, setEditSkillsList] = useState<SkillItem[]>([]);
   const [newSkillName, setNewSkillName] = useState('');
   const [newSkillCategory, setNewSkillCategory] = useState<
-    'tecnicas' | 'blandas' | 'herramientas' | 'metodologias'
-  >('tecnicas');
+    'tecnologias' | 'conceptos' | 'blandas'
+  >('tecnologias');
 
   const updateSkillsMutation = useUpdateUserSkills();
 
@@ -47,60 +47,18 @@ export default function SkillsCard({
     ...skillGaps.map((g) => ({ ...g, market_importance: g.market_importance || 'gap' })),
   ];
 
-  // Helper to categorize skills
+  // Helper to categorize skills into the 3 clean SkillNature categories
   const getSkillCategory = (
-    name: string,
     type: string,
-  ): 'tecnicas' | 'blandas' | 'herramientas' | 'metodologias' => {
-    const nameLower = name.toLowerCase();
-    if (type === 'soft_skill' || nameLower === 'soft_skill') return 'blandas';
-    if (type === 'tool' || nameLower === 'tool') return 'herramientas';
-    if (type === 'methodology' || nameLower === 'methodology') return 'metodologias';
-
-    // Simple heuristical filters for safety
-    const tools = [
-      'aws',
-      'azure',
-      'google cloud',
-      'gcp',
-      'docker',
-      'kubernetes',
-      'terraform',
-      'git',
-      'github',
-      'linux',
-      'prometheus',
-      'grafana',
-      'airflow',
-      'snowflake',
-      'ci/cd',
-      'github actions',
-      'kubernetes',
-      'helm',
-      'docker',
-    ];
-    const soft = [
-      'liderazgo',
-      'comunicación',
-      'trabajo en equipo',
-      'mentoría',
-      'adaptabilidad',
-      'empatía',
-      'resolución de problemas',
-      'negociación',
-      'agile',
-      'scrum',
-      'leadership',
-      'communication',
-      'teamwork',
-    ];
-    if (tools.some((t) => nameLower.includes(t))) return 'herramientas';
-    if (soft.some((s) => nameLower.includes(s))) return 'blandas';
-    return 'tecnicas';
+  ): 'tecnologias' | 'conceptos' | 'blandas' => {
+    const t = type ? type.toLowerCase() : '';
+    if (t === 'soft' || t === 'soft_skill') return 'blandas';
+    if (t === 'concept' || t === 'methodology') return 'conceptos';
+    return 'tecnologias';
   };
 
   // Filter skills for active tab view
-  const tabSkills = allSkills.filter((s) => getSkillCategory(s.name, s.skill_type) === activeTab);
+  const tabSkills = allSkills.filter((s) => getSkillCategory(s.skill_type) === activeTab);
 
   const handleOpenEdit = () => {
     setEditSkillsList(allSkills.map((s) => ({ ...s })));
@@ -133,10 +91,9 @@ export default function SkillsCard({
     }
 
     const typeMapping = {
-      tecnicas: 'hard_skill',
-      blandas: 'soft_skill',
-      herramientas: 'tool',
-      metodologias: 'methodology',
+      tecnologias: 'tech',
+      conceptos: 'concept',
+      blandas: 'soft',
     };
 
     const newSkill: SkillItem = {
@@ -182,7 +139,7 @@ export default function SkillsCard({
       <CardContent>
         {/* Navigation Tabs */}
         <div className="flex border-b border-border pb-px mb-4">
-          {(['tecnicas', 'blandas', 'herramientas', 'metodologias'] as const).map((tab) => (
+          {(['tecnologias', 'conceptos', 'blandas'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -193,13 +150,11 @@ export default function SkillsCard({
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               } ${isPlaceholder ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {tab === 'tecnicas'
-                ? 'Técnicas'
-                : tab === 'blandas'
-                  ? 'Blandas'
-                  : tab === 'metodologias'
-                    ? 'Metodologías'
-                    : 'Herramientas'}
+              {tab === 'tecnologias'
+                ? 'Tecnologías'
+                : tab === 'conceptos'
+                  ? 'Conceptos'
+                  : 'Blandas'}
             </button>
           ))}
         </div>
@@ -292,15 +247,14 @@ export default function SkillsCard({
                 value={newSkillCategory}
                 onChange={(e) =>
                   setNewSkillCategory(
-                    e.target.value as 'tecnicas' | 'blandas' | 'herramientas' | 'metodologias',
+                    e.target.value as 'tecnologias' | 'conceptos' | 'blandas',
                   )
                 }
                 className="h-9 rounded-md border border-input bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="tecnicas">Técnicas</option>
+                <option value="tecnologias">Tecnologías</option>
+                <option value="conceptos">Conceptos</option>
                 <option value="blandas">Blandas</option>
-                <option value="herramientas">Herramientas</option>
-                <option value="metodologias">Metodologías</option>
               </select>
             </div>
             <Button
@@ -332,7 +286,11 @@ export default function SkillsCard({
                           {skill.name}
                         </p>
                         <p className="text-[9px] text-muted-foreground capitalize">
-                          {getSkillCategory(skill.name, skill.skill_type)}
+                          {getSkillCategory(skill.skill_type) === 'tecnologias'
+                            ? 'Tecnología'
+                            : getSkillCategory(skill.skill_type) === 'conceptos'
+                              ? 'Concepto'
+                              : 'Blanda'}
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">

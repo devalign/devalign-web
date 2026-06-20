@@ -76,7 +76,10 @@ export default function PublicSharePage() {
 
           if (draft.detected_skills) {
             const tech = draft.detected_skills
-              .filter((s: LocalSkillItem) => s.skill_type === 'hard_skill')
+              .filter((s: LocalSkillItem) => {
+                const t = s.skill_type ? s.skill_type.toLowerCase() : '';
+                return t !== 'soft' && t !== 'soft_skill';
+              })
               .map((s: LocalSkillItem) => s.name);
             if (tech.length > 0) setTechSkills(tech);
             else setTechSkills([]);
@@ -93,8 +96,10 @@ export default function PublicSharePage() {
           } else if (draft.detected_skills) {
             // Calculate score based on skills length
             const techCount =
-              draft.detected_skills.filter((s: LocalSkillItem) => s.skill_type === 'hard_skill')
-                .length || 0;
+              draft.detected_skills.filter((s: LocalSkillItem) => {
+                const t = s.skill_type ? s.skill_type.toLowerCase() : '';
+                return t !== 'soft' && t !== 'soft_skill';
+              }).length || 0;
             setCurrentScore(Math.min(42 + techCount * 3, 98));
           }
 

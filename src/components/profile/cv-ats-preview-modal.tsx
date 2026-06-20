@@ -35,9 +35,11 @@ export default function CVAtsPreviewModal({
     return profile.detected_skills
       .filter((s) => {
         const nameLower = s.name.toLowerCase();
+        const sType = s.skill_type ? s.skill_type.toLowerCase() : '';
         if (type === 'soft') {
           return (
-            s.skill_type === 'soft_skill' ||
+            sType === 'soft_skill' ||
+            sType === 'soft' ||
             nameLower === 'soft_skill' ||
             [
               'liderazgo',
@@ -55,33 +57,36 @@ export default function CVAtsPreviewModal({
         }
         if (type === 'tool') {
           return (
-            s.skill_type === 'tool' ||
+            sType === 'tool' ||
             nameLower === 'tool' ||
-            [
-              'aws',
-              'azure',
-              'gcp',
-              'docker',
-              'kubernetes',
-              'terraform',
-              'git',
-              'github',
-              'linux',
-              'ci/cd',
-            ].some((x) => nameLower.includes(x))
+            ((sType === 'tech' || sType === 'hard_skill') &&
+              [
+                'aws',
+                'azure',
+                'gcp',
+                'docker',
+                'kubernetes',
+                'terraform',
+                'git',
+                'github',
+                'linux',
+                'ci/cd',
+              ].some((x) => nameLower.includes(x)))
           );
         }
         // default to technical/hard skills
         if (type === 'hard_skill') {
           return (
-            s.skill_type !== 'soft_skill' &&
-            s.skill_type !== 'tool' &&
-            s.skill_type !== 'methodology' &&
+            sType !== 'soft_skill' &&
+            sType !== 'soft' &&
+            sType !== 'tool' &&
+            sType !== 'methodology' &&
+            sType !== 'concept' &&
             !['aws', 'docker', 'kubernetes', 'git', 'github'].some((x) => nameLower.includes(x))
           );
         }
         if (type === 'methodology') {
-          return s.skill_type === 'methodology' || nameLower === 'methodology';
+          return sType === 'methodology' || sType === 'concept' || nameLower === 'methodology';
         }
         return false;
       })

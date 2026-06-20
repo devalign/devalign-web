@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <CVAnalysisProvider>
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">{children}</div>
+          <div className="w-full">{children}</div>
         </div>
       </div>
     </CVAnalysisProvider>
