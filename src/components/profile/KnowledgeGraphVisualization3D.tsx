@@ -50,12 +50,13 @@ export function KnowledgeGraphVisualization3D({
   highlightMode = 'all'
 }: KnowledgeGraphVisualization3DProps) {
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return document.documentElement.classList.contains('dark');
+  });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
-    setIsDark(document.documentElement.classList.contains('dark'));
 
     const observer = new MutationObserver(() => {
       setIsDark(document.documentElement.classList.contains('dark'));

@@ -43,8 +43,10 @@ export default function OverviewPage() {
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [highlightMode, setHighlightMode] = useState<FilterMode>('all');
 
+  // Derived state
+  const hasCV = !!(cvData && cvData.cvs && cvData.cvs.length > 0);
+
   // Profile data states for sync
-  const [hasCV, setHasCV] = useState(true);
   const [fullName, setFullName] = useState('');
   const [roleTitle, setRoleTitle] = useState('');
   const [seniority, setSeniority] = useState('mid');
@@ -56,17 +58,6 @@ export default function OverviewPage() {
   const [techSkills, setTechSkills] = useState<string[]>([]);
   const [conceptSkills, setConceptSkills] = useState<string[]>([]);
   const [softSkills, setSoftSkills] = useState<string[]>([]);
-
-  const [activeClusterIndex, setActiveClusterIndex] = useState(0);
-
-  // Sync hasCV with hook data
-  useEffect(() => {
-    if (cvData && cvData.cvs && cvData.cvs.length > 0) {
-      setHasCV(true);
-    } else {
-      setHasCV(false);
-    }
-  }, [cvData]);
 
   // Sync profile details
   useEffect(() => {
@@ -211,23 +202,23 @@ export default function OverviewPage() {
     return list.slice(0, 3);
   }, [profile]);
 
-  // Sync cluster selection with URL params or default specialty
-  useEffect(() => {
+  // Derive activeClusterIndex from URL parameter or default specialty
+  const activeClusterIndex = React.useMemo(() => {
     if (allAffinities && allAffinities.length > 0) {
       if (clusterParam) {
         const idx = allAffinities.findIndex(
           (a) => a.cluster_name.toLowerCase() === clusterParam.toLowerCase(),
         );
         if (idx !== -1) {
-          setActiveClusterIndex(idx);
-          return;
+          return idx;
         }
       }
       const primaryIdx = allAffinities.findIndex((a) => a.is_primary);
       if (primaryIdx !== -1) {
-        setActiveClusterIndex(primaryIdx);
+        return primaryIdx;
       }
     }
+    return 0;
   }, [allAffinities, clusterParam]);
 
   const handleSelectCluster = (index: number) => {
@@ -347,7 +338,6 @@ export default function OverviewPage() {
       {!hasCV && (
         <OverviewEmptyState
           onUploadSuccess={(newCvId) => {
-            setHasCV(true);
             if (newCvId) {
               startAnalysis(newCvId);
             }

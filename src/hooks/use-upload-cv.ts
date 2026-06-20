@@ -1,11 +1,13 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { uploadCV } from '@/lib/api';
 
 export function useUploadCV() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (file: File) => uploadCV(file),
     onSuccess: () => {
-      // Do nothing here; CVAnalysisContext will handle polling and explicit invalidation
+      queryClient.invalidateQueries({ queryKey: ['userCVs'] });
     },
   });
 }

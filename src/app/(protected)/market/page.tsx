@@ -269,7 +269,7 @@ function TopologyContent() {
                   <strong className="text-primary font-semibold">{selectedCluster}</strong>.
                 </p>
                 <p className="text-[10px] text-muted-foreground leading-normal">
-                  Haz clic en "Ver Diagnóstico" para analizar tu perfil con esta especialidad.
+                  Haz clic en &quot;Ver Diagnóstico&quot; para analizar tu perfil con esta especialidad.
                 </p>
               </CardContent>
             </Card>

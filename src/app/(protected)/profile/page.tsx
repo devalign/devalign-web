@@ -113,7 +113,7 @@ function ProfileContent() {
   const [isRecalculationReady, setIsRecalculationReady] = useState(false);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
 
-  const initialSnapshotRef = useRef<{
+  interface SnapshotData {
     fullName: string;
     roleTitle: string;
     seniority: string;
@@ -123,7 +123,9 @@ function ProfileContent() {
     techSkills: string[];
     conceptSkills: string[];
     softSkills: string[];
-  } | null>(null);
+  }
+
+  const [initialSnapshot, setInitialSnapshot] = useState<SnapshotData | null>(null);
 
   const reanalyzeMutation = useReanalyzeCV();
 
@@ -212,9 +214,9 @@ function ProfileContent() {
             }))
           : [];
 
-        let newTechSkills: string[] = [];
-        let newConceptSkills: string[] = [];
-        let newSoftSkills: string[] = [];
+        const newTechSkills: string[] = [];
+        const newConceptSkills: string[] = [];
+        const newSoftSkills: string[] = [];
 
         if (profile.detected_skills?.length) {
           profile.detected_skills.forEach((s) => {
@@ -239,7 +241,7 @@ function ProfileContent() {
         setConceptSkills(newConceptSkills);
         setSoftSkills(newSoftSkills);
 
-        initialSnapshotRef.current = {
+        setInitialSnapshot({
           fullName: newFullName,
           roleTitle: newRoleTitle,
           seniority: newSeniority,
@@ -249,7 +251,7 @@ function ProfileContent() {
           techSkills: newTechSkills,
           conceptSkills: newConceptSkills,
           softSkills: newSoftSkills,
-        };
+        });
       } else if (user) {
         const newFullName = user.full_name || user.email?.split('@')[0] || 'Desarrollador';
 
@@ -263,7 +265,7 @@ function ProfileContent() {
         setConceptSkills([]);
         setSoftSkills([]);
 
-        initialSnapshotRef.current = {
+        setInitialSnapshot({
           fullName: newFullName,
           roleTitle: '',
           seniority: 'mid',
@@ -273,7 +275,7 @@ function ProfileContent() {
           techSkills: [],
           conceptSkills: [],
           softSkills: [],
-        };
+        });
       }
     };
 
@@ -283,8 +285,8 @@ function ProfileContent() {
 
   // Detect pending changes against initial snapshot
   const hasChanges = useMemo(() => {
-    if (!initialSnapshotRef.current) return false;
-    const snap = initialSnapshotRef.current;
+    if (!initialSnapshot) return false;
+    const snap = initialSnapshot;
     return (
       snap.fullName !== fullName ||
       snap.roleTitle !== roleTitle ||
@@ -297,6 +299,7 @@ function ProfileContent() {
       JSON.stringify(snap.softSkills) !== JSON.stringify(softSkills)
     );
   }, [
+    initialSnapshot,
     fullName,
     roleTitle,
     seniority,
@@ -480,7 +483,7 @@ function ProfileContent() {
       toast.dismiss(toastId);
 
       // Update snapshot so save button gets disabled immediately (no unsaved changes)
-      initialSnapshotRef.current = {
+      setInitialSnapshot({
         fullName,
         roleTitle,
         seniority,
@@ -490,7 +493,7 @@ function ProfileContent() {
         techSkills,
         conceptSkills,
         softSkills,
-      };
+      });
 
       toast.success('¡Perfil guardado y diagnóstico recalculado con éxito!');
     } catch (error) {
@@ -503,8 +506,8 @@ function ProfileContent() {
   };
 
   const handleDiscardChanges = () => {
-    if (!initialSnapshotRef.current) return;
-    const snap = initialSnapshotRef.current;
+    if (!initialSnapshot) return;
+    const snap = initialSnapshot;
     setFullName(snap.fullName);
     setRoleTitle(snap.roleTitle);
     setSeniority(snap.seniority);
@@ -525,7 +528,7 @@ function ProfileContent() {
       await refetchCVs();
 
       setIsRecalculationReady(false);
-      initialSnapshotRef.current = {
+      setInitialSnapshot({
         fullName,
         roleTitle,
         seniority,
@@ -535,7 +538,7 @@ function ProfileContent() {
         techSkills,
         conceptSkills,
         softSkills,
-      };
+      });
 
       toast.dismiss(toastId);
       toast.success('¡Perfil y diagnóstico actualizados con éxito!');
