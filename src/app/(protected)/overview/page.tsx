@@ -20,7 +20,7 @@ import {
   KnowledgeGraphVisualization,
   GraphNode,
 } from '@/components/profile/KnowledgeGraphVisualization';
-import { HeaderBar } from '@/components/layout/header-bar';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -62,39 +62,6 @@ export default function OverviewPage() {
   // Sync profile details
   useEffect(() => {
     const syncProfileData = () => {
-      // 1. Check offline draft
-      const draftStr = localStorage.getItem('devalign_profile_draft');
-      if (draftStr) {
-        try {
-          const draft = JSON.parse(draftStr);
-          if (draft.fullName) setFullName(draft.fullName);
-          if (draft.roleTitle) setRoleTitle(draft.roleTitle);
-          if (draft.seniority) setSeniority(draft.seniority);
-          if (draft.work_experience) setExperiences(draft.work_experience);
-          if (draft.education) setEducationList(draft.education);
-          if (draft.certifications) setCertifications(draft.certifications);
-
-          if (draft.detected_skills) {
-            const tech: string[] = [];
-            const concept: string[] = [];
-            const soft: string[] = [];
-            draft.detected_skills.forEach((s: { name: string; skill_type: string }) => {
-              const t = s.skill_type ? s.skill_type.toLowerCase() : '';
-              if (t === 'soft' || t === 'soft_skill') soft.push(s.name);
-              else if (t === 'concept' || t === 'methodology') concept.push(s.name);
-              else tech.push(s.name);
-            });
-            setTechSkills(tech);
-            setConceptSkills(concept);
-            setSoftSkills(soft);
-          }
-          return;
-        } catch (e) {
-          console.error('Failed to parse profile draft:', e);
-        }
-      }
-
-      // 2. Base sync
       if (profile) {
         if (profile.full_name) {
           setFullName(profile.full_name);
@@ -317,22 +284,7 @@ export default function OverviewPage() {
         )}
       </div>
 
-      {/* 2. Top Header Navigation (Floating Glassmorphic) */}
-      <div className="relative z-10 p-4 shrink-0 pointer-events-none">
-        <div className="pointer-events-auto">
-          <HeaderBar
-            clusters={allAffinities}
-            activeCluster={activeCluster}
-            onSelectCluster={(name) => {
-              const idx = allAffinities.findIndex((a) => a.cluster_name === name);
-              if (idx !== -1) handleSelectCluster(idx);
-            }}
-            isAnalyzing={isAnalyzing}
-            isAnalysisReady={isAnalysisReady}
-            lastAnalysisDate={formattedDate}
-          />
-        </div>
-      </div>
+
 
       {/* 3. Empty State (Zero-state Overlay with Blur) */}
       {!hasCV && (

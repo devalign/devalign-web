@@ -3,12 +3,14 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target, Loader2 } from 'lucide-react';
+import type { DomainAffinityItem } from '@/lib/api/types';
 
 interface AffinityRadarChartProps {
-  domainAffinities?: { domain: string; affinity_score: number }[];
-  techSkills: string[];
+  domainAffinities?: DomainAffinityItem[];
+  techSkills?: string[];
   isLoading?: boolean;
   standalone?: boolean;
+  className?: string;
 }
 
 const DOMAIN_CONFIGS = [
@@ -26,6 +28,7 @@ export function AffinityRadarChart({
   techSkills,
   isLoading = false,
   standalone = true,
+  className,
 }: AffinityRadarChartProps) {
   // DYNAMIC RADAR CHART COORDINATES CALCULATION
   const getRadarPoints = () => {
@@ -41,98 +44,16 @@ export function AffinityRadarChart({
       const score =
         domainAffinities?.find((d) => d.domain.toLowerCase() === config.key.toLowerCase())
           ?.affinity_score || 0;
-
-      let val = 20;
-      if (domainAffinities && domainAffinities.length > 0) {
-        val = Math.min(20 + score * 80, 95);
-      } else {
-        // Fallback calculations using techSkills
-        const skillsLower = techSkills.map((s) => s.toLowerCase());
-        if (config.key === 'Backend') {
-          val = Math.min(
-            35 +
-              skillsLower.filter((s) =>
-                ['python', 'postgresql', 'microservicios', 'java', 'springboot', 'c#', 'net'].some(
-                  (k) => s.includes(k),
-                ),
-              ).length *
-                20,
-            95,
-          );
-        } else if (config.key === 'Frontend') {
-          val = Math.min(
-            20 +
-              skillsLower.filter((s) =>
-                ['react', 'html', 'css', 'javascript', 'typescript', 'vue', 'angular'].some((k) =>
-                  s.includes(k),
-                ),
-              ).length *
-                20,
-            85,
-          );
-        } else if (config.key === 'Cloud') {
-          val = Math.min(
-            20 +
-              skillsLower.filter((s) =>
-                ['aws', 'docker', 'azure', 'gcp'].some((k) => s.includes(k)),
-              ).length *
-                35,
-            95,
-          );
-        } else if (config.key === 'DevOps') {
-          val = Math.min(
-            20 +
-              skillsLower.filter((s) =>
-                ['kubernetes', 'ci/cd', 'terraform', 'jenkins', 'actions'].some((k) =>
-                  s.includes(k),
-                ),
-              ).length *
-                35,
-            95,
-          );
-        } else if (config.key === 'Data') {
-          val = Math.min(
-            35 +
-              skillsLower.filter((s) =>
-                ['databricks', 'spark', 'hadoop', 'sql', 'mysql', 'snowflake', 'airflow'].some(
-                  (k) => s.includes(k),
-                ),
-              ).length *
-                15,
-            95,
-          );
-        } else if (config.key === 'QA') {
-          val = Math.min(
-            20 +
-              skillsLower.filter((s) =>
-                ['qa', 'selenium', 'cypress', 'playwright', 'testing', 'junit'].some((k) =>
-                  s.includes(k),
-                ),
-              ).length *
-                25,
-            95,
-          );
-        } else if (config.key === 'Mobile') {
-          val = Math.min(
-            20 +
-              skillsLower.filter((s) =>
-                ['flutter', 'react native', 'swift', 'kotlin', 'android', 'ios'].some((k) =>
-                  s.includes(k),
-                ),
-              ).length *
-                35,
-            95,
-          );
-        }
-      }
-
+      const val = Math.min(20 + score * 80, 95);
       const angle = (index * 360) / DOMAIN_CONFIGS.length;
       return convert(val, angle);
     });
 
     const marketPoints = DOMAIN_CONFIGS.map((config, index) => {
+      const dbDemand = domainAffinities?.find((d) => d.domain.toLowerCase() === config.key.toLowerCase())?.market_demand;
+      const demandVal = dbDemand !== undefined ? Math.round(dbDemand * 100) : config.marketDemand;
       const angle = (index * 360) / DOMAIN_CONFIGS.length;
-      return convert(config.marketDemand, angle);
+      return convert(demandVal, angle);
     });
 
     return {
@@ -193,7 +114,7 @@ export function AffinityRadarChart({
   );
 
   const renderRadarSVG = () => (
-    <div className="relative w-full max-w-[280px] aspect-square">
+    <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-square my-4">
       <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
         {/* Background rings */}
         {[20, 40, 60, 80, 100].map((r) => {
@@ -294,11 +215,11 @@ export function AffinityRadarChart({
 
   if (standalone) {
     return (
-      <Card className="card-glass relative overflow-hidden flex flex-col h-full">
+      <Card className={`card-glass relative overflow-hidden flex flex-col h-full ${className || ''}`}>
         {renderContent()}
       </Card>
     );
   }
 
-  return <div className="relative flex flex-col h-full w-full min-h-0">{renderContent()}</div>;
+  return <div className={`relative flex flex-col h-full w-full min-h-0 ${className || ''}`}>{renderContent()}</div>;
 }

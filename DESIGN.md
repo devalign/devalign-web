@@ -6,25 +6,25 @@ description: Sistema de diseño unificado y premium basado en tonos verdes salvi
 colors:
   primary: '#8EAD9A' # Verde Salvia (Base de alineación)
   primary-foreground: '#1D3224' # Verde Pizarra Forestal Oscuro
-  background: '#F4F6F4' # Blanco Salvia Suave
+  background: '#F5F7F5' # Blanco Salvia Suave (Light HSL 140 12% 97%)
   foreground: '#1D3224' # Verde Pizarra Forestal Oscuro
   card: '#FFFFFF' # Blanco Puro
   card-foreground: '#1D3224'
   popover: '#FFFFFF'
   popover-foreground: '#1D3224'
-  secondary: '#EDF0ED' # Gris Salvia Muy Claro
-  secondary-foreground: '#1D3224'
-  muted: '#EDF0ED'
-  muted-foreground: '#67756B' # Muted text con tinte salvia
+  secondary: '#E4E9F0' # Azul Pizarra Suave (Light HSL 215 30% 92%)
+  secondary-foreground: '#212C3B' # Deep blue-slate (Light HSL 215 35% 20%)
+  muted: '#E9ECE9' # Gris Salvia Sutil (Light HSL 140 12% 93%)
+  muted-foreground: '#677F6E' # Muted text con tinte salvia (Light HSL 143 10% 45%)
   accent: '#8EAD9A'
   accent-foreground: '#1D3224'
-  border: '#DCE3DE' # Gris Salvia Claro
-  input: '#DCE3DE'
+  border: '#DAE1DA' # Gris Salvia Claro (Light HSL 140 12% 86%)
+  input: '#DAE1DA'
   ring: '#8EAD9A'
   destructive: '#EF4444'
   destructive-foreground: '#F9FAFB'
-  success: '#10B981'
-  success-foreground: '#FFFFFF'
+  success: '#16A34A'
+  success-foreground: '#FFF2F3'
 
 typography:
   font-sans:
@@ -73,14 +73,58 @@ La atmósfera visual de Devalign debe evocar profesionalismo, mentoría técnica
 ### Colors
 
 - **Primary (`#8EAD9A`)**: Usado para botones principales, llamadas a la acción relevantes, indicadores de progreso completado y acentos visuales dominantes. Su texto en contraste siempre debe ser **Forest Green (`#1D3224`)** para cumplir con las guías WCAG.
-- **Background (`#F4F6F4`)**: Fondo general de la plataforma que atenúa la dureza de los blancos puros en pantallas.
-- **Foreground / Slate (`#1D3224`)**: Texto principal, títulos de tarjetas y elementos interactivos oscuros.
-- **Borders (`#DCE3DE`)**: Líneas divisorias delgadas y bordes de inputs para una delimitación limpia sin saturación.
+- **Background (`#F5F7F5`)**: Fondo general de la plataforma en Light Mode, que atenúa la dureza de los blancos puros en pantallas.
+- **Foreground / Slate (`#1D3224`)**: Texto principal, títulos de tarjetas y elementos interactivos oscuros en Light Mode.
+- **Borders (`#DAE1DA`)**: Líneas divisorias delgadas y bordes de inputs para una delimitación limpia sin saturación.
 
 ### Typography
 
 - El texto de UI general debe usar la clase `font-sans`.
 - Cualquier cadena de código, identificadores UUID (como el id de Supabase), valores JSON y estados del sistema deben usar `font-mono`.
+
+---
+
+## TailwindCSS v4 & CSS-First Styling
+
+Devalign utiliza **TailwindCSS v4** bajo un modelo de configuración CSS-First declarado en [globals.css](file:///c:/Projects/Devalign/devalign-web/src/app/globals.css). Toda la configuración del tema y variantes se administra mediante directivas CSS estándar dentro del bloque `@theme`.
+
+### Tema de HSL Tokens (Light vs. Dark Mode)
+
+| Token Variable | Light Mode (HSL / Hex) | Dark Mode (HSL / Hex) | Descripción / Propósito |
+| :--- | :--- | :--- | :--- |
+| `--background` | `140 12% 97%` / `#F5F7F5` | `143 20% 6%` / `#0C130E` | Fondo general de la interfaz |
+| `--foreground` | `143 27% 15%` / `#1D3224` | `140 12% 93%` / `#E9ECE9` | Texto principal del sistema |
+| `--primary` | `143 16% 62%` / `#8EAD9A` | `143 16% 62%` / `#8EAD9A` | Color primario de marca (Verde Salvia) |
+| `--primary-foreground` | `143 27% 15%` / `#1D3224` | `143 27% 15%` / `#1D3224` | Texto en contraste sobre fondo primario |
+| `--secondary` | `215 30% 92%` / `#E4E9F0` | `215 25% 14%` / `#1B2430` | Color secundario (Azul Pizarra) |
+| `--secondary-foreground`| `215 35% 20%` / `#212C3B` | `215 30% 92%` / `#E4E9F0` | Texto sobre fondo secundario |
+| `--muted` | `140 12% 93%` / `#E9ECE9` | `143 15% 14%` / `#1B241D` | Color atenuado para fondos secundarios |
+| `--muted-foreground` | `143 10% 45%` / `#677F6E` | `143 8% 65%` / `#9EACA1` | Texto secundario y etiquetas |
+| `--card` | `0 0% 100%` / `#FFFFFF` | `143 18% 10%` / `#151E18` | Fondo de contenedores y tarjetas |
+| `--card-foreground` | `143 27% 15%` / `#1D3224` | `140 12% 93%` / `#E9ECE9` | Texto sobre tarjetas |
+| `--border` / `--input` | `140 12% 86%` / `#DAE1DA` | `143 15% 14%` / `#1B241D` | Bordes generales e inputs |
+| `--ring` | `143 16% 62%` / `#8EAD9A` | `143 16% 62%` / `#8EAD9A` | Anillos de foco y selección |
+| `--destructive` | `0 84.2% 60.2%` / `#EF4444` | `0 62.8% 30.6%` / `#7F1D1D` | Elementos de error o peligro |
+| `--success` | `142.1 76.2% 36.3%`/`#16A34A` | `142.1 70% 45%` / `#22C55E` | Indicadores de completado o éxito |
+
+### Sidebar Tokens
+
+La barra lateral tiene tokens de tema exclusivos para controlar su visualización:
+
+| Variable de Sidebar | Light Mode HSL | Dark Mode HSL |
+| :--- | :--- | :--- |
+| `--sidebar-background` | `0 0% 100%` | `143 18% 10%` |
+| `--sidebar-foreground` | `143 27% 15%` | `140 12% 93%` |
+| `--sidebar-primary` | `143 27% 15%` | `143 16% 62%` |
+| `--sidebar-primary-foreground`| `140 12% 97%` | `143 27% 15%` |
+| `--sidebar-accent` | `140 12% 93%` | `143 15% 14%` |
+| `--sidebar-accent-foreground` | `143 27% 15%` | `140 12% 93%` |
+| `--sidebar-border` | `140 12% 86%` | `143 15% 14%` |
+| `--sidebar-ring` | `143 16% 62%` | `143 16% 62%` |
+
+### Arquitectura de Configuración y Variantes
+- **Variante de Modo Oscuro**: Declarado con `@custom-variant dark (&:where(.dark, .dark *));`. Esto activa el modo oscuro agregando la clase `.dark` al contenedor principal (generalmente `<html>` o `<body>`).
+- **Nombres de Clases y Variables**: En Tailwind v4, registrar variables en `@theme` como `--color-primary` genera de manera automática clases utilitarias como `bg-primary`, `text-primary` y `border-primary`.
 
 ---
 
@@ -119,11 +163,24 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
 Los componentes de interfaz se localizan en [src/components/ui](file:///c:/Projects/Devalign/devalign-web/src/components/ui). Todos ellos siguen el patrón de extender los elementos HTML estándar de React y aplicar estilos Tailwind mediante la utilidad `cn(...)` de [src/lib/utils.ts](file:///c:/Projects/Devalign/devalign-web/src/lib/utils.ts) para permitir personalizaciones locales sin perder los estilos base:
 
 1.  **Button**: Ofrece variantes estilizadas (`default`, `destructive`, `outline`, `secondary`, `ghost`, `link`) y tamaños preconfigurados. Utiliza transiciones de color suaves ante eventos hover.
-2.  **Card**: Componente estructurado en subcomponentes (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) para enmarcar secciones de contenido. Se basa en un diseño plano sin sombreados, delimitado únicamente por bordes claros (`border-border`).
+2.  **Card**: Componente estructurado en subcomponentes (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) para enmarcar secciones de contenido.
 3.  **Input**: Elemento de entrada de texto optimizado para formularios. Cuenta con estados deshabilitados con opacidad controlada y efectos de anillo (`focus-visible:ring-1`) al enfocarse.
 4.  **Form**: Componentes de formulario basados en `react-hook-form` y `zod` para validaciones completas en el cliente.
 5.  **Tabs**: Soporte para vistas tabulares dinámicas (utilizado para alternar entre Login y Signup).
 6.  **Diagnosis Components**: Tarjetas del panel de diagnóstico (`StrengthsCard`, `PriorityGapsCard`, `AffinityRadarChartCard`, etc.) que siguen las pautas de diseño atómico del perfil (utilizando `Card` con bordes planos y cajas de habilidades redondeadas) y exponen gráficos interactivos con `recharts` controlados por temas.
+
+### Tailwind Custom Utilities
+
+El sistema expone utilidades de diseño para contenedores y tarjetas declaradas en [globals.css](file:///c:/Projects/Devalign/devalign-web/src/app/globals.css) usando `@utility`:
+
+- `@utility card-standard`: Aplica fondo `--color-card`, borde `--color-border` y redondeado de `12px` (`rounded-xl`).
+- `@utility card-elevated`: Añade espaciado interno de `1.5rem` (`p-6`) sobre la estructura estándar.
+- `@utility card-tinted`: Usa una base del color primario con `5%` de opacidad (`bg-primary/5`) y un borde del primario al `20%` (`border-primary/20`) para destacar áreas de contenido especial.
+- `@utility card-glass`: Aplica un fondo traslúcido (`bg-background/60`), desenfoque de fondo (`backdrop-blur-md`), borde y redondeado premium (`rounded-2xl`).
+
+### Animaciones e Interacción
+- **Animaciones de Acordeón**: Se configuran variables de animación `--animate-accordion-down` y `--animate-accordion-up` con transiciones de `0.2s` y funciones de aceleración cúbicas.
+- **Scrollbar Premium**: Barras de desplazamiento personalizadas de `6px` de grosor, con bordes redondeados y un efecto hover que resalta en el color primario con `60%` de opacidad (`hsl(var(--primary) / 0.6)`).
 
 ---
 
@@ -140,5 +197,5 @@ La interfaz se comunica con el backend FastAPI (puerto 8000) mediante peticiones
 
 ## Future Styling Roadmap
 
-- **Modo Oscuro Dinámico**: Al agregar componentes nuevos, utilizar variables semánticas (p.ej., `bg-card`, `text-muted-foreground`) para asegurar que el cambio entre el tema claro y el tema oscuro pizarra (`.dark` en [globals.css](file:///c:/Projects/Devalign/devalign-web/src/app/globals.css)) sea transparente.
+- **Modo Oscuro Dinámico**: Al agregar componentes nuevos, utilizar variables semánticas (p.ej., `bg-card`, `text-muted-foreground`) para asegurar que el cambio entre el tema claro y el tema oscuro sea transparente.
 - **Soporte de CLI**: El archivo `DESIGN.md` es compatible con el validador oficial `npx @google/design.md lint DESIGN.md` para garantizar el cumplimiento de accesibilidad y estructura de tokens.

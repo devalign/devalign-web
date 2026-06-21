@@ -19,8 +19,8 @@ export function ClusterDemandCard({
   const growth = marketInsights?.growth_percentage ?? null;
   const isPositive = growth !== null && growth >= 0;
   return (
-    <Card className="card-standard flex flex-col justify-between h-full min-h-[220px]">
-      <CardContent className="p-5 flex flex-col justify-between h-full gap-4">
+    <Card className="card-ai flex flex-col justify-between h-auto min-h-[220px]">
+      <CardContent className="p-5 flex flex-col justify-between h-auto gap-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3 h-full">
             <Loader2 className="w-6 h-6 text-primary animate-spin" />
@@ -38,16 +38,16 @@ export function ClusterDemandCard({
                   Demanda del Cluster
                 </span>
               </div>
-              <div className="flex items-baseline gap-2 pt-1">
+              <div className="flex items-baseline gap-1.5 pt-1">
                 <span
-                  className={`text-3xl font-extrabold tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}
+                  className={`text-lg font-black tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}
                 >
                   {growth !== null ? `${isPositive ? '+' : ''}${growth}%` : 'N/A'}
                 </span>
                 <span
-                  className={`text-[11px] font-semibold ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}
+                  className={`text-[10px] font-bold uppercase tracking-wider ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}
                 >
-                  Crecimiento laboral
+                  Crecimiento
                 </span>
               </div>
             </div>

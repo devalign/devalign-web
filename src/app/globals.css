@@ -233,3 +233,8 @@ button:hover {
 @utility card-glass {
   @apply bg-background/60 backdrop-blur-md border border-border rounded-2xl;
 }
+
+@utility card-ai {
+  @apply border border-primary/15 bg-primary/[0.03] dark:bg-primary/[0.05] rounded-xl;
+}
+

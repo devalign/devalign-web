@@ -47,7 +47,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isDashboardRoute =
-    request.nextUrl.pathname.startsWith('/dashboard') ||
+    request.nextUrl.pathname.startsWith('/diagnosis') ||
     request.nextUrl.pathname.startsWith('/profile') ||
     request.nextUrl.pathname.startsWith('/overview') ||
     request.nextUrl.pathname.startsWith('/market') ||
