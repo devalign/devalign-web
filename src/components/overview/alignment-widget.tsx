@@ -69,16 +69,7 @@ export function AlignmentWidget({
           </h4>
         </div>
 
-        <Link href={`/dashboard/action-plan?cluster=${encodeURIComponent(primarySpecialty)}`}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-[9px] font-bold h-6 py-0.5 px-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1 transition-all rounded-lg mt-1"
-          >
-            <Map className="h-2.5 w-2.5" />
-            Ver Plan de Acción
-          </Button>
-        </Link>
+
       </div>
     </div>
   );

@@ -29,22 +29,13 @@ export function HeaderBar({
     const items: BreadcrumbItem[] = [];
     const clusterName = activeCluster?.cluster_name || '';
 
-    if (pathname.startsWith('/dashboard/action-plan')) {
-      items.push({ label: 'Evaluación', href: '/dashboard' });
-      if (clusterName) {
-        items.push({ label: clusterName, isClusterSelector: true });
-      }
-      items.push({ label: 'Plan de Acción' });
-    } else if (pathname.startsWith('/dashboard')) {
-      items.push({ label: 'Evaluación' });
+    if (pathname.startsWith('/diagnosis')) {
+      items.push({ label: 'Diagnóstico' });
       if (clusterName) {
         items.push({ label: clusterName, isClusterSelector: true });
       }
     } else if (pathname.startsWith('/market')) {
-      items.push({ label: 'Mercado', href: '/market' });
-      if (clusterName) {
-        items.push({ label: clusterName, isClusterSelector: true });
-      }
+      items.push({ label: 'Mercado' });
     } else if (pathname.startsWith('/overview')) {
       items.push({ label: 'Overview' });
       if (clusterName) {

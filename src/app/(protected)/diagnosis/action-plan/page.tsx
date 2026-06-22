@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
-import { HeaderBar } from '@/components/layout/header-bar';
+
 
 interface RoadmapStep {
   skill: string;
@@ -93,51 +93,11 @@ function RoadmapContent() {
   const { data: cvData, isLoading: isCVLoading } = useUserCVs();
   const { isAnalyzing, isAnalysisReady, commitUpdate } = useCVAnalysis();
 
-  // Generator simulation state
-  const [isGenerated, setIsGenerated] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState(0);
-
   // Active drawer step
   const [activeStep, setActiveStep] = useState<RoadmapStep | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const hasCV = cvData && cvData.cvs && cvData.cvs.length > 0;
-
-  // Sync state with localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedRoadmap = localStorage.getItem('devalign_roadmap_generated');
-      if (savedRoadmap === 'true') {
-        const timeoutId = setTimeout(() => {
-          setIsGenerated(true);
-        }, 0);
-        return () => clearTimeout(timeoutId);
-      }
-    }
-  }, []);
-
-  const startGeneration = () => {
-    setIsGenerating(true);
-    setGenerationStep(1);
-
-    const timer1 = setTimeout(() => setGenerationStep(2), 600);
-    const timer2 = setTimeout(() => setGenerationStep(3), 1200);
-    const timer3 = setTimeout(() => setGenerationStep(4), 1800);
-    const timer4 = setTimeout(() => {
-      setIsGenerating(false);
-      setIsGenerated(true);
-      localStorage.setItem('devalign_roadmap_generated', 'true');
-      toast.success('¡Plan de Acción generado con éxito!');
-    }, 2400);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
-    };
-  };
 
   // Get all affinities with fallback (slice(0, 3) to align with dashboard)
   const allAffinities = useMemo(() => {
@@ -258,25 +218,6 @@ function RoadmapContent() {
 
   // Retrieve user technical & conceptual skills (supports profile hook and offline localStorage draft)
   const techSkills = useMemo<string[]>(() => {
-    if (typeof window !== 'undefined') {
-      const draftStr = localStorage.getItem('devalign_profile_draft');
-      if (draftStr) {
-        try {
-          const draft = JSON.parse(draftStr);
-          if (draft.detected_skills) {
-            return draft.detected_skills
-              .filter((s: { skill_type: string; name: string }) => {
-                const t = s.skill_type ? s.skill_type.toLowerCase() : '';
-                return t !== 'soft' && t !== 'soft_skill';
-              })
-              .map((s: { skill_type: string; name: string }) => s.name);
-          }
-        } catch (e) {
-          console.error('Failed to parse offline profile draft:', e);
-        }
-      }
-    }
-
     if (profile?.detected_skills) {
       return profile.detected_skills
         .filter((s) => {
@@ -442,26 +383,11 @@ function RoadmapContent() {
 
   return (
     <>
-      <div className="w-full px-4 md:px-6 pt-4">
-        <HeaderBar
-          clusters={allAffinities}
-          activeCluster={activeCluster}
-          onSelectCluster={(name) => {
-            const params = new URLSearchParams(searchParams.toString());
-            params.set('cluster', name);
-            router.push(`?${params.toString()}`);
-          }}
-          isAnalyzing={isAnalyzing}
-          isAnalysisReady={isAnalysisReady}
-          lastAnalysisDate={formattedDate}
-        />
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-      {/* Action required banner when roadmap is not generated */}
-      {!isGenerated && (
-        <div className="max-w-xl mx-auto py-12 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10">
-          {!hasCV ? (
+        {!hasCV ? (
+          <div className="max-w-xl mx-auto py-12 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10">
             <Card className="card-elevated text-center space-y-6">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary">
                 <Map className="h-6 w-6" />
@@ -484,274 +410,160 @@ function RoadmapContent() {
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Card>
-          ) : !isGenerating ? (
-            <Card className="card-elevated sm:p-8 text-center space-y-6">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary">
-                <Sparkles className="h-6 w-6" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-lg font-extrabold text-foreground tracking-tight sm:text-xl">
-                  Diseña tu Plan de Acción
-                </h2>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Ya tenemos listo tu diagnóstico de mercado. Ahora podemos diseñar un roadmap de
-                  aprendizaje secuencial y estructurado con temas a dominar para cerrar tus brechas
-                  técnicas de especialización.
-                </p>
-              </div>
+          </div>
+        ) : (
+          <div className="transition-all duration-700">
+            {/* Header */}
+            <div className="max-w-4xl mx-auto mb-8">
+              <CVUpdateBanner />
 
-              <div className="border border-border/80 bg-secondary/10 rounded-2xl text-left p-4 space-y-2.5">
-                <h4 className="text-[10px] font-bold text-foreground uppercase tracking-wider mb-1">
-                  ¿Qué contiene tu Plan de Acción?
-                </h4>
-                <ul className="space-y-2 text-xs text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span>
-                      <strong>Fases de estudio:</strong> Ordenado lógicamente de lo más crítico a lo
-                      complementario.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span>
-                      <strong>Métricas de impacto:</strong> Cuánto aumenta tu nivel de alineación al
-                      aprender cada habilidad.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <span>
-                      <strong>Evidencia de mercado:</strong> Respaldo matemático con tendencias y
-                      reglas de asociación de ofertas reales.
-                    </span>
-                  </li>
-                </ul>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                  <Sparkles className="w-3 h-3" />
+                  Ruta Recomendada
+                </span>
               </div>
+              <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+                Tu Plan de Acción
+              </h1>
+              <p className="text-muted-foreground text-sm mt-1 mb-4">
+                Una ruta secuencial optimizada mediante reglas de asociación para reducir tus brechas
+                con el mercado.
+              </p>
+            </div>
 
-              <Button
-                onClick={startGeneration}
-                className="w-full gap-1.5 text-xs font-semibold cursor-pointer h-10"
-              >
-                Generar mi Plan de Acción
-                <Sparkles className="h-3.5 w-3.5" />
-              </Button>
-            </Card>
-          ) : (
-            <Card className="card-elevated sm:p-8 text-left space-y-6">
-              <div className="text-center space-y-2">
-                <div className="relative mx-auto h-8 w-8 flex items-center justify-center">
-                  <Loader2 className="h-6 w-6 text-primary animate-spin" />
-                </div>
-                <h3 className="text-sm font-bold text-foreground">
-                  Generando tu Plan de Acción personalizado...
-                </h3>
-              </div>
-
-              <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-300 ease-out"
-                  style={{ width: `${(generationStep / 4) * 100}%` }}
-                />
-              </div>
-
-              <div className="space-y-2.5">
-                {[
-                  { id: 1, text: 'Evaluando brechas críticas detectadas...' },
-                  { id: 2, text: 'Secuenciando fases lógicas de aprendizaje...' },
-                  { id: 3, text: 'Compilando justificaciones y reglas de asociación...' },
-                  { id: 4, text: 'Configurando panel y métricas de impacto...' },
-                ].map((step) => {
-                  const isDone = generationStep > step.id;
-                  const isActive = generationStep === step.id;
-
-                  return (
-                    <div
-                      key={step.id}
-                      className={cn(
-                        'flex items-center gap-2.5 p-2 rounded-lg border transition-all text-xs',
-                        isDone
-                          ? 'border-emerald-200/50 bg-emerald-50/5 text-emerald-800 dark:border-emerald-950/20 dark:text-emerald-400'
-                          : isActive
-                            ? 'border-primary/30 bg-primary/5 text-foreground font-semibold'
-                            : 'border-border/50 bg-transparent text-muted-foreground/60',
-                      )}
-                    >
-                      {isDone ? (
-                        <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500 shrink-0" />
-                      ) : isActive ? (
-                        <Loader2 className="h-4.5 w-4.5 text-primary animate-spin shrink-0" />
-                      ) : (
-                        <div className="h-4.5 w-4.5 rounded-full border border-muted-foreground/30 flex items-center justify-center text-[10px] font-mono shrink-0">
-                          {step.id}
-                        </div>
-                      )}
-                      <span>{step.text}</span>
+            {/* Grid Layout (Roadmap + Market Insights) */}
+            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+              {/* ROADMAP STEPS (Left Column - 2/3 width) */}
+              <div className="md:col-span-2 space-y-8">
+                {phases.map((phase, phaseIdx) => (
+                  <div key={phaseIdx} className="space-y-4">
+                    {/* Phase Title */}
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-primary text-xs font-bold shrink-0 mt-0.5">
+                        {phaseIdx + 1}
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-foreground">{phase.title}</h3>
+                        <p className="text-[10px] text-muted-foreground">{phase.description}</p>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            </Card>
-          )}
-        </div>
-      )}
 
-      {/* Main Roadmap Content (Blurred if not generated yet) */}
-      <div
-        className={cn(
-          'transition-all duration-700',
-          !isGenerated && 'opacity-20 blur-xs pointer-events-none select-none scale-[0.99]',
-        )}
-      >
-        {/* Header */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <CVUpdateBanner />
-
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
-              <Sparkles className="w-3 h-3" />
-              Ruta Recomendada
-            </span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-            Tu Plan de Acción
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1 mb-4">
-            Una ruta secuencial optimizada mediante reglas de asociación para reducir tus brechas
-            con el mercado.
-          </p>
-        </div>
-
-        {/* Grid Layout (Roadmap + Market Insights) */}
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          {/* ROADMAP STEPS (Left Column - 2/3 width) */}
-          <div className="md:col-span-2 space-y-8">
-            {phases.map((phase, phaseIdx) => (
-              <div key={phaseIdx} className="space-y-4">
-                {/* Phase Title */}
-                <div className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-primary text-xs font-bold shrink-0 mt-0.5">
-                    {phaseIdx + 1}
+                    {/* Steps Cards */}
+                    <div className="space-y-3 pl-9">
+                      {phase.steps.map((step, stepIdx) => (
+                        <Card
+                          key={stepIdx}
+                          onClick={() => handleStepClick(step)}
+                          className="border border-border/80 hover:border-primary/50 bg-card hover:bg-secondary/10 transition-all cursor-pointer shadow-xs relative overflow-hidden group"
+                        >
+                          <CardContent className="p-4 flex items-center justify-between gap-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                                  {step.skill}
+                                </h4>
+                                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
+                                  {step.impact}
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {step.topics.slice(0, 3).map((topic, tIdx) => (
+                                  <span
+                                    key={tIdx}
+                                    className="text-[9px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full"
+                                  >
+                                    {topic}
+                                  </span>
+                                ))}
+                                {step.topics.length > 3 && (
+                                  <span className="text-[9px] text-muted-foreground">
+                                    +{step.topics.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">{phase.title}</h3>
-                    <p className="text-[10px] text-muted-foreground">{phase.description}</p>
-                  </div>
-                </div>
-
-                {/* Steps Cards */}
-                <div className="space-y-3 pl-9">
-                  {phase.steps.map((step, stepIdx) => (
-                    <Card
-                      key={stepIdx}
-                      onClick={() => handleStepClick(step)}
-                      className="border border-border/80 hover:border-primary/50 bg-card hover:bg-secondary/10 transition-all cursor-pointer shadow-xs relative overflow-hidden group"
-                    >
-                      <CardContent className="p-4 flex items-center justify-between gap-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-                              {step.skill}
-                            </h4>
-                            <span className="text-[9px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
-                              {step.impact}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {step.topics.slice(0, 3).map((topic, tIdx) => (
-                              <span
-                                key={tIdx}
-                                className="text-[9px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full"
-                              >
-                                {topic}
-                              </span>
-                            ))}
-                            {step.topics.length > 3 && (
-                              <span className="text-[9px] text-muted-foreground">
-                                +{step.topics.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* MARKET INSIGHTS (Right Column - 1/3 width) */}
-          <div className="space-y-6">
-            {/* Demanda del Cluster */}
-            <Card className="card-standard">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                  <CardTitle className="text-[10px] font-bold text-foreground uppercase tracking-wider">
-                    Demanda del Cluster
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-foreground tracking-tight">
-                    {growth !== null ? `${isPositiveGrowth ? '+' : ''}${growth}%` : 'N/A'}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground font-semibold">
-                    Crecimiento laboral
-                  </span>
-                </div>
-                <p className="text-[10px] text-muted-foreground leading-normal">
-                  Las ofertas para el clúster <strong>{primarySpecialty}</strong>{' '}
-                  {isPositiveGrowth ? 'se han incrementado' : 'han disminuido'} en los últimos 6
-                  meses en Lima metropolitana.
-                </p>
-
-                {/* Sparkline Graph */}
-                <div className="h-10 w-full mt-2">
-                  <svg className="w-full h-full" viewBox="0 0 100 30" preserveAspectRatio="none">
-                    <path
-                      d="M0,30 L10,25 L30,28 L50,18 L70,15 L90,10 L100,5 L100,30 Z"
-                      className="fill-primary/10"
-                    />
-                    <path
-                      d="M0,30 L10,25 L30,28 L50,18 L70,15 L90,10 L100,5"
-                      className="fill-none stroke-primary stroke-1.5"
-                    />
-                  </svg>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Insight IA Box */}
-            <Card className="card-standard">
-              <CardContent className="space-y-3">
-                <div className="flex items-start gap-2.5">
-                  <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <h4 className="text-[10px] font-bold text-foreground uppercase tracking-wider">
-                      INSIGHT IA
-                    </h4>
+              {/* MARKET INSIGHTS (Right Column - 1/3 width) */}
+              <div className="space-y-6">
+                {/* Demanda del Cluster */}
+                <Card className="card-standard">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-primary" />
+                      <CardTitle className="text-[10px] font-bold text-foreground uppercase tracking-wider">
+                        Demanda del Cluster
+                      </CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-foreground tracking-tight">
+                        {growth !== null ? `${isPositiveGrowth ? '+' : ''}${growth}%` : 'N/A'}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-semibold">
+                        Crecimiento laboral
+                      </span>
+                    </div>
                     <p className="text-[10px] text-muted-foreground leading-normal">
-                      Los perfiles <strong>{primarySpecialty}</strong> con dominio de habilidades
-                      críticas de nube e infraestructura tienen salarios promedios{' '}
-                      <strong>
-                        {salaryDiff !== null
-                          ? isPositiveSalary
-                            ? `${salaryDiff}% más altos`
-                            : `${Math.abs(salaryDiff)}% más bajos`
-                          : 'variables'}
-                      </strong>{' '}
-                      en el mercado peruano comparado con perfiles tradicionales.
+                      Las ofertas para el clúster <strong>{primarySpecialty}</strong>{' '}
+                      {isPositiveGrowth ? 'se han incrementado' : 'han disminuido'} en los últimos 6
+                      meses en Lima metropolitana.
                     </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
+                    {/* Sparkline Graph */}
+                    <div className="h-10 w-full mt-2">
+                      <svg className="w-full h-full" viewBox="0 0 100 30" preserveAspectRatio="none">
+                        <path
+                          d="M0,30 L10,25 L30,28 L50,18 L70,15 L90,10 L100,5 L100,30 Z"
+                          className="fill-primary/10"
+                        />
+                        <path
+                          d="M0,30 L10,25 L30,28 L50,18 L70,15 L90,10 L100,5"
+                          className="fill-none stroke-primary stroke-1.5"
+                        />
+                      </svg>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Insight IA Box */}
+                <Card className="card-standard">
+                  <CardContent className="space-y-3">
+                    <div className="flex items-start gap-2.5">
+                      <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <h4 className="text-[10px] font-bold text-foreground uppercase tracking-wider">
+                          INSIGHT IA
+                        </h4>
+                        <p className="text-[10px] text-muted-foreground leading-normal">
+                          Los perfiles <strong>{primarySpecialty}</strong> con dominio de habilidades
+                          críticas de nube e infraestructura tienen salarios promedios{' '}
+                          <strong>
+                            {salaryDiff !== null
+                              ? isPositiveSalary
+                                ? `${salaryDiff}% más altos`
+                                : `${Math.abs(salaryDiff)}% más bajos`
+                              : 'variables'}
+                          </strong>{' '}
+                          en el mercado peruano comparado con perfiles tradicionales.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* DRAWER LATERAL DERECHO (Contexto de Mercado) */}
@@ -888,7 +700,6 @@ function RoadmapContent() {
           </div>
         </div>
       )}
-      </div>
     </>
   );
 }

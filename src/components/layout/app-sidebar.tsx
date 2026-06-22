@@ -41,8 +41,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'Overview', href: '/overview', icon: Network },
   { name: 'Mercado', href: '/market', icon: TrendingUp },
-  { name: 'Evaluación', href: '/dashboard', icon: Activity },
-  { name: 'Plan de Acción', href: '/dashboard/action-plan', icon: Map },
+  { name: 'Diagnóstico', href: '/diagnosis', icon: Activity },
 ];
 
 export default function AppSidebar() {

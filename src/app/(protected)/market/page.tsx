@@ -373,7 +373,7 @@ function TopologyContent() {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/dashboard?cluster=${encodeURIComponent(cluster.name)}`);
+                          router.push(`/diagnosis?cluster=${encodeURIComponent(cluster.name)}`);
                         }}
                         className="text-[10px] font-bold h-7 gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
                       >

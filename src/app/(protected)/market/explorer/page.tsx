@@ -40,7 +40,7 @@ export default function MarketExplorerPage() {
       <header className="absolute top-6 left-6 right-6 z-20 flex items-center justify-between pointer-events-none">
         {/* Title and Back button */}
         <div className="flex items-center gap-4 bg-background/60 backdrop-blur-xl border border-border/40 rounded-2xl p-4 shadow-xl pointer-events-auto">
-          <Link href="/dashboard">
+          <Link href="/diagnosis">
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full border border-border/20 bg-muted/30 hover:bg-muted/50 transition-all">
               <ArrowLeft className="h-4 w-4" />
             </Button>

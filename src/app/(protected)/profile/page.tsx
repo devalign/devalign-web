@@ -153,31 +153,7 @@ function ProfileContent() {
     }
   };
 
-  // Check backend connection on mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
-        await fetch(API_BASE_URL, {
-          method: 'GET',
-          signal: controller.signal,
-          mode: 'no-cors',
-        });
-        clearTimeout(timeoutId);
-      } catch {
-        toast.warning(
-          'El servidor de análisis (backend) está fuera de línea. Operando en modo de simulación local.',
-          {
-            duration: 8000,
-            id: 'backend-offline-warning',
-          },
-        );
-      }
-    };
-    checkConnection();
-  }, []);
+
 
   // Load profile data into state once loaded
   useEffect(() => {

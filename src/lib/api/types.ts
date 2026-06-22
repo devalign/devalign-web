@@ -80,6 +80,7 @@ export interface ClusterAffinityItem {
 export interface DomainAffinityItem {
   domain: string;
   affinity_score: number;
+  market_demand?: number;
 }
 
 export interface UserProfileData {

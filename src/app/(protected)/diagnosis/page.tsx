@@ -33,22 +33,22 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Lightbulb } from 'lucide-react';
-import { HeaderBar } from '@/components/layout/header-bar';
+
 
 // Refactored modular subcomponents
 import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
 import { PriorityGapsCard } from '@/components/diagnosis/priority-gaps-card';
-import { MarketScoreCard } from '@/components/diagnosis/market-score-card';
+
 import { StrengthsCard } from '@/components/diagnosis/strengths-card';
 import { AffinityRadarChart } from '@/components/diagnosis/affinity-radar-chart';
-import { UserProfileCard } from '@/components/diagnosis/user-profile-card';
-import { CompatibleRolesCard } from '@/components/diagnosis/compatible-roles-card';
+import { UserHeroCard } from '@/components/diagnosis/user-hero-card';
+
 import { AiInsightCard } from '@/components/diagnosis/ai-insight-card';
 import { ClusterDemandCard } from '@/components/diagnosis/cluster-demand-card';
 import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
 import { KnowledgeGraphCard } from '@/components/profile/KnowledgeGraphCard';
 
-function DashboardContent() {
+function DiagnosisContent() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: cvData, isLoading: isCVLoading, refetch: refetchCVs } = useUserCVs();
   const { data: profile, refetch: refetchProfile } = useUserProfile();
@@ -62,8 +62,6 @@ function DashboardContent() {
   // Drawers states
   const [isStrengthsDrawerOpen, setIsStrengthsDrawerOpen] = useState(false);
   const [isGapsDrawerOpen, setIsGapsDrawerOpen] = useState(false);
-  const [isRolesDrawerOpen, setIsRolesDrawerOpen] = useState(false);
-  const [isInsightDrawerOpen, setIsInsightDrawerOpen] = useState(false);
 
   // Search states for drawers
   const [strengthsSearch, setStrengthsSearch] = useState('');
@@ -78,6 +76,23 @@ function DashboardContent() {
   const [educationList, setEducationList] = useState<EducationItem[]>([]);
   const [experiences, setExperiences] = useState<WorkExperienceItem[]>([]);
   const [certifications, setCertifications] = useState<CertificationItem[]>([]);
+
+  // Calculate total years of experience
+  const yearsOfExperience = React.useMemo(() => {
+    if (!experiences || experiences.length === 0) return 0;
+    let totalMonths = 0;
+    experiences.forEach((exp) => {
+      if (!exp.start_date) return;
+      const start = new Date(exp.start_date);
+      const end = exp.current || !exp.end_date ? new Date() : new Date(exp.end_date);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        totalMonths += diffDays / 30.44;
+      }
+    });
+    return Math.max(0, Math.round(totalMonths / 12));
+  }, [experiences]);
 
   // Skills Lists
   const [techSkills, setTechSkills] = useState<string[]>([]);
@@ -115,64 +130,19 @@ function DashboardContent() {
     return () => clearTimeout(timeoutId);
   }, [action]);
 
-  // Simulate Recalculation on redirect from /profile
-  useEffect(() => {
-    if (recalculateParam === 'true') {
-      const timeoutId = setTimeout(() => {
-        setIsRecalculating(true);
-      }, 0);
-      const timer = setTimeout(() => {
-        setIsRecalculating(false);
-        // Clear query parameter
-        router.replace('/dashboard');
-        toast.success('Diagnóstico recalculado y actualizado con las nuevas habilidades.');
-      }, 1800);
-      return () => {
-        clearTimeout(timeoutId);
-        clearTimeout(timer);
-      };
-    }
-  }, [recalculateParam, router]);
-
   const handleCloseAts = (open: boolean) => {
     setIsAtsOpen(open);
     if (!open && action === 'preview-ats') {
-      router.push('/dashboard');
+      router.push('/diagnosis');
     }
   };
 
   const handleCloseUpload = (open: boolean) => {
     setIsUploadOpen(open);
     if (!open && action === 'update-cv') {
-      router.push('/dashboard');
+      router.push('/diagnosis');
     }
   };
-
-  // Check backend connection on mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
-        await fetch(API_BASE_URL, {
-          method: 'GET',
-          signal: controller.signal,
-          mode: 'no-cors',
-        });
-        clearTimeout(timeoutId);
-      } catch {
-        toast.warning(
-          'El servidor de análisis (backend) está fuera de línea. Operando en modo de simulación local.',
-          {
-            duration: 8000,
-            id: 'backend-offline-warning',
-          },
-        );
-      }
-    };
-    checkConnection();
-  }, []);
 
   // Sync hasCV with hook data
   useEffect(() => {
@@ -183,65 +153,9 @@ function DashboardContent() {
     }
   }, [cvData]);
 
-  // Load data from profile hook OR fallback to localStorage draft if backend API is offline
+  // Synchronize profile data with API hook
   useEffect(() => {
     const syncProfileData = () => {
-      // 1. Check if we have an offline draft first
-      const draftStr = localStorage.getItem('devalign_profile_draft');
-      if (draftStr) {
-        try {
-          const draft = JSON.parse(draftStr);
-          if (draft.fullName) setFullName(draft.fullName);
-          if (draft.roleTitle) setRoleTitle(draft.roleTitle);
-          if (draft.seniority) setSeniority(draft.seniority);
-
-          if (draft.work_experience) setExperiences(draft.work_experience);
-          if (draft.education) setEducationList(draft.education);
-          if (draft.certifications) setCertifications(draft.certifications);
-
-          if (draft.detected_skills) {
-            const tech: string[] = [];
-            const concept: string[] = [];
-            const soft: string[] = [];
-            draft.detected_skills.forEach((s: { name: string; skill_type: string }) => {
-              const t = s.skill_type ? s.skill_type.toLowerCase() : '';
-              if (t === 'soft' || t === 'soft_skill') soft.push(s.name);
-              else if (t === 'concept' || t === 'methodology') concept.push(s.name);
-              else tech.push(s.name);
-            });
-
-            setTechSkills(tech);
-            setConceptSkills(concept);
-            setSoftSkills(soft);
-
-            // Dynamically adjust gaps: remove skills that are now in technical skills
-            const originalGaps = [
-              'Docker',
-              'Kubernetes',
-              'AWS',
-              'Microservicios',
-              'CI/CD',
-              'Spark',
-              'Hadoop',
-              'NoSQL',
-            ];
-            const newGaps: SkillItem[] = originalGaps
-              .filter((gap) => !tech.includes(gap) && !concept.includes(gap))
-              .map((name, idx) => ({
-                name,
-                skill_type: 'tech',
-                market_importance: idx < 3 ? 'critical' : 'high',
-                market_demand_percentage: Math.max(74 - idx * 4, 38),
-              }));
-            setMarketGaps(newGaps);
-          }
-          return; // Skip reading base profile as draft has priority in simulation
-        } catch (e) {
-          console.error('Failed to parse profile draft:', e);
-        }
-      }
-
-      // 2. Base sync with hook API
       if (profile) {
         if (profile.full_name) {
           setFullName(profile.full_name);
@@ -294,8 +208,8 @@ function DashboardContent() {
       }
     };
 
-    const timeoutId = setTimeout(syncProfileData, 0);
-    return () => clearTimeout(timeoutId);
+    const timer = setTimeout(syncProfileData, 0);
+    return () => clearTimeout(timer);
   }, [profile, user]);
 
   // Active Cluster Index for navigation
@@ -556,48 +470,35 @@ function DashboardContent() {
 
   return (
     <>
-      <div className="w-full px-4 md:px-6 pt-4">
-        <HeaderBar
-          clusters={allAffinities}
-          activeCluster={activeCluster}
-          onSelectCluster={(name) => {
-            const idx = allAffinities.findIndex((a) => a.cluster_name === name);
-            if (idx !== -1) handleSelectCluster(idx);
-          }}
-          isAnalyzing={isAnalyzing}
-          isAnalysisReady={isAnalysisReady}
-          lastAnalysisDate={formattedDate}
-        />
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         {/* Banner de Sincronización Diferida */}
         <CVUpdateBanner />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Columna Izquierda: Perfil y Radar */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
-            <UserProfileCard fullName={fullName} roleTitle={roleTitle} seniority={seniority} />
-            <AffinityRadarChart
-              domainAffinities={dynamicProfile.domain_affinities}
-              techSkills={techSkills}
-              isLoading={isRecalculating}
-            />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Main Content (80% / 4 cols) */}
+          <div className="lg:col-span-3 flex flex-col gap-6">
+            {/* Top Row: User Hero Card */}
+            <div className="w-full">
+              <UserHeroCard
+                fullName={fullName}
+                roleTitle={roleTitle}
+                seniority={seniority}
+                currentScore={activeScore}
+                primarySpecialty={
+                  activeCluster?.cluster_name ||
+                  dynamicProfile.primary_specialty ||
+                  'Software Engineering'
+                }
+                totalSkills={techSkills.length + conceptSkills.length + softSkills.length}
+                totalStrengths={activeStrengths.length}
+                totalGaps={activeGaps.length}
+                isLoading={isRecalculating}
+              />
+            </div>
 
-          {/* Columna Derecha: Score, Fortalezas, Brechas */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            <MarketScoreCard
-              currentScore={activeScore}
-              primarySpecialty={activeCluster?.cluster_name || 'Software Engineering'}
-              isLoading={isRecalculating}
-              onViewRoadmap={() => {
-                router.push(
-                  `/dashboard/action-plan?cluster=${encodeURIComponent(activeCluster?.cluster_name || '')}`,
-                );
-              }}
-            />
-
+            {/* Competency breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <StrengthsCard
                 strengths={activeStrengths}
@@ -616,36 +517,31 @@ function DashboardContent() {
                 isLoading={isRecalculating}
               />
             </div>
+
+            {/* Row 3: Affinity Radar Chart (Full width deep dive) */}
+            <div className="w-full">
+              <AffinityRadarChart
+                domainAffinities={dynamicProfile.domain_affinities}
+                techSkills={techSkills}
+                isLoading={isRecalculating}
+                className="w-full"
+              />
+            </div>
+
           </div>
 
-          {/* Fila 3: Análisis de Mercado (Roles, Demanda de Cluster, Impacto de Mercado) */}
-          <div className="lg:col-span-1">
-            <CompatibleRolesCard
-              roles={activeCluster?.compatible_roles}
-              onViewAll={() => setIsRolesDrawerOpen(true)}
-              isLoading={isRecalculating}
-            />
-          </div>
-
-          <div className="lg:col-span-1">
+          {/* Aside panel (20% / 1 col) */}
+          <div className="lg:col-span-1 flex flex-col gap-6">
             <ClusterDemandCard
               clusterName={activeCluster?.cluster_name || dynamicProfile.primary_specialty}
               marketInsights={activeCluster?.market_insights}
               isLoading={isRecalculating}
             />
-          </div>
-
-          <div className="lg:col-span-1">
             <MarketImpactCard
               marketGaps={activeGaps}
               marketInsights={activeCluster?.market_insights}
-              onViewAll={() => setIsInsightDrawerOpen(true)}
               isLoading={isRecalculating}
             />
-          </div>
-
-          {/* Fila 4: Recomendaciones IA */}
-          <div className="lg:col-span-3">
             <AiInsightCard marketGaps={activeGaps} isLoading={isRecalculating} />
           </div>
         </div>
@@ -726,7 +622,7 @@ function DashboardContent() {
                       <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
                         {strength.name}
                       </span>
-                      <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+                      <span className="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-bold shrink-0">
                         {strength.demandPercentage}% DEMANDA
                       </span>
                     </div>
@@ -821,7 +717,7 @@ function DashboardContent() {
                       <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
                         {gap.name}
                       </span>
-                      <span className={`text-[9px] font-bold shrink-0 ${textClass}`}>
+                      <span className={`text-[9px] font-bold shrink-0 ${textClass} opacity-80`}>
                         {demand}% DEMANDA
                       </span>
                     </div>
@@ -853,111 +749,23 @@ function DashboardContent() {
           </div>
         </SheetContent>
       </Sheet>
-
-      {/* Drawer: Todos los Roles Compatibles */}
-      <Sheet open={isRolesDrawerOpen} onOpenChange={setIsRolesDrawerOpen}>
-        <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="flex items-center gap-2 text-primary font-bold">
-              Roles Compatibles ({activeCluster?.cluster_name || 'Especialidad'})
-            </SheetTitle>
-            <SheetDescription className="text-xs text-muted-foreground mt-1">
-              Estos son todos los roles del mercado que hacen match con esta especialidad evaluada.
-            </SheetDescription>
-          </SheetHeader>
-
-          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none mt-4">
-            {activeCluster?.compatible_roles?.map((role, idx) => {
-              const badgeClass =
-                role.match === 'Alta'
-                  ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
-                  : role.match === 'Media'
-                    ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                    : 'bg-red-500/10 text-red-600 border border-red-500/20';
-
-              return (
-                <div
-                  key={idx}
-                  className="flex justify-between items-center p-3 rounded-lg bg-secondary/35 border border-border/50 text-xs"
-                >
-                  <span className="font-semibold text-foreground truncate">{role.title}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[9px] font-bold shrink-0 ${badgeClass}`}
-                  >
-                    Afinidad {role.match}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Drawer: Detalle del Insight de Mercado */}
-      <Sheet open={isInsightDrawerOpen} onOpenChange={setIsInsightDrawerOpen}>
-        <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="flex items-center gap-2 text-amber-500 font-bold">
-              <Lightbulb className="h-5 w-5" />
-              Detalle del Insight de Mercado
-            </SheetTitle>
-            <SheetDescription className="text-xs text-muted-foreground mt-1">
-              Desglose salarial y proyección para los perfiles que cubren las brechas actuales.
-            </SheetDescription>
-          </SheetHeader>
-
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1 mt-4 text-sm text-foreground">
-            <div className="p-4 rounded-lg bg-secondary/35 border border-border">
-              <h3 className="font-bold text-xs uppercase text-muted-foreground mb-2">
-                Impacto Salarial
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Según nuestro modelo de Machine Learning entrenado con miles de ofertas locales,
-                cerrar las brechas indicadas (especialmente aquellas marcadas como Críticas) te
-                permite apuntar a roles Senior o Especializados.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 rounded-lg border border-border flex flex-col items-center justify-center text-center">
-                <span className="text-xs text-muted-foreground font-semibold">
-                  Salario Promedio Actual
-                </span>
-                <span className="text-lg font-bold">
-                  S/.{' '}
-                  {Math.round((activeCluster?.market_insights?.average_salary_pen || 0) * 0.75) ||
-                    'N/A'}
-                </span>
-              </div>
-              <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 flex flex-col items-center justify-center text-center">
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                  Salario Proyectado
-                </span>
-                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                  S/. {activeCluster?.market_insights?.average_salary_pen || 'N/A'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
     </>
   );
 }
 
-export default function DashboardPage() {
+export default function DiagnosisPage() {
   return (
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-3">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            <p className="text-xs text-muted-foreground font-semibold">Cargando dashboard...</p>
+            <p className="text-xs text-muted-foreground font-semibold">Cargando diagnóstico...</p>
           </div>
         </div>
       }
     >
-      <DashboardContent />
+      <DiagnosisContent />
     </Suspense>
   );
 }

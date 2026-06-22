@@ -55,64 +55,7 @@ export default function PublicSharePage() {
     { name: 'Cloud Developer', issuer: 'Plataforma Cloud', date: '2025' },
   ]);
 
-  useEffect(() => {
-    // Try to load from localStorage draft for presentation/preview
-    const draftStr = localStorage.getItem('devalign_profile_draft');
-    if (draftStr) {
-      try {
-        const draft = JSON.parse(draftStr);
-        const timeoutId = setTimeout(() => {
-          if (draft.fullName) setDeveloperName(draft.fullName);
-          if (draft.roleTitle) setRoleTitle(draft.roleTitle);
-          if (draft.seniority) setSeniority(draft.seniority);
-
-          if (draft.education && draft.education.length > 0) {
-            setDegree(draft.education[0].degree);
-            setUniversity(draft.education[0].institution);
-          } else {
-            setDegree('Sin registrar');
-            setUniversity('Sin registrar');
-          }
-
-          if (draft.detected_skills) {
-            const tech = draft.detected_skills
-              .filter((s: LocalSkillItem) => {
-                const t = s.skill_type ? s.skill_type.toLowerCase() : '';
-                return t !== 'soft' && t !== 'soft_skill';
-              })
-              .map((s: LocalSkillItem) => s.name);
-            if (tech.length > 0) setTechSkills(tech);
-            else setTechSkills([]);
-          }
-
-          if (draft.certifications && draft.certifications.length > 0) {
-            setCertifications(draft.certifications);
-          } else {
-            setCertifications([]);
-          }
-
-          if (draft.alignment_score) {
-            setCurrentScore(draft.alignment_score);
-          } else if (draft.detected_skills) {
-            // Calculate score based on skills length
-            const techCount =
-              draft.detected_skills.filter((s: LocalSkillItem) => {
-                const t = s.skill_type ? s.skill_type.toLowerCase() : '';
-                return t !== 'soft' && t !== 'soft_skill';
-              }).length || 0;
-            setCurrentScore(Math.min(42 + techCount * 3, 98));
-          }
-
-          if (draft.primary_specialty) {
-            setSpecialty(draft.primary_specialty);
-          }
-        }, 0);
-        return () => clearTimeout(timeoutId);
-      } catch (e) {
-        console.error('Failed to parse profile draft:', e);
-      }
-    }
-  }, []);
+  // Profile preview defaults are rendered statically for shared diagnostic links.
 
   // SVG Radar Coordinates out of 100 for (Data, Backend, Cloud, DevOps, Frontend)
   const convert = React.useCallback((val: number, angleDeg: number) => {

@@ -134,19 +134,7 @@ export function OverviewSideDrawer({
                       </Badge>
                     )}
                   </div>
-                  <Link
-                    href={`/dashboard/action-plan?cluster=${encodeURIComponent(primarySpecialty)}`}
-                    className="block w-full"
-                  >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-[10px] font-bold h-8 bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10 flex items-center justify-center gap-1.5 transition-all rounded-lg cursor-pointer"
-                    >
-                      <Map className="h-3 w-3" />
-                      Ver Plan de Acción
-                    </Button>
-                  </Link>
+
                 </div>
               )}
 
@@ -162,7 +150,7 @@ export function OverviewSideDrawer({
 
               {/* Footer: Ver Diagnóstico Completo */}
               <div className="p-3 border-t border-border/50 bg-muted/20 shrink-0">
-                <Link href="/dashboard" className="block w-full">
+                <Link href="/diagnosis" className="block w-full">
                   <Button
                     variant="ghost"
                     size="sm"

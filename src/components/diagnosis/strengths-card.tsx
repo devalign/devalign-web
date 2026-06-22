@@ -45,6 +45,14 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
             Fortalezas principales
           </span>
         </div>
+        {strengths.length > 0 && (
+          <button
+            onClick={onViewAll}
+            className="text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer bg-transparent border-0"
+          >
+            Ver todas ({strengths.length}) <ArrowRight className="w-3 h-3" />
+          </button>
+        )}
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-between pt-0 space-y-3">
         {strengths.length === 0 ? (
@@ -63,7 +71,7 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
                     <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
                       {s.name}
                     </span>
-                    <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+                    <span className="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-bold shrink-0">
                       {s.demandPercentage}% DEMANDA
                     </span>
                   </div>
@@ -77,14 +85,6 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
                   </div>
                 </div>
               ))}
-            </div>
-            <div className="pt-2 text-right">
-              <button
-                onClick={onViewAll}
-                className="text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer bg-transparent border-0"
-              >
-                Ver todas ({strengths.length}) <ArrowRight className="w-3 h-3" />
-              </button>
             </div>
           </>
         )}
