@@ -444,16 +444,10 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
                     <div key={i} className="flex items-center gap-1.5 text-muted-foreground">
                       <span
                         className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                          met ? 'bg-emerald-500' : 'bg-muted-foreground/40'
+                          met ? 'bg-success' : 'bg-muted-foreground/40'
                         }`}
                       />
-                      <span
-                        className={
-                          met
-                            ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                            : 'text-muted-foreground'
-                        }
-                      >
+                      <span className={met ? 'text-success font-medium' : 'text-muted-foreground'}>
                         {req.label}
                       </span>
                     </div>

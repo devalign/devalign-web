@@ -7,7 +7,7 @@ export function DiagnosisHeader() {
       <div>
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
           Diagnóstico Inteligente
-          <span className="text-emerald-500">✨</span>
+          <span className="text-success">✨</span>
         </h1>
         <p className="text-muted-foreground mt-1">
           Análisis automático de tu perfil vs. demanda del mercado IT.

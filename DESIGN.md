@@ -90,39 +90,40 @@ Devalign utiliza **TailwindCSS v4** bajo un modelo de configuración CSS-First d
 
 ### Tema de HSL Tokens (Light vs. Dark Mode)
 
-| Token Variable | Light Mode (HSL / Hex) | Dark Mode (HSL / Hex) | Descripción / Propósito |
-| :--- | :--- | :--- | :--- |
-| `--background` | `140 12% 97%` / `#F5F7F5` | `143 20% 6%` / `#0C130E` | Fondo general de la interfaz |
-| `--foreground` | `143 27% 15%` / `#1D3224` | `140 12% 93%` / `#E9ECE9` | Texto principal del sistema |
-| `--primary` | `143 16% 62%` / `#8EAD9A` | `143 16% 62%` / `#8EAD9A` | Color primario de marca (Verde Salvia) |
-| `--primary-foreground` | `143 27% 15%` / `#1D3224` | `143 27% 15%` / `#1D3224` | Texto en contraste sobre fondo primario |
-| `--secondary` | `215 30% 92%` / `#E4E9F0` | `215 25% 14%` / `#1B2430` | Color secundario (Azul Pizarra) |
-| `--secondary-foreground`| `215 35% 20%` / `#212C3B` | `215 30% 92%` / `#E4E9F0` | Texto sobre fondo secundario |
-| `--muted` | `140 12% 93%` / `#E9ECE9` | `143 15% 14%` / `#1B241D` | Color atenuado para fondos secundarios |
-| `--muted-foreground` | `143 10% 45%` / `#677F6E` | `143 8% 65%` / `#9EACA1` | Texto secundario y etiquetas |
-| `--card` | `0 0% 100%` / `#FFFFFF` | `143 18% 10%` / `#151E18` | Fondo de contenedores y tarjetas |
-| `--card-foreground` | `143 27% 15%` / `#1D3224` | `140 12% 93%` / `#E9ECE9` | Texto sobre tarjetas |
-| `--border` / `--input` | `140 12% 86%` / `#DAE1DA` | `143 15% 14%` / `#1B241D` | Bordes generales e inputs |
-| `--ring` | `143 16% 62%` / `#8EAD9A` | `143 16% 62%` / `#8EAD9A` | Anillos de foco y selección |
-| `--destructive` | `0 84.2% 60.2%` / `#EF4444` | `0 62.8% 30.6%` / `#7F1D1D` | Elementos de error o peligro |
-| `--success` | `142.1 76.2% 36.3%`/`#16A34A` | `142.1 70% 45%` / `#22C55E` | Indicadores de completado o éxito |
+| Token Variable           | Light Mode (HSL / Hex)        | Dark Mode (HSL / Hex)       | Descripción / Propósito                 |
+| :----------------------- | :---------------------------- | :-------------------------- | :-------------------------------------- |
+| `--background`           | `140 12% 97%` / `#F5F7F5`     | `143 20% 6%` / `#0C130E`    | Fondo general de la interfaz            |
+| `--foreground`           | `143 27% 15%` / `#1D3224`     | `140 12% 93%` / `#E9ECE9`   | Texto principal del sistema             |
+| `--primary`              | `143 16% 62%` / `#8EAD9A`     | `143 16% 62%` / `#8EAD9A`   | Color primario de marca (Verde Salvia)  |
+| `--primary-foreground`   | `143 27% 15%` / `#1D3224`     | `143 27% 15%` / `#1D3224`   | Texto en contraste sobre fondo primario |
+| `--secondary`            | `215 30% 92%` / `#E4E9F0`     | `215 25% 14%` / `#1B2430`   | Color secundario (Azul Pizarra)         |
+| `--secondary-foreground` | `215 35% 20%` / `#212C3B`     | `215 30% 92%` / `#E4E9F0`   | Texto sobre fondo secundario            |
+| `--muted`                | `140 12% 93%` / `#E9ECE9`     | `143 15% 14%` / `#1B241D`   | Color atenuado para fondos secundarios  |
+| `--muted-foreground`     | `143 10% 45%` / `#677F6E`     | `143 8% 65%` / `#9EACA1`    | Texto secundario y etiquetas            |
+| `--card`                 | `0 0% 100%` / `#FFFFFF`       | `143 18% 10%` / `#151E18`   | Fondo de contenedores y tarjetas        |
+| `--card-foreground`      | `143 27% 15%` / `#1D3224`     | `140 12% 93%` / `#E9ECE9`   | Texto sobre tarjetas                    |
+| `--border` / `--input`   | `140 12% 86%` / `#DAE1DA`     | `143 15% 14%` / `#1B241D`   | Bordes generales e inputs               |
+| `--ring`                 | `143 16% 62%` / `#8EAD9A`     | `143 16% 62%` / `#8EAD9A`   | Anillos de foco y selección             |
+| `--destructive`          | `0 84.2% 60.2%` / `#EF4444`   | `0 62.8% 30.6%` / `#7F1D1D` | Elementos de error o peligro            |
+| `--success`              | `142.1 76.2% 36.3%`/`#16A34A` | `142.1 70% 45%` / `#22C55E` | Indicadores de completado o éxito       |
 
 ### Sidebar Tokens
 
 La barra lateral tiene tokens de tema exclusivos para controlar su visualización:
 
-| Variable de Sidebar | Light Mode HSL | Dark Mode HSL |
-| :--- | :--- | :--- |
-| `--sidebar-background` | `0 0% 100%` | `143 18% 10%` |
-| `--sidebar-foreground` | `143 27% 15%` | `140 12% 93%` |
-| `--sidebar-primary` | `143 27% 15%` | `143 16% 62%` |
-| `--sidebar-primary-foreground`| `140 12% 97%` | `143 27% 15%` |
-| `--sidebar-accent` | `140 12% 93%` | `143 15% 14%` |
-| `--sidebar-accent-foreground` | `143 27% 15%` | `140 12% 93%` |
-| `--sidebar-border` | `140 12% 86%` | `143 15% 14%` |
-| `--sidebar-ring` | `143 16% 62%` | `143 16% 62%` |
+| Variable de Sidebar            | Light Mode HSL | Dark Mode HSL |
+| :----------------------------- | :------------- | :------------ |
+| `--sidebar-background`         | `0 0% 100%`    | `143 18% 10%` |
+| `--sidebar-foreground`         | `143 27% 15%`  | `140 12% 93%` |
+| `--sidebar-primary`            | `143 27% 15%`  | `143 16% 62%` |
+| `--sidebar-primary-foreground` | `140 12% 97%`  | `143 27% 15%` |
+| `--sidebar-accent`             | `140 12% 93%`  | `143 15% 14%` |
+| `--sidebar-accent-foreground`  | `143 27% 15%`  | `140 12% 93%` |
+| `--sidebar-border`             | `140 12% 86%`  | `143 15% 14%` |
+| `--sidebar-ring`               | `143 16% 62%`  | `143 16% 62%` |
 
 ### Arquitectura de Configuración y Variantes
+
 - **Variante de Modo Oscuro**: Declarado con `@custom-variant dark (&:where(.dark, .dark *));`. Esto activa el modo oscuro agregando la clase `.dark` al contenedor principal (generalmente `<html>` o `<body>`).
 - **Nombres de Clases y Variables**: En Tailwind v4, registrar variables en `@theme` como `--color-primary` genera de manera automática clases utilitarias como `bg-primary`, `text-primary` y `border-primary`.
 
@@ -179,6 +180,7 @@ El sistema expone utilidades de diseño para contenedores y tarjetas declaradas 
 - `@utility card-glass`: Aplica un fondo traslúcido (`bg-background/60`), desenfoque de fondo (`backdrop-blur-md`), borde y redondeado premium (`rounded-2xl`).
 
 ### Animaciones e Interacción
+
 - **Animaciones de Acordeón**: Se configuran variables de animación `--animate-accordion-down` y `--animate-accordion-up` con transiciones de `0.2s` y funciones de aceleración cúbicas.
 - **Scrollbar Premium**: Barras de desplazamiento personalizadas de `6px` de grosor, con bordes redondeados y un efecto hover que resalta en el color primario con `60%` de opacidad (`hsl(var(--primary) / 0.6)`).
 

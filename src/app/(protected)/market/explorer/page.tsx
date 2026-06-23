@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 import { ArrowLeft, Network, Cpu, Layers, Zap, Info } from 'lucide-react';
 import Link from 'next/link';
 import { useKnowledgeGraph } from '@/hooks/use-knowledge-graph';
-import { KnowledgeGraphVisualization, GraphNode } from '@/components/profile/KnowledgeGraphVisualization';
+import {
+  KnowledgeGraphVisualization,
+  GraphNode,
+} from '@/components/profile/KnowledgeGraphVisualization';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,13 +26,13 @@ export default function MarketExplorerPage() {
       <div className="absolute inset-0 z-0 bg-transparent">
         {error ? (
           <div className="flex h-full w-full items-center justify-center bg-black/40">
-            <p className="text-sm text-red-400 font-semibold">
+            <p className="text-sm text-destructive font-semibold">
               Hubo un error cargando el grafo de conocimiento.
             </p>
           </div>
         ) : (
-          <KnowledgeGraphVisualization 
-            data={data || { nodes: [], links: [] }} 
+          <KnowledgeGraphVisualization
+            data={data || { nodes: [], links: [] }}
             isLoading={isLoading}
             onNodeClick={handleNodeClick}
           />
@@ -41,13 +44,17 @@ export default function MarketExplorerPage() {
         {/* Title and Back button */}
         <div className="flex items-center gap-4 bg-background/60 backdrop-blur-xl border border-border/40 rounded-2xl p-4 shadow-xl pointer-events-auto">
           <Link href="/diagnosis">
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full border border-border/20 bg-muted/30 hover:bg-muted/50 transition-all">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full border border-border/20 bg-muted/30 hover:bg-muted/50 transition-all"
+            >
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div className="space-y-0.5">
             <h1 className="text-sm md:text-base font-black tracking-tight text-foreground flex items-center gap-2">
-              <Network className="w-4 h-4 text-indigo-500 shrink-0" />
+              <Network className="w-4 h-4 text-info shrink-0" />
               Explorador de Red Neuronal
             </h1>
             <p className="text-[10px] text-muted-foreground">
@@ -63,26 +70,40 @@ export default function MarketExplorerPage() {
           <Card className="border-border/40 shadow-2xl bg-background/60 backdrop-blur-xl h-full flex flex-col pointer-events-auto rounded-2xl overflow-hidden transition-all duration-300">
             <CardHeader className="pb-4 border-b border-border/40 bg-muted/[0.03]">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-bold text-foreground leading-tight">{selectedNode.label}</CardTitle>
+                <CardTitle className="text-lg font-bold text-foreground leading-tight">
+                  {selectedNode.label}
+                </CardTitle>
                 <Cpu className="h-4 w-4 text-muted-foreground/50 shrink-0 ml-2 mt-1" />
               </div>
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {selectedNode.status === 'acquired' && (
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] py-0.5">
+                  <Badge
+                    variant="outline"
+                    className="bg-success/10 text-success dark:text-success border-success/20 text-[10px] py-0.5"
+                  >
                     Adquirida
                   </Badge>
                 )}
                 {selectedNode.status === 'gap' && (
-                  <Badge variant="outline" className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 text-[10px] py-0.5">
+                  <Badge
+                    variant="outline"
+                    className="bg-warning/10 text-warning dark:text-warning border-warning/20 text-[10px] py-0.5"
+                  >
                     Brecha
                   </Badge>
                 )}
                 {selectedNode.status === 'neutral' && (
-                  <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 text-[10px] py-0.5">
+                  <Badge
+                    variant="outline"
+                    className="bg-info/10 text-info dark:text-info border-info/20 text-[10px] py-0.5"
+                  >
                     Relacionada
                   </Badge>
                 )}
-                <Badge variant="secondary" className="bg-muted/30 text-muted-foreground border border-border/30 text-[10px] py-0.5 hover:bg-muted/30">
+                <Badge
+                  variant="secondary"
+                  className="bg-muted/30 text-muted-foreground border border-border/30 text-[10px] py-0.5 hover:bg-muted/30"
+                >
                   {selectedNode.group}
                 </Badge>
               </div>
@@ -94,36 +115,43 @@ export default function MarketExplorerPage() {
                   Dominios de Aplicación
                 </h4>
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {selectedNode.domains.map(domain => (
-                    <span key={domain} className="px-2 py-1 text-[11px] font-medium rounded-lg bg-muted/30 text-foreground border border-border/30">
+                  {selectedNode.domains.map((domain) => (
+                    <span
+                      key={domain}
+                      className="px-2 py-1 text-[11px] font-medium rounded-lg bg-muted/30 text-foreground border border-border/30"
+                    >
                       {domain}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 p-4 mt-6">
-                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+              <div className="space-y-3 rounded-xl bg-info/5 border border-info/10 p-4 mt-6">
+                <div className="flex items-center gap-2 text-info dark:text-info">
                   <Info className="h-3.5 w-3.5" />
-                  <h4 className="text-xs font-bold uppercase tracking-wider">Análisis Contextual</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wider">
+                    Análisis Contextual
+                  </h4>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Esta tecnología se conecta con otras herramientas en tu grafo basadas en la demanda actual del mercado. 
-                  {selectedNode.status === 'gap' 
-                    ? ' Al ser una brecha en tu perfil, adquirir esta habilidad fortalecería tu posición para roles que demandan este stack.' 
-                    : selectedNode.status === 'acquired' 
-                    ? ' Ya posees esta habilidad, lo que te posiciona favorablemente en su respectivo dominio.' 
-                    : ' Es una tecnología relacionada frecuentemente con tu stack actual.'}
+                  Esta tecnología se conecta con otras herramientas en tu grafo basadas en la
+                  demanda actual del mercado.
+                  {selectedNode.status === 'gap'
+                    ? ' Al ser una brecha en tu perfil, adquirir esta habilidad fortalecería tu posición para roles que demandan este stack.'
+                    : selectedNode.status === 'acquired'
+                      ? ' Ya posees esta habilidad, lo que te posiciona favorablemente en su respectivo dominio.'
+                      : ' Es una tecnología relacionada frecuentemente con tu stack actual.'}
                 </p>
               </div>
             </CardContent>
           </Card>
         ) : (
           <Card className="border-dashed border-2 border-border/30 bg-background/40 backdrop-blur-md shadow-xl h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground pointer-events-auto rounded-2xl">
-            <Zap className="h-8 w-8 mb-3 text-indigo-500/50 dark:text-indigo-400/50 animate-pulse" />
+            <Zap className="h-8 w-8 mb-3 text-info/50 dark:text-info/50 animate-pulse" />
             <p className="text-xs font-bold text-foreground/80 mb-1">Exploración Activa</p>
             <p className="text-[11px] leading-relaxed max-w-[200px] mx-auto text-muted-foreground">
-              Haz clic en cualquier nodo de la red para analizar sus relaciones y contexto en el mercado IT.
+              Haz clic en cualquier nodo de la red para analizar sus relaciones y contexto en el
+              mercado IT.
             </p>
           </Card>
         )}

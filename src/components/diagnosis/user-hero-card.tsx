@@ -36,16 +36,16 @@ export function UserHeroCard({
     if (score >= 75)
       return {
         label: 'Alta afinidad',
-        color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30',
+        color: 'text-success bg-success/10 border-success/30',
       };
     if (score >= 50)
       return {
         label: 'Media afinidad',
-        color: 'text-amber-500 bg-amber-500/10 border-amber-500/30',
+        color: 'text-warning bg-warning/10 border-warning/30',
       };
     return {
       label: 'Baja afinidad',
-      color: 'text-red-500 bg-red-500/10 border-red-500/30',
+      color: 'text-destructive bg-destructive/10 border-destructive/30',
     };
   };
 
@@ -55,7 +55,7 @@ export function UserHeroCard({
     <Card
       className={cn(
         'card-glass relative overflow-hidden flex flex-col justify-between h-full p-6 sm:p-8 gap-6',
-        className
+        className,
       )}
     >
       {isLoading && (
@@ -66,7 +66,6 @@ export function UserHeroCard({
 
       {/* Top Section: Identity & Specialty Split */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-6 pb-6 border-b border-border/40">
-        
         {/* Left Side: User Identity */}
         <div className="flex justify-between items-start gap-4 w-full md:w-auto flex-1">
           <div className="space-y-2.5 min-w-0">
@@ -111,7 +110,7 @@ export function UserHeroCard({
             <p className="text-base sm:text-lg font-black text-foreground tracking-tight truncate leading-tight max-w-[280px]">
               {primarySpecialty}
             </p>
-            
+
             <div className="flex items-baseline gap-3 mt-1.5 md:justify-end">
               <span className="text-4xl sm:text-5xl font-black text-foreground tracking-tighter leading-none">
                 {currentScore}%
@@ -119,7 +118,7 @@ export function UserHeroCard({
               <span
                 className={cn(
                   'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black border shrink-0',
-                  scoreState.color
+                  scoreState.color,
                 )}
               >
                 {scoreState.label}
@@ -127,7 +126,6 @@ export function UserHeroCard({
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Bottom Section: Indicadores Clave */}
@@ -144,8 +142,8 @@ export function UserHeroCard({
         {/* Grid for key indicators */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-1">
           {/* Habilidades */}
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/15 border border-border/30 hover:border-emerald-500/20 hover:bg-secondary/25 transition-all">
-            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/15 border border-border/30 hover:border-success/20 hover:bg-secondary/25 transition-all">
+            <div className="p-2 rounded-lg bg-success/10 text-success shrink-0">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div className="min-w-0">
@@ -174,8 +172,8 @@ export function UserHeroCard({
           </div>
 
           {/* Brechas */}
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/15 border border-border/30 hover:border-red-500/20 hover:bg-secondary/25 transition-all">
-            <div className="p-2 rounded-lg bg-red-500/10 text-red-500 shrink-0">
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/15 border border-border/30 hover:border-destructive/20 hover:bg-secondary/25 transition-all">
+            <div className="p-2 rounded-lg bg-destructive/10 text-destructive shrink-0">
               <AlertCircle className="w-5 h-5" />
             </div>
             <div className="min-w-0">

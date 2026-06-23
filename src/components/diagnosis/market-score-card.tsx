@@ -22,14 +22,17 @@ export function MarketScoreCard({
     if (score >= 75)
       return {
         label: 'Alta afinidad',
-        color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/35',
+        color: 'text-success bg-success/10 border-success/35',
       };
     if (score >= 50)
       return {
         label: 'Media afinidad',
-        color: 'text-amber-500 bg-amber-500/10 border-amber-500/35',
+        color: 'text-warning bg-warning/10 border-warning/35',
       };
-    return { label: 'Baja afinidad', color: 'text-red-500 bg-red-500/10 border-red-500/35' };
+    return {
+      label: 'Baja afinidad',
+      color: 'text-destructive bg-destructive/10 border-destructive/35',
+    };
   };
 
   const scoreState = getScoreState(currentScore);

@@ -50,7 +50,9 @@ export function AffinityRadarChart({
     });
 
     const marketPoints = DOMAIN_CONFIGS.map((config, index) => {
-      const dbDemand = domainAffinities?.find((d) => d.domain.toLowerCase() === config.key.toLowerCase())?.market_demand;
+      const dbDemand = domainAffinities?.find(
+        (d) => d.domain.toLowerCase() === config.key.toLowerCase(),
+      )?.market_demand;
       const demandVal = dbDemand !== undefined ? Math.round(dbDemand * 100) : config.marketDemand;
       const angle = (index * 360) / DOMAIN_CONFIGS.length;
       return convert(demandVal, angle);
@@ -215,11 +217,17 @@ export function AffinityRadarChart({
 
   if (standalone) {
     return (
-      <Card className={`card-glass relative overflow-hidden flex flex-col h-full ${className || ''}`}>
+      <Card
+        className={`card-glass relative overflow-hidden flex flex-col h-full ${className || ''}`}
+      >
         {renderContent()}
       </Card>
     );
   }
 
-  return <div className={`relative flex flex-col h-full w-full min-h-0 ${className || ''}`}>{renderContent()}</div>;
+  return (
+    <div className={`relative flex flex-col h-full w-full min-h-0 ${className || ''}`}>
+      {renderContent()}
+    </div>
+  );
 }

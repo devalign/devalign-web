@@ -37,7 +37,7 @@ export function MarketImpactCard({
             {/* Header */}
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                <Lightbulb className="w-3.5 h-3.5 text-warning" />
                 <span className="text-[10px] font-bold font-mono uppercase tracking-wider">
                   Insight de Mercado
                 </span>
@@ -49,7 +49,7 @@ export function MarketImpactCard({
                   {salaryDiff !== null ? `${isPositive ? '+' : ''}${salaryDiff}%` : 'N/A'}
                 </span>
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wider ${isPositive ? 'text-amber-500' : 'text-red-500'}`}
+                  className={`text-[10px] font-bold uppercase tracking-wider ${isPositive ? 'text-warning' : 'text-destructive'}`}
                 >
                   Diferencial
                 </span>

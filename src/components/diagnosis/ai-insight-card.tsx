@@ -59,10 +59,7 @@ export function AiInsightCard({ marketGaps, isLoading = false }: AiInsightCardPr
                   </>
                 )}{' '}
                 podría aumentar tu alineación con el mercado en{' '}
-                <strong className="text-emerald-600 dark:text-emerald-400">
-                  +{potentialIncrease}%
-                </strong>
-                .
+                <strong className="text-success dark:text-success">+{potentialIncrease}%</strong>.
               </p>
             </div>
           </div>

@@ -35,16 +35,16 @@ export function OverviewSideDrawer({
     if (score >= 75)
       return {
         label: 'Alta afinidad',
-        color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/35 hover:bg-emerald-500/10',
+        color: 'text-success bg-success/10 border-success/35 hover:bg-success/10',
       };
     if (score >= 50)
       return {
         label: 'Media afinidad',
-        color: 'text-amber-500 bg-amber-500/10 border-amber-500/35 hover:bg-amber-500/10',
+        color: 'text-warning bg-warning/10 border-warning/35 hover:bg-warning/10',
       };
     return {
       label: 'Baja afinidad',
-      color: 'text-red-500 bg-red-500/10 border-red-500/35 hover:bg-red-500/10',
+      color: 'text-destructive bg-destructive/10 border-destructive/35 hover:bg-destructive/10',
     };
   };
 
@@ -115,8 +115,8 @@ export function OverviewSideDrawer({
               {alignmentScore !== undefined && primarySpecialty && (
                 <div className="p-5 py-4 border-b border-border/50 bg-secondary/5 space-y-3 shrink-0">
                   <div className="flex items-center gap-2 text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider">
-                    <div className="p-1 rounded-md bg-indigo-500/10">
-                      <Compass className="w-3.5 h-3.5 text-indigo-500" />
+                    <div className="p-1 rounded-md bg-info/10">
+                      <Compass className="w-3.5 h-3.5 text-info" />
                     </div>
                     Especialidad Objetivo
                   </div>
@@ -134,7 +134,6 @@ export function OverviewSideDrawer({
                       </Badge>
                     )}
                   </div>
-
                 </div>
               )}
 

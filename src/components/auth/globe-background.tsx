@@ -11,23 +11,23 @@ export default function GlobeBackground() {
   return (
     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center">
       {/* Resplandor central (glow radial suave) */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.06)_0%,transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--success)/0.06)_0%,transparent_50%)]" />
 
       {/* Contenedor principal del globo */}
       <div className="relative w-[900px] h-[900px]">
         {/* SVG Wireframe */}
-        <svg 
-          viewBox="0 0 1000 1000" 
-          className="absolute inset-0 w-full h-full text-foreground" 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          viewBox="0 0 1000 1000"
+          className="absolute inset-0 w-full h-full text-foreground"
+          fill="none"
+          stroke="currentColor"
           strokeWidth="1"
         >
           <defs>
             <linearGradient id="beam-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#10B981" stopOpacity="0" />
-              <stop offset="20%" stopColor="#10B981" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#10B981" stopOpacity="1" />
+              <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity="0" />
+              <stop offset="20%" stopColor="hsl(var(--success))" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity="1" />
             </linearGradient>
           </defs>
 
@@ -35,7 +35,7 @@ export default function GlobeBackground() {
           <g opacity="0.15">
             {/* Círculo exterior */}
             <circle cx="500" cy="500" r="498" />
-            
+
             {/* Longitudes (Verticales) */}
             <ellipse cx="500" cy="500" rx="120" ry="498" />
             <ellipse cx="500" cy="500" rx="250" ry="498" />
@@ -54,20 +54,20 @@ export default function GlobeBackground() {
           </g>
 
           {/* Haz de luz conectando nodos (efecto de resplandor blur) */}
-          <path 
-            d="M 175 550 Q 450 750 795 300" 
-            fill="none" 
-            stroke="url(#beam-grad)" 
-            strokeWidth="8" 
+          <path
+            d="M 175 550 Q 450 750 795 300"
+            fill="none"
+            stroke="url(#beam-grad)"
+            strokeWidth="8"
             opacity="0.3"
             style={{ filter: 'blur(4px)' }}
           />
           {/* Haz de luz principal (núcleo brillante) */}
-          <path 
-            d="M 175 550 Q 450 750 795 300" 
-            fill="none" 
-            stroke="url(#beam-grad)" 
-            strokeWidth="2.5" 
+          <path
+            d="M 175 550 Q 450 750 795 300"
+            fill="none"
+            stroke="url(#beam-grad)"
+            strokeWidth="2.5"
           />
         </svg>
 
@@ -80,12 +80,12 @@ export default function GlobeBackground() {
           >
             <div className="relative bg-zinc-950 rounded-xl p-3 flex items-center justify-center border border-zinc-800 shadow-inner">
               <Icon className="w-5 h-5 text-zinc-300" />
-              
+
               {/* Punto de conexión verde brillante en el nodo destino (índice 2) */}
               {i === 2 && (
                 <>
-                  <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]" />
-                  <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping opacity-75" />
+                  <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-success rounded-full shadow-[0_0_10px_var(--color-success)]" />
+                  <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-success rounded-full animate-ping opacity-75" />
                 </>
               )}
             </div>

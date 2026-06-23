@@ -105,7 +105,7 @@ export default function CVHistoryModal({
           // Confirmation View for Re-analysis
           <div className="space-y-5">
             <DialogHeader>
-              <div className="flex items-center gap-2 text-amber-500 mb-1">
+              <div className="flex items-center gap-2 text-warning mb-1">
                 <AlertTriangle className="h-5 w-5 animate-pulse" />
                 <DialogTitle className="text-sm font-extrabold uppercase tracking-wider text-foreground">
                   Confirmar Re-análisis
@@ -122,7 +122,7 @@ export default function CVHistoryModal({
                 Documento Seleccionado
               </span>
               <div className="flex items-center gap-2.5">
-                <FileText className="h-4 w-4 text-red-500" />
+                <FileText className="h-4 w-4 text-destructive" />
                 <span
                   className="text-xs font-semibold text-foreground truncate"
                   title={selectedCv.original_filename}
@@ -132,7 +132,7 @@ export default function CVHistoryModal({
               </div>
             </div>
 
-            <div className="bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 p-4 rounded-xl text-xs space-y-1.5 leading-relaxed">
+            <div className="bg-warning/10 border border-warning/20 text-amber-800 dark:text-amber-300 p-4 rounded-xl text-xs space-y-1.5 leading-relaxed">
               <p className="font-bold flex items-center gap-1.5">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                 ¡Atención!
@@ -197,7 +197,7 @@ export default function CVHistoryModal({
                 Documento a Eliminar
               </span>
               <div className="flex items-center gap-2.5">
-                <FileText className="h-4 w-4 text-red-500" />
+                <FileText className="h-4 w-4 text-destructive" />
                 <span
                   className="text-xs font-semibold text-foreground truncate"
                   title={deletingCv.original_filename}
@@ -208,7 +208,7 @@ export default function CVHistoryModal({
             </div>
 
             {deletingCv.cv_id === activeCvId ? (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive dark:text-red-300 p-4 rounded-xl text-xs space-y-1.5 leading-relaxed">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive dark:text-destructive p-4 rounded-xl text-xs space-y-1.5 leading-relaxed">
                 <p className="font-bold flex items-center gap-1.5">
                   <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                   ¡Advertencia Crítica!
@@ -365,8 +365,8 @@ export default function CVHistoryModal({
                         </Button>
 
                         {isActive ? (
-                          <div className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
-                            <CheckCircle className="h-3 w-3 text-emerald-500" />
+                          <div className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-success dark:text-success bg-success/5 border border-success/20 rounded-lg">
+                            <CheckCircle className="h-3 w-3 text-success" />
                             Activo
                           </div>
                         ) : (

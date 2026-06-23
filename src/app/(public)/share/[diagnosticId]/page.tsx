@@ -101,7 +101,7 @@ export default function PublicSharePage() {
             <Hexagon className="w-5 h-5 fill-primary/30 text-primary" />
             DEV-ALIGN
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 shadow-xs">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-success/10 text-success border border-success/20 shadow-xs">
             <ShieldCheck className="w-3.5 h-3.5" />
             Alineación Verificada
           </div>
@@ -214,7 +214,7 @@ export default function PublicSharePage() {
                         {currentScore}%
                       </span>
                     </div>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border text-emerald-600 bg-emerald-500/10 border-emerald-500/35">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border text-success bg-success/10 border-success/35">
                       Alta afinidad
                     </span>
                   </div>
@@ -374,13 +374,13 @@ export default function PublicSharePage() {
               <CardContent className="space-y-2">
                 <div className="flex justify-between items-center p-2 rounded-lg bg-secondary/35 text-xs">
                   <span className="font-bold text-foreground">Backend Java Developer</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded bg-success/10 text-success text-[10px] font-bold">
                     Afinidad Alta
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-2 rounded-lg bg-secondary/35 text-xs">
                   <span className="font-bold text-foreground">Java Cloud Engineer</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded bg-success/10 text-success text-[10px] font-bold">
                     Afinidad Alta
                   </span>
                 </div>

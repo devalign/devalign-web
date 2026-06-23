@@ -29,24 +29,24 @@ export default function AffinityCard({
 
   const domainStyles: Record<string, { barClass: string; textClass: string }> = {
     Backend: {
-      barClass: 'bg-emerald-600 dark:bg-emerald-500',
-      textClass: 'text-emerald-700 dark:text-emerald-400',
+      barClass: 'bg-domain-backend',
+      textClass: 'text-domain-backend',
     },
     Cloud: {
-      barClass: 'bg-blue-600 dark:bg-blue-500',
-      textClass: 'text-blue-700 dark:text-blue-400',
+      barClass: 'bg-domain-cloud',
+      textClass: 'text-domain-cloud',
     },
     DevOps: {
-      barClass: 'bg-amber-600 dark:bg-amber-500',
-      textClass: 'text-amber-700 dark:text-amber-400',
+      barClass: 'bg-domain-devops',
+      textClass: 'text-domain-devops',
     },
     Frontend: {
-      barClass: 'bg-purple-600 dark:bg-purple-500',
-      textClass: 'text-purple-700 dark:text-purple-400',
+      barClass: 'bg-domain-frontend',
+      textClass: 'text-domain-frontend',
     },
     'Data Engineering': {
-      barClass: 'bg-red-600 dark:bg-red-500',
-      textClass: 'text-red-700 dark:text-red-400',
+      barClass: 'bg-domain-data',
+      textClass: 'text-domain-data',
     },
   };
 

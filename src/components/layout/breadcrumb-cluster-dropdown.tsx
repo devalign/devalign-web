@@ -68,14 +68,16 @@ export function BreadcrumbClusterDropdown({
           'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-bold transition-all cursor-pointer',
           'hover:bg-primary/10 hover:text-primary',
           'text-foreground',
-          isOpen && 'bg-primary/10 text-primary'
+          isOpen && 'bg-primary/10 text-primary',
         )}
       >
-        <span className="truncate max-w-[140px] sm:max-w-[180px]">{activeCluster.cluster_name}</span>
+        <span className="truncate max-w-[140px] sm:max-w-[180px]">
+          {activeCluster.cluster_name}
+        </span>
         <ChevronDown
           className={cn(
             'h-3 w-3 shrink-0 transition-transform duration-200',
-            isOpen && 'rotate-180'
+            isOpen && 'rotate-180',
           )}
         />
       </button>
@@ -98,14 +100,14 @@ export function BreadcrumbClusterDropdown({
                     'w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-left transition-colors cursor-pointer',
                     isSelected
                       ? 'bg-primary/10 text-primary'
-                      : 'text-foreground hover:bg-secondary/50'
+                      : 'text-foreground hover:bg-secondary/50',
                   )}
                 >
                   {cluster.is_primary && (
                     <Sparkles
                       className={cn(
                         'h-3 w-3 shrink-0',
-                        isSelected ? 'text-primary' : 'text-emerald-500'
+                        isSelected ? 'text-primary' : 'text-success',
                       )}
                     />
                   )}
@@ -116,7 +118,7 @@ export function BreadcrumbClusterDropdown({
                   <span
                     className={cn(
                       'text-[10px] font-bold tabular-nums',
-                      isSelected ? 'text-primary' : 'text-muted-foreground'
+                      isSelected ? 'text-primary' : 'text-muted-foreground',
                     )}
                   >
                     {clusterScore}%

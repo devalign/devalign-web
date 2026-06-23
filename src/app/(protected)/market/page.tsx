@@ -27,7 +27,7 @@ function getClusterMetadata(name: string) {
   if (lowerName.includes('data')) {
     return {
       icon: Database,
-      colorClass: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
+      colorClass: 'text-warning bg-warning/10 border-warning/20',
     };
   }
   if (
@@ -37,13 +37,13 @@ function getClusterMetadata(name: string) {
   ) {
     return {
       icon: Server,
-      colorClass: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20',
+      colorClass: 'text-info bg-info/10 border-info/20',
     };
   }
   if (lowerName.includes('devops') || lowerName.includes('cloud') || lowerName.includes('sre')) {
     return {
       icon: CloudLightning,
-      colorClass: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
+      colorClass: 'text-success bg-success/10 border-success/20',
     };
   }
   if (lowerName.includes('frontend') || lowerName.includes('front-end')) {
@@ -228,7 +228,8 @@ function TopologyContent() {
                       Clustering HDBSCAN sobre UMAP
                     </p>
                     <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
-                      Clustering jerárquico basado en densidad optimizado con reducción dimensional para capturar afinidades complejas de habilidades.
+                      Clustering jerárquico basado en densidad optimizado con reducción dimensional
+                      para capturar afinidades complejas de habilidades.
                     </p>
                   </div>
                 </div>
@@ -269,7 +270,8 @@ function TopologyContent() {
                   <strong className="text-primary font-semibold">{selectedCluster}</strong>.
                 </p>
                 <p className="text-[10px] text-muted-foreground leading-normal">
-                  Haz clic en &quot;Ver Diagnóstico&quot; para analizar tu perfil con esta especialidad.
+                  Haz clic en &quot;Ver Diagnóstico&quot; para analizar tu perfil con esta
+                  especialidad.
                 </p>
               </CardContent>
             </Card>
@@ -299,11 +301,13 @@ function TopologyContent() {
                 >
                   {/* Radio Selection Indicator */}
                   <div className="absolute top-4 right-4">
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
-                      isSelected
-                        ? 'border-primary bg-primary'
-                        : 'border-muted-foreground/30 bg-transparent'
-                    }`}>
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected
+                          ? 'border-primary bg-primary'
+                          : 'border-muted-foreground/30 bg-transparent'
+                      }`}
+                    >
                       {isSelected && (
                         <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
                       )}

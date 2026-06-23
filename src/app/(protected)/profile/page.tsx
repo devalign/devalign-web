@@ -3,7 +3,11 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useUserProfile, useUpdateUserProfile, useUpdateUserSkills } from '@/hooks/use-user-profile';
+import {
+  useUserProfile,
+  useUpdateUserProfile,
+  useUpdateUserSkills,
+} from '@/hooks/use-user-profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -152,8 +156,6 @@ function ProfileContent() {
       router.push('/profile');
     }
   };
-
-
 
   // Load profile data into state once loaded
   useEffect(() => {
@@ -308,10 +310,7 @@ function ProfileContent() {
     toast.success(`Habilidad "${skillName}" añadida localmente.`);
   };
 
-  const handleDeleteSkill = (
-    skillName: string,
-    type: 'tech' | 'soft' | 'concept',
-  ) => {
+  const handleDeleteSkill = (skillName: string, type: 'tech' | 'soft' | 'concept') => {
     if (type === 'tech') setTechSkills(techSkills.filter((s) => s !== skillName));
     if (type === 'soft') setSoftSkills(softSkills.filter((s) => s !== skillName));
     if (type === 'concept') setConceptSkills(conceptSkills.filter((s) => s !== skillName));
@@ -597,7 +596,7 @@ function ProfileContent() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsEditingInfo(false)}
-                    className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg cursor-pointer"
+                    className="h-8 w-8 text-success hover:text-success hover:bg-success/10 dark:hover:bg-success/15 rounded-lg cursor-pointer"
                     title="Listo"
                   >
                     <Check className="w-4 h-4" />
@@ -663,10 +662,10 @@ function ProfileContent() {
                 {currentCV && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/5 border border-emerald-500/20 px-2.5 py-0.5 rounded-full cursor-help">
-                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                      <div className="flex items-center gap-1.5 text-xs text-success dark:text-success font-bold bg-success/5 border border-success/20 px-2.5 py-0.5 rounded-full cursor-help">
+                        <ShieldCheck className="h-3.5 w-3.5 text-success" />
                         Alta (94%)
-                        <Info className="h-3 w-3 text-emerald-500/60" />
+                        <Info className="h-3 w-3 text-success/60" />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="text-[11px] max-w-[220px]">
@@ -684,7 +683,7 @@ function ProfileContent() {
                 ) : currentCV ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border/40">
-                      <div className="rounded-xl bg-red-50 p-2 text-red-500 shrink-0 dark:bg-red-950/30">
+                      <div className="rounded-xl bg-destructive/10 p-2 text-destructive shrink-0 dark:bg-destructive/15">
                         <FileText className="h-5 w-5" />
                       </div>
                       <div className="space-y-0.5 min-w-0 flex-1">
@@ -782,11 +781,7 @@ function ProfileContent() {
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      {tab === 'tech'
-                        ? 'Tecnologías'
-                        : tab === 'concept'
-                          ? 'Conceptos'
-                          : 'Blandas'}
+                      {tab === 'tech' ? 'Tecnologías' : tab === 'concept' ? 'Conceptos' : 'Blandas'}
                     </button>
                   ))}
                 </div>
@@ -932,7 +927,7 @@ function ProfileContent() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => setEditingEducationIdx(null)}
-                                  className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg cursor-pointer"
+                                  className="h-7 w-7 text-success hover:text-success hover:bg-success/10 dark:hover:bg-success/15 rounded-lg cursor-pointer"
                                   title="Listo"
                                 >
                                   <Check className="w-4 h-4" />
@@ -1113,7 +1108,7 @@ function ProfileContent() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => setEditingExperienceIdx(null)}
-                                  className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg cursor-pointer"
+                                  className="h-7 w-7 text-success hover:text-success hover:bg-success/10 dark:hover:bg-success/15 rounded-lg cursor-pointer"
                                   title="Listo"
                                 >
                                   <Check className="w-4 h-4" />
@@ -1285,7 +1280,7 @@ function ProfileContent() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => setEditingCertIdx(null)}
-                                  className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg cursor-pointer"
+                                  className="h-7 w-7 text-success hover:text-success hover:bg-success/10 dark:hover:bg-success/15 rounded-lg cursor-pointer"
                                   title="Listo"
                                 >
                                   <Check className="w-4 h-4" />
@@ -1415,8 +1410,8 @@ function ProfileContent() {
                     Descartar cambios
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground pt-1">
-                    ¿Estás seguro de descartar los cambios realizados? Los datos nuevos agregados
-                    se perderán y no podrás recuperarlos.
+                    ¿Estás seguro de descartar los cambios realizados? Los datos nuevos agregados se
+                    perderán y no podrás recuperarlos.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex gap-2 justify-end pt-2">

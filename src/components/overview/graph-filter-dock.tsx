@@ -18,22 +18,22 @@ export function GraphFilterDock({ activeFilter, onFilterChange }: GraphFilterDoc
       id: 'all' as FilterMode,
       label: 'Ver Todo',
       icon: Network,
-      colorClass: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/30',
-      activeColorClass: 'bg-indigo-500 text-white shadow-indigo-500/30 ring-indigo-500/20',
+      colorClass: 'text-info bg-info/10 border-info/30',
+      activeColorClass: 'bg-info text-white shadow-info/30 ring-info/20',
     },
     {
       id: 'strengths' as FilterMode,
       label: 'Mis Fortalezas',
       icon: CheckCircle2,
-      colorClass: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30',
-      activeColorClass: 'bg-emerald-500 text-white shadow-emerald-500/30 ring-indigo-500/20',
+      colorClass: 'text-success bg-success/10 border-success/30',
+      activeColorClass: 'bg-success text-white shadow-success/30 ring-info/20',
     },
     {
       id: 'gaps' as FilterMode,
       label: 'Mis Brechas',
       icon: AlertCircle,
-      colorClass: 'text-orange-500 bg-orange-500/10 border-orange-500/30',
-      activeColorClass: 'bg-orange-500 text-white shadow-orange-500/30 ring-indigo-500/20',
+      colorClass: 'text-warning bg-warning/10 border-warning/30',
+      activeColorClass: 'bg-warning text-white shadow-warning/30 ring-info/20',
     },
   ];
 
@@ -54,13 +54,17 @@ export function GraphFilterDock({ activeFilter, onFilterChange }: GraphFilterDoc
                     'flex items-center justify-center h-8 w-8 rounded-full transition-all duration-300 ring-2 ring-transparent cursor-pointer',
                     isActive
                       ? cn('shadow-lg ring-offset-2', opt.activeColorClass)
-                      : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
+                      : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
                   )}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={10} className="text-xs font-bold bg-popover text-popover-foreground border-border/40">
+              <TooltipContent
+                side="top"
+                sideOffset={10}
+                className="text-xs font-bold bg-popover text-popover-foreground border-border/40"
+              >
                 {opt.label}
               </TooltipContent>
             </Tooltip>

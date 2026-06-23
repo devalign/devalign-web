@@ -53,7 +53,7 @@ export function PriorityGapsCard({
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-between pt-0 space-y-3">
         {marketGaps.length === 0 ? (
-          <div className="p-4 rounded-lg bg-emerald-500/5 border border-dashed border-emerald-500/30 text-center text-xs text-muted-foreground my-auto">
+          <div className="p-4 rounded-lg bg-success/5 border border-dashed border-success/30 text-center text-xs text-muted-foreground my-auto">
             🎉 ¡Felicidades! Has cubierto todas las brechas detectadas.
           </div>
         ) : (
@@ -64,13 +64,10 @@ export function PriorityGapsCard({
                 const demand = bg.market_demand_percentage || 50;
 
                 const borderClass =
-                  crit === 'critical' || crit === 'critical'
-                    ? 'border-red-500/30 bg-red-500/5 hover:border-red-500/50'
-                    : 'border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50';
-                const textClass =
-                  crit === 'critical' || crit === 'critical'
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-amber-600 dark:text-amber-400';
+                  crit === 'critical'
+                    ? 'border-destructive/30 bg-destructive/5 hover:border-destructive/50'
+                    : 'border-warning/30 bg-warning/5 hover:border-warning/50';
+                const textClass = crit === 'critical' ? 'text-destructive' : 'text-warning';
                 const critLabel =
                   crit === 'critical'
                     ? 'Crítica'
@@ -81,8 +78,8 @@ export function PriorityGapsCard({
                         : crit;
                 const tagClass =
                   crit === 'critical'
-                    ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+                    ? 'bg-destructive/10 text-destructive'
+                    : 'bg-warning/10 text-warning';
 
                 return (
                   <div
@@ -100,7 +97,9 @@ export function PriorityGapsCard({
                     <div className="flex items-center justify-between mt-1">
                       <span className={`text-[10px] font-medium ${textClass}`}>{critLabel}</span>
                       {bg.skill_type && (
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tagClass}`}>
+                        <span
+                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tagClass}`}
+                        >
                           {categoryLabel(bg.skill_type)}
                         </span>
                       )}

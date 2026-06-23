@@ -270,7 +270,7 @@ export default function OverviewPage() {
       <div className="absolute inset-0 z-0 bg-transparent">
         {graphError ? (
           <div className="flex h-full w-full items-center justify-center bg-black/40">
-            <p className="text-sm text-red-400 font-semibold">
+            <p className="text-sm text-destructive font-semibold">
               Hubo un error cargando el grafo de conocimiento.
             </p>
           </div>
@@ -283,8 +283,6 @@ export default function OverviewPage() {
           />
         )}
       </div>
-
-
 
       {/* 3. Empty State (Zero-state Overlay with Blur) */}
       {!hasCV && (
@@ -325,7 +323,7 @@ export default function OverviewPage() {
                         {selectedNode.status === 'acquired' && (
                           <Badge
                             variant="outline"
-                            className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[9px] py-0 px-1.5 font-bold"
+                            className="bg-success/10 text-success dark:text-success border-success/20 text-[9px] py-0 px-1.5 font-bold"
                           >
                             Adquirida
                           </Badge>
@@ -333,7 +331,7 @@ export default function OverviewPage() {
                         {selectedNode.status === 'gap' && (
                           <Badge
                             variant="outline"
-                            className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 text-[9px] py-0 px-1.5 font-bold"
+                            className="bg-warning/10 text-warning dark:text-warning border-warning/20 text-[9px] py-0 px-1.5 font-bold"
                           >
                             Brecha
                           </Badge>
@@ -341,7 +339,7 @@ export default function OverviewPage() {
                         {selectedNode.status === 'neutral' && (
                           <Badge
                             variant="outline"
-                            className="bg-indigo-500/10 text-indigo-400 dark:text-indigo-400 border-indigo-500/20 text-[9px] py-0 px-1.5 font-bold"
+                            className="bg-info/10 text-info dark:text-info border-info/20 text-[9px] py-0 px-1.5 font-bold"
                           >
                             Relacionada
                           </Badge>
@@ -381,8 +379,8 @@ export default function OverviewPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 p-4 mt-6">
-                      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                    <div className="space-y-3 rounded-xl bg-info/5 border border-info/10 p-4 mt-6">
+                      <div className="flex items-center gap-2 text-info dark:text-info">
                         <Info className="h-3.5 w-3.5" />
                         <h4 className="text-[10px] font-bold uppercase tracking-wider">
                           Análisis Contextual

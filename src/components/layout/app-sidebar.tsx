@@ -95,89 +95,93 @@ export default function AppSidebar() {
 
       <nav className="flex-1 flex flex-col justify-between px-3 py-4">
         <div className="space-y-1.5">
-          {navItems.filter(item => item.name !== 'Mercado').map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
+          {navItems
+            .filter((item) => item.name !== 'Mercado')
+            .map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
 
-          if (item.disabled) {
-            return (
-              <div key={item.name} className="relative group">
-                <div
-                  className="flex items-center justify-center rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground/60 cursor-not-allowed select-none"
-                  title={`${item.name} (Próximamente)`}
-                >
-                  <Icon className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+              if (item.disabled) {
+                return (
+                  <div key={item.name} className="relative group">
+                    <div
+                      className="flex items-center justify-center rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground/60 cursor-not-allowed select-none"
+                      title={`${item.name} (Próximamente)`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+                    </div>
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                      {item.name} (Próximamente)
+                    </div>
+                  </div>
+                );
+              }
+
+              const itemHref = cluster
+                ? `${item.href}?cluster=${encodeURIComponent(cluster)}`
+                : item.href;
+
+              return (
+                <div key={item.name} className="relative group">
+                  <Link
+                    href={itemHref}
+                    className={cn(
+                      'flex items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
+                      isActive
+                        ? 'bg-secondary text-foreground font-extrabold shadow-xs'
+                        : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        'h-4 w-4 shrink-0',
+                        isActive ? 'text-primary' : 'text-muted-foreground/70',
+                      )}
+                    />
+                  </Link>
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                    {item.name}
+                  </div>
                 </div>
-                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
-                  {item.name} (Próximamente)
-                </div>
-              </div>
-            );
-          }
-
-          const itemHref = cluster
-            ? `${item.href}?cluster=${encodeURIComponent(cluster)}`
-            : item.href;
-
-          return (
-            <div key={item.name} className="relative group">
-              <Link
-                href={itemHref}
-                className={cn(
-                  'flex items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
-                  isActive
-                    ? 'bg-secondary text-foreground font-extrabold shadow-xs'
-                    : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
-                )}
-              >
-                <Icon
-                  className={cn(
-                    'h-4 w-4 shrink-0',
-                    isActive ? 'text-primary' : 'text-muted-foreground/70',
-                  )}
-                />
-              </Link>
-              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
-                {item.name}
-              </div>
-            </div>
-          );
-        })}
+              );
+            })}
         </div>
 
         <div className="space-y-1.5">
-          {navItems.filter(item => item.name === 'Mercado').map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
+          {navItems
+            .filter((item) => item.name === 'Mercado')
+            .map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
 
-            const itemHref = cluster
-              ? `${item.href}?cluster=${encodeURIComponent(cluster)}`
-              : item.href;
+              const itemHref = cluster
+                ? `${item.href}?cluster=${encodeURIComponent(cluster)}`
+                : item.href;
 
-            return (
-              <div key={item.name} className="relative group">
-                <Link
-                  href={itemHref}
-                  className={cn(
-                    'flex items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
-                    isActive
-                      ? 'bg-secondary text-foreground font-extrabold shadow-xs'
-                      : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
-                  )}
-                >
-                  <Icon
+              return (
+                <div key={item.name} className="relative group">
+                  <Link
+                    href={itemHref}
                     className={cn(
-                      'h-4 w-4 shrink-0',
-                      isActive ? 'text-primary' : 'text-muted-foreground/70',
+                      'flex items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200',
+                      isActive
+                        ? 'bg-secondary text-foreground font-extrabold shadow-xs'
+                        : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground',
                     )}
-                  />
-                </Link>
-                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
-                  {item.name}
+                  >
+                    <Icon
+                      className={cn(
+                        'h-4 w-4 shrink-0',
+                        isActive ? 'text-primary' : 'text-muted-foreground/70',
+                      )}
+                    />
+                  </Link>
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg text-xs font-semibold opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                    {item.name}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </nav>
 

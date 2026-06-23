@@ -143,7 +143,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
           <div className="space-y-1 w-full">
             {selectedFile ? (
               <div className="w-full flex flex-col items-center justify-center space-y-4">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
                   <FileText className="h-7 w-7" />
                 </div>
                 <div className="space-y-1 text-center">
