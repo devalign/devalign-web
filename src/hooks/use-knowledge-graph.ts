@@ -15,4 +15,3 @@ export function useKnowledgeGraph() {
     retry: 2,
   });
 }
-

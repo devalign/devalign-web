@@ -10,7 +10,7 @@ export default function AIPipelineSteps() {
       title: '1. Extrae tus habilidades',
       desc: 'Detectamos competencias técnicas y experiencias clave.',
       icon: FileSearch,
-      color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400',
+      color: 'bg-success/10 text-success dark:bg-success/15 dark:text-success',
     },
     {
       num: 2,

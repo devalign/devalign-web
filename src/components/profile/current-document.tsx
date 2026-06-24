@@ -48,7 +48,7 @@ export default function CurrentDocument({
 
       <div className="flex flex-col items-start justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="rounded-xl bg-red-50 p-2.5 text-red-500 shrink-0 dark:bg-red-950/30">
+          <div className="rounded-xl bg-destructive/10 p-2.5 text-destructive shrink-0 dark:bg-destructive/15">
             <FileText className="h-5 w-5" />
           </div>
           <div className="space-y-0.5 min-w-0">

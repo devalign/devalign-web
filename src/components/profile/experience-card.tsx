@@ -173,7 +173,7 @@ export default function ExperienceCard({
               )}
               {type === 'certifications' && (
                 <div className="flex items-start gap-2.5 opacity-40 select-none">
-                  <Star className="h-4 w-4 text-amber-500/65 shrink-0 mt-0.5" />
+                  <Star className="h-4 w-4 text-warning/65 shrink-0 mt-0.5" />
                   <div className="space-y-0.5">
                     <h5 className="text-xs font-bold text-foreground">Certificación Obtenida</h5>
                     <p className="text-[10px] text-muted-foreground">
@@ -221,7 +221,7 @@ export default function ExperienceCard({
               {type === 'certifications' &&
                 items.map((item, idx) => (
                   <div key={idx} className="flex items-start gap-2.5">
-                    <Star className="h-4 w-4 text-amber-500 fill-amber-500/20 shrink-0 mt-0.5" />
+                    <Star className="h-4 w-4 text-warning fill-amber-500/20 shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
                       <h5 className="text-xs font-bold text-foreground">{item.name}</h5>
                       <p className="text-[10px] text-muted-foreground">

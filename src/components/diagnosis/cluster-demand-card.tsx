@@ -33,7 +33,7 @@ export function ClusterDemandCard({
             {/* Header */}
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-muted-foreground">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500" />
+                <TrendingUp className="w-3.5 h-3.5 text-success" />
                 <span className="text-[10px] font-bold font-mono uppercase tracking-wider">
                   Demanda del Cluster
                 </span>
@@ -45,7 +45,7 @@ export function ClusterDemandCard({
                   {growth !== null ? `${isPositive ? '+' : ''}${growth}%` : 'N/A'}
                 </span>
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wider ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}
+                  className={`text-[10px] font-bold uppercase tracking-wider ${isPositive ? 'text-success' : 'text-destructive'}`}
                 >
                   Crecimiento
                 </span>
@@ -64,8 +64,8 @@ export function ClusterDemandCard({
               <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="sparkline-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0.0" />
+                    <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
                 {/* Area under the line */}
@@ -77,7 +77,7 @@ export function ClusterDemandCard({
                 <path
                   d="M 0 35 Q 20 32, 40 38 T 80 20 T 100 15"
                   fill="none"
-                  stroke="rgb(16, 185, 129)"
+                  stroke="hsl(var(--success))"
                   strokeWidth="2"
                   strokeLinecap="round"
                 />

@@ -46,10 +46,10 @@ export function CompatibleRolesCard({
           {roles.map((role, idx) => {
             const badgeClass =
               role.match === 'Alta'
-                ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                ? 'bg-success/10 text-success border border-success/20'
                 : role.match === 'Media'
-                  ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                  : 'bg-red-500/10 text-red-600 border border-red-500/20';
+                  ? 'bg-warning/10 text-warning border border-warning/20'
+                  : 'bg-destructive/10 text-destructive border border-destructive/20';
 
             return (
               <div

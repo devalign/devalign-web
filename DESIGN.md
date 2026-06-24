@@ -90,39 +90,40 @@ Devalign utiliza **TailwindCSS v4** bajo un modelo de configuración CSS-First d
 
 ### Tema de HSL Tokens (Light vs. Dark Mode)
 
-| Token Variable | Light Mode (HSL / Hex) | Dark Mode (HSL / Hex) | Descripción / Propósito |
-| :--- | :--- | :--- | :--- |
-| `--background` | `140 12% 97%` / `#F5F7F5` | `143 20% 6%` / `#0C130E` | Fondo general de la interfaz |
-| `--foreground` | `143 27% 15%` / `#1D3224` | `140 12% 93%` / `#E9ECE9` | Texto principal del sistema |
-| `--primary` | `143 16% 62%` / `#8EAD9A` | `143 16% 62%` / `#8EAD9A` | Color primario de marca (Verde Salvia) |
-| `--primary-foreground` | `143 27% 15%` / `#1D3224` | `143 27% 15%` / `#1D3224` | Texto en contraste sobre fondo primario |
-| `--secondary` | `215 30% 92%` / `#E4E9F0` | `215 25% 14%` / `#1B2430` | Color secundario (Azul Pizarra) |
-| `--secondary-foreground`| `215 35% 20%` / `#212C3B` | `215 30% 92%` / `#E4E9F0` | Texto sobre fondo secundario |
-| `--muted` | `140 12% 93%` / `#E9ECE9` | `143 15% 14%` / `#1B241D` | Color atenuado para fondos secundarios |
-| `--muted-foreground` | `143 10% 45%` / `#677F6E` | `143 8% 65%` / `#9EACA1` | Texto secundario y etiquetas |
-| `--card` | `0 0% 100%` / `#FFFFFF` | `143 18% 10%` / `#151E18` | Fondo de contenedores y tarjetas |
-| `--card-foreground` | `143 27% 15%` / `#1D3224` | `140 12% 93%` / `#E9ECE9` | Texto sobre tarjetas |
-| `--border` / `--input` | `140 12% 86%` / `#DAE1DA` | `143 15% 14%` / `#1B241D` | Bordes generales e inputs |
-| `--ring` | `143 16% 62%` / `#8EAD9A` | `143 16% 62%` / `#8EAD9A` | Anillos de foco y selección |
-| `--destructive` | `0 84.2% 60.2%` / `#EF4444` | `0 62.8% 30.6%` / `#7F1D1D` | Elementos de error o peligro |
-| `--success` | `142.1 76.2% 36.3%`/`#16A34A` | `142.1 70% 45%` / `#22C55E` | Indicadores de completado o éxito |
+| Token Variable           | Light Mode (HSL / Hex)        | Dark Mode (HSL / Hex)       | Descripción / Propósito                 |
+| :----------------------- | :---------------------------- | :-------------------------- | :-------------------------------------- |
+| `--background`           | `140 12% 97%` / `#F5F7F5`     | `143 20% 6%` / `#0C130E`    | Fondo general de la interfaz            |
+| `--foreground`           | `143 27% 15%` / `#1D3224`     | `140 12% 93%` / `#E9ECE9`   | Texto principal del sistema             |
+| `--primary`              | `143 16% 62%` / `#8EAD9A`     | `143 16% 62%` / `#8EAD9A`   | Color primario de marca (Verde Salvia)  |
+| `--primary-foreground`   | `143 27% 15%` / `#1D3224`     | `143 27% 15%` / `#1D3224`   | Texto en contraste sobre fondo primario |
+| `--secondary`            | `215 30% 92%` / `#E4E9F0`     | `215 25% 14%` / `#1B2430`   | Color secundario (Azul Pizarra)         |
+| `--secondary-foreground` | `215 35% 20%` / `#212C3B`     | `215 30% 92%` / `#E4E9F0`   | Texto sobre fondo secundario            |
+| `--muted`                | `140 12% 93%` / `#E9ECE9`     | `143 15% 14%` / `#1B241D`   | Color atenuado para fondos secundarios  |
+| `--muted-foreground`     | `143 10% 45%` / `#677F6E`     | `143 8% 65%` / `#9EACA1`    | Texto secundario y etiquetas            |
+| `--card`                 | `0 0% 100%` / `#FFFFFF`       | `143 18% 10%` / `#151E18`   | Fondo de contenedores y tarjetas        |
+| `--card-foreground`      | `143 27% 15%` / `#1D3224`     | `140 12% 93%` / `#E9ECE9`   | Texto sobre tarjetas                    |
+| `--border` / `--input`   | `140 12% 86%` / `#DAE1DA`     | `143 15% 14%` / `#1B241D`   | Bordes generales e inputs               |
+| `--ring`                 | `143 16% 62%` / `#8EAD9A`     | `143 16% 62%` / `#8EAD9A`   | Anillos de foco y selección             |
+| `--destructive`          | `0 84.2% 60.2%` / `#EF4444`   | `0 62.8% 30.6%` / `#7F1D1D` | Elementos de error o peligro            |
+| `--success`              | `142.1 76.2% 36.3%`/`#16A34A` | `142.1 70% 45%` / `#22C55E` | Indicadores de completado o éxito       |
 
 ### Sidebar Tokens
 
 La barra lateral tiene tokens de tema exclusivos para controlar su visualización:
 
-| Variable de Sidebar | Light Mode HSL | Dark Mode HSL |
-| :--- | :--- | :--- |
-| `--sidebar-background` | `0 0% 100%` | `143 18% 10%` |
-| `--sidebar-foreground` | `143 27% 15%` | `140 12% 93%` |
-| `--sidebar-primary` | `143 27% 15%` | `143 16% 62%` |
-| `--sidebar-primary-foreground`| `140 12% 97%` | `143 27% 15%` |
-| `--sidebar-accent` | `140 12% 93%` | `143 15% 14%` |
-| `--sidebar-accent-foreground` | `143 27% 15%` | `140 12% 93%` |
-| `--sidebar-border` | `140 12% 86%` | `143 15% 14%` |
-| `--sidebar-ring` | `143 16% 62%` | `143 16% 62%` |
+| Variable de Sidebar            | Light Mode HSL | Dark Mode HSL |
+| :----------------------------- | :------------- | :------------ |
+| `--sidebar-background`         | `0 0% 100%`    | `143 18% 10%` |
+| `--sidebar-foreground`         | `143 27% 15%`  | `140 12% 93%` |
+| `--sidebar-primary`            | `143 27% 15%`  | `143 16% 62%` |
+| `--sidebar-primary-foreground` | `140 12% 97%`  | `143 27% 15%` |
+| `--sidebar-accent`             | `140 12% 93%`  | `143 15% 14%` |
+| `--sidebar-accent-foreground`  | `143 27% 15%`  | `140 12% 93%` |
+| `--sidebar-border`             | `140 12% 86%`  | `143 15% 14%` |
+| `--sidebar-ring`               | `143 16% 62%`  | `143 16% 62%` |
 
 ### Arquitectura de Configuración y Variantes
+
 - **Variante de Modo Oscuro**: Declarado con `@custom-variant dark (&:where(.dark, .dark *));`. Esto activa el modo oscuro agregando la clase `.dark` al contenedor principal (generalmente `<html>` o `<body>`).
 - **Nombres de Clases y Variables**: En Tailwind v4, registrar variables en `@theme` como `--color-primary` genera de manera automática clases utilitarias como `bg-primary`, `text-primary` y `border-primary`.
 
@@ -135,35 +136,53 @@ El enrutamiento y la estructura general siguen la arquitectura de **Next.js 16 (
 ### 3.1. Grupos de Rutas y Páginas
 
 - **Flujo de Autenticación (`/` o ruta de login)**:
-  - Implementado a través de [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/page.tsx) que renderiza el [AuthShell](file:///c:/Projects/Devalign/devalign-web/src/components/auth/auth-shell.tsx) envolviendo al [AuthCard](<file:///c:/Projects/Devalign/devalign-web/src/app/(auth)/login/auth-card.tsx>).
-  - Ofrece un diseño tipo "banner publicitario + formulario centrado" con un efecto visual de fondo que simula una grilla circular tecnológica de color `{colors.border}`.
+  - Implementado a través de [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/page.tsx) que renderiza el [AuthShell](file:///c:/Projects/Devalign/devalign-web/src/components/auth/auth-shell.tsx) envolviendo al [AuthCard](file:///c:/Projects/Devalign/devalign-web/src/app/(auth)/login/auth-card.tsx).
+  - Ofrece un diseño tipo "banner publicitario + formulario centrado" con un fondo interactivo de globo terráqueo y partículas animadas:
+    - **Globo Terráqueo Wireframe**: Líneas delgadas con color neutral (`stroke="currentColor"`, `opacity="0.15"`).
+    - **Partículas Animadas**: Múltiples partículas verdes brillantes (`hsl(var(--success))`) animadas usando `<animateMotion>` a lo largo de las curvas del globo.
+    - **Iconos de Intersección**: Cuatro iconos de hardware (Server, CPU, CPU, Database) ubicados exactamente en las intersecciones matemáticas externas del elipse vertical de longitud (`rx="460" ry="498"`) con las líneas de latitud:
+      - *Top-Left (Server)*: `left: 9.38%`, `top: 26.64%`
+      - *Top-Right (CPU)*: `left: 90.62%`, `top: 26.64%`
+      - *Bottom-Left (CPU)*: `left: 9.38%`, `top: 73.36%`
+      - *Bottom-Right (Database)*: `left: 90.62%`, `top: 73.36%`
+  - Incluye un conmutador de tema de posición fija (`fixed`) para permanecer flotante y accesible al hacer scroll, y un footer con texto de copyright y un separador superior sutil del mismo color y opacidad que las líneas del globo (`border-foreground/15`).
+- **Páginas de Legales Públicas (`(public)`)**:
+  - Renders legal documents inside the same dynamic shell for layout consistency:
+    - **Términos de Servicio (`/terms`)**: [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(public)/terms/page.tsx)
+    - **Política de Privacidad (`/privacy`)**: [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(public)/privacy/page.tsx)
+  - Estas páginas se cargan de forma estática y se enlazan con atributos `target="_blank"` y `rel="noopener noreferrer"` desde la tarjeta de autenticación y el cargador de currículum ([cv-uploader.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/profile/cv-uploader.tsx)), optimizando el rendimiento al evitar el uso de diálogos emergentes cargados de texto legal directo.
 - **Zona Protegida (`(protected)`)**:
   - Implementa un sistema de layouts de 3 columnas compuesto por:
     - **Columna 1: Sidebar de Navegación** ([app-sidebar.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/layout/app-sidebar.tsx)): Menú colapsable lateral con información del usuario autenticado, estado activo/bloqueado de vistas y botón de cierre de sesión.
     - **Columna 2: Contenido Principal**: El espacio flexible central (`{children}`) que renderiza páginas específicas (como `/profile` o `/dashboard`).
     - **Columna 3: Aside Contextual** (p.ej. [profile-aside.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/profile/profile-aside.tsx)): Barra lateral derecha para mostrar beneficios, social proof, guías informativas y políticas de seguridad ajustadas al contexto activo.
-  - La landing page post-login por defecto es `/profile` ([page.tsx](<file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/profile/page.tsx>)), que contiene el flujo de upload del CV para análisis inicial del desarrollador.
+  - La landing page post-login por defecto es `/profile` ([page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/profile/page.tsx)), que contiene el flujo de upload del CV para análisis inicial del desarrollador.
   - **Diagnóstico Inteligente (`/diagnosis`)**:
-    - Implementado a través de [page.tsx](<file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/diagnosis/page.tsx>) que renderiza el [DiagnosisDashboard](file:///c:/Projects/Devalign/devalign-web/src/components/diagnosis/diagnosis-dashboard.tsx).
+    - Implementado a través de [page.tsx](file:///c:/Projects/Devalign/devalign-web/src/app/(protected)/diagnosis/page.tsx) que renderiza el [DiagnosisDashboard](file:///c:/Projects/Devalign/devalign-web/src/components/diagnosis/diagnosis-dashboard.tsx).
     - Orquesta un bento-grid responsivo de 3 columnas en desktop para mostrar las fortalezas, brechas, afinidad por dominio, roles compatibles, insights y tendencias del mercado.
     - Utiliza `recharts` para las visualizaciones de datos, estilizadas de forma dinámica usando las variables HSL de los temas del sistema de diseño.
-
+ 
 ### 3.2. Middleware y Protección de Rutas
-
+ 
 - [middleware.ts](file:///c:/Projects/Devalign/devalign-web/src/middleware.ts) intercepta las peticiones de páginas.
 - Delega a [src/lib/supabase/middleware.ts](file:///c:/Projects/Devalign/devalign-web/src/lib/supabase/middleware.ts), el cual:
   1.  Obtiene la sesión del usuario de forma asíncrona mediante cookies.
   2.  Si el usuario no está autenticado e intenta acceder a rutas de la zona protegida (`/dashboard`, `/profile`, `/analysis`, `/roadmap`), lo redirige al flujo de login.
   3.  Si el usuario está autenticado e intenta entrar a las rutas de auth (`/login`, `/register`), lo redirige directamente al `/dashboard`.
-
+ 
 ---
-
+ 
 ## Component Guide
-
+ 
 Los componentes de interfaz se localizan en [src/components/ui](file:///c:/Projects/Devalign/devalign-web/src/components/ui). Todos ellos siguen el patrón de extender los elementos HTML estándar de React y aplicar estilos Tailwind mediante la utilidad `cn(...)` de [src/lib/utils.ts](file:///c:/Projects/Devalign/devalign-web/src/lib/utils.ts) para permitir personalizaciones locales sin perder los estilos base:
-
-1.  **Button**: Ofrece variantes estilizadas (`default`, `destructive`, `outline`, `secondary`, `ghost`, `link`) y tamaños preconfigurados. Utiliza transiciones de color suaves ante eventos hover.
+ 
+1.  **Button**: Ofrece variantes estilizadas (`default`, `destructive`, `outline`, `secondary`, `ghost`, `link`) y tamaños preconfigurados.
+    - **Variante Outline**: Centralizado para usar un borde suave (`border-border`), evitando bordes oscuros chillones. Además, previene el oscurecimiento del texto en hover bajo el modo oscuro aplicando `dark:hover:text-foreground`.
+    - **Variante Ghost**: Configurado con un fondo traslúcido suave (`hover:bg-muted` y `dark:hover:bg-muted/30` con texto en color `hover:text-foreground`), eliminando fondos de hover verde brillante muy llamativos en botones como "Ajustar" y el icono de ajustes lateral.
+    - **Excepciones de Hover**:
+      - El botón de restablecer en ajustes de cuenta ([app-sidebar.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/layout/app-sidebar.tsx)) utiliza la clase `hover:text-destructive` local para mantener su color rojo de peligro e impedir que se apliquen los colores predeterminados de hover.
 2.  **Card**: Componente estructurado en subcomponentes (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) para enmarcar secciones de contenido.
+3.  **Dialog / Modal**: Componentes dialog/modal extendidos mediante [dialog.tsx](file:///c:/Projects/Devalign/devalign-web/src/components/ui/dialog.tsx). Se ha estandarizado la clase base `DialogContent` con `border-border bg-card rounded-xl` para corregir de forma global los bordes blancos chillones y aplicar esquinas redondeadas modernas en todos los modales de la aplicación (incluidos los de legales y cierre de sesión).
 3.  **Input**: Elemento de entrada de texto optimizado para formularios. Cuenta con estados deshabilitados con opacidad controlada y efectos de anillo (`focus-visible:ring-1`) al enfocarse.
 4.  **Form**: Componentes de formulario basados en `react-hook-form` y `zod` para validaciones completas en el cliente.
 5.  **Tabs**: Soporte para vistas tabulares dinámicas (utilizado para alternar entre Login y Signup).
@@ -179,6 +198,7 @@ El sistema expone utilidades de diseño para contenedores y tarjetas declaradas 
 - `@utility card-glass`: Aplica un fondo traslúcido (`bg-background/60`), desenfoque de fondo (`backdrop-blur-md`), borde y redondeado premium (`rounded-2xl`).
 
 ### Animaciones e Interacción
+
 - **Animaciones de Acordeón**: Se configuran variables de animación `--animate-accordion-down` y `--animate-accordion-up` con transiciones de `0.2s` y funciones de aceleración cúbicas.
 - **Scrollbar Premium**: Barras de desplazamiento personalizadas de `6px` de grosor, con bordes redondeados y un efecto hover que resalta en el color primario con `60%` de opacidad (`hsl(var(--primary) / 0.6)`).
 

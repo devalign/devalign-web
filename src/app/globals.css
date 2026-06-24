@@ -26,9 +26,27 @@
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-success: hsl(var(--success));
   --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  /* Print tokens */
+  --color-print-foreground: hsl(var(--print-foreground));
+  --color-print-muted: hsl(var(--print-muted));
+  --color-print-primary: hsl(var(--print-primary));
+  --color-print-border: hsl(var(--print-border));
+  --color-print-dark: hsl(var(--print-dark));
+
+  /* Domain tokens */
+  --color-domain-backend: hsl(var(--domain-backend));
+  --color-domain-cloud: hsl(var(--domain-cloud));
+  --color-domain-devops: hsl(var(--domain-devops));
+  --color-domain-frontend: hsl(var(--domain-frontend));
+  --color-domain-data: hsl(var(--domain-data));
 
   --color-sidebar: hsl(var(--sidebar-background));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
@@ -85,9 +103,28 @@
   --success: 142.1 76.2% 36.3%;
   --success-foreground: 355.6 100% 97.3%;
 
+  --warning: 25 97% 53%;
+  --warning-foreground: 25 95% 12%;
+  --info: 239 84% 67%;
+  --info-foreground: 239 95% 12%;
+
   --border: 140 12% 86%;
   --input: 140 12% 86%;
   --ring: 143 16% 62%;
+
+  /* Print tokens (always high contrast) */
+  --print-foreground: 220 14% 10%;
+  --print-muted: 215 16% 47%;
+  --print-primary: 221 83% 53%;
+  --print-border: 214 32% 91%;
+  --print-dark: 215 25% 27%;
+
+  /* Domain colors */
+  --domain-backend: 142.1 76.2% 36.3%;
+  --domain-cloud: 217.2 91.2% 59.8%;
+  --domain-devops: 38 92% 50%;
+  --domain-frontend: 271.5 81.3% 55.9%;
+  --domain-data: 0 84.2% 60.2%;
 
   /* Sidebar styling */
   --sidebar-background: 0 0% 100%;
@@ -131,9 +168,28 @@
   --success: 142.1 70% 45%;
   --success-foreground: 143 27% 15%;
 
+  --warning: 25 95% 53%;
+  --warning-foreground: 25 95% 12%;
+  --info: 239 84% 67%;
+  --info-foreground: 239 95% 95%;
+
   --border: 143 15% 14%;
   --input: 143 15% 14%;
   --ring: 143 16% 62%;
+
+  /* Print tokens (always high contrast) */
+  --print-foreground: 220 14% 10%;
+  --print-muted: 215 16% 47%;
+  --print-primary: 221 83% 53%;
+  --print-border: 214 32% 91%;
+  --print-dark: 215 25% 27%;
+
+  /* Domain colors */
+  --domain-backend: 142.1 70% 45%;
+  --domain-cloud: 217.2 80% 50%;
+  --domain-devops: 38 90% 45%;
+  --domain-frontend: 271.5 75% 50%;
+  --domain-data: 0 75% 50%;
 
   /* Sidebar in Dark Mode */
   --sidebar-background: 143 18% 10%;
@@ -231,10 +287,9 @@ button:hover {
 }
 
 @utility card-glass {
-  @apply bg-background/60 backdrop-blur-md border border-border rounded-2xl;
+  @apply bg-background/60 backdrop-blur-2xl border border-border rounded-2xl;
 }
 
 @utility card-ai {
   @apply border border-primary/15 bg-primary/[0.03] dark:bg-primary/[0.05] rounded-xl;
 }
-

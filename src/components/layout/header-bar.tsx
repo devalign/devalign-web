@@ -67,8 +67,8 @@ export function HeaderBar({
           </span>
         )}
         {isAnalysisReady && (
-          <span className="hidden md:flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 font-semibold">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+          <span className="hidden md:flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full border border-success/20 font-semibold">
+            <span className="h-1.5 w-1.5 rounded-full bg-success shrink-0" />
             <span className="hidden lg:inline">Actualización Lista</span>
           </span>
         )}

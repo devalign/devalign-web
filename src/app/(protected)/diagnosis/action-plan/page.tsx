@@ -23,7 +23,6 @@ import { toast } from 'sonner';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 
-
 interface RoadmapStep {
   skill: string;
   impact: string;
@@ -383,8 +382,6 @@ function RoadmapContent() {
 
   return (
     <>
-
-
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         {!hasCV ? (
           <div className="max-w-xl mx-auto py-12 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10">
@@ -427,8 +424,8 @@ function RoadmapContent() {
                 Tu Plan de Acción
               </h1>
               <p className="text-muted-foreground text-sm mt-1 mb-4">
-                Una ruta secuencial optimizada mediante reglas de asociación para reducir tus brechas
-                con el mercado.
+                Una ruta secuencial optimizada mediante reglas de asociación para reducir tus
+                brechas con el mercado.
               </p>
             </div>
 
@@ -463,7 +460,7 @@ function RoadmapContent() {
                                 <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                                   {step.skill}
                                 </h4>
-                                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
+                                <span className="text-[9px] font-bold text-success bg-success/10 px-1.5 py-0.5 rounded-md">
                                   {step.impact}
                                 </span>
                               </div>
@@ -521,7 +518,11 @@ function RoadmapContent() {
 
                     {/* Sparkline Graph */}
                     <div className="h-10 w-full mt-2">
-                      <svg className="w-full h-full" viewBox="0 0 100 30" preserveAspectRatio="none">
+                      <svg
+                        className="w-full h-full"
+                        viewBox="0 0 100 30"
+                        preserveAspectRatio="none"
+                      >
                         <path
                           d="M0,30 L10,25 L30,28 L50,18 L70,15 L90,10 L100,5 L100,30 Z"
                           className="fill-primary/10"
@@ -545,8 +546,8 @@ function RoadmapContent() {
                           INSIGHT IA
                         </h4>
                         <p className="text-[10px] text-muted-foreground leading-normal">
-                          Los perfiles <strong>{primarySpecialty}</strong> con dominio de habilidades
-                          críticas de nube e infraestructura tienen salarios promedios{' '}
+                          Los perfiles <strong>{primarySpecialty}</strong> con dominio de
+                          habilidades críticas de nube e infraestructura tienen salarios promedios{' '}
                           <strong>
                             {salaryDiff !== null
                               ? isPositiveSalary

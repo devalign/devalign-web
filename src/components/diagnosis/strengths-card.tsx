@@ -65,20 +65,20 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
               {strengths.slice(0, 4).map((s) => (
                 <div
                   key={s.name}
-                  className="flex flex-col justify-between p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10"
+                  className="flex flex-col justify-between p-2.5 rounded-lg bg-success/5 border border-success/10"
                 >
                   <div className="flex justify-between items-start gap-1">
                     <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
                       {s.name}
                     </span>
-                    <span className="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-bold shrink-0">
+                    <span className="text-[9px] text-success/80 font-bold shrink-0">
                       {s.demandPercentage}% DEMANDA
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-[10px] text-muted-foreground">{s.level}</span>
                     {s.category && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-success/10 text-success font-medium">
                         {categoryLabel(s.category)}
                       </span>
                     )}

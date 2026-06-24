@@ -34,7 +34,6 @@ import {
 } from '@/components/ui/sheet';
 import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Lightbulb } from 'lucide-react';
 
-
 // Refactored modular subcomponents
 import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
 import { PriorityGapsCard } from '@/components/diagnosis/priority-gaps-card';
@@ -470,8 +469,6 @@ function DiagnosisContent() {
 
   return (
     <>
-
-
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         {/* Banner de Sincronización Diferida */}
         <CVUpdateBanner />
@@ -527,7 +524,6 @@ function DiagnosisContent() {
                 className="w-full"
               />
             </div>
-
           </div>
 
           {/* Aside panel (20% / 1 col) */}
@@ -551,8 +547,8 @@ function DiagnosisContent() {
       <Dialog open={isUploadOpen} onOpenChange={handleCloseUpload}>
         <DialogContent className="sm:max-w-md border-border bg-card">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-bold text-foreground text-emerald-600 dark:text-emerald-500">
-              <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+            <DialogTitle className="flex items-center gap-2 font-bold text-foreground text-success dark:text-success">
+              <Sparkles className="h-5 w-5 text-success dark:text-success" />
               Actualizar Currículum Vitae
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -587,8 +583,8 @@ function DiagnosisContent() {
       <Sheet open={isStrengthsDrawerOpen} onOpenChange={setIsStrengthsDrawerOpen}>
         <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
           <SheetHeader className="pb-4">
-            <SheetTitle className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-bold">
-              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            <SheetTitle className="flex items-center gap-2 text-success dark:text-success font-bold">
+              <CheckCircle2 className="h-5 w-5 text-success" />
               Todas las Fortalezas
             </SheetTitle>
             <SheetDescription className="text-xs text-muted-foreground mt-1">
@@ -616,20 +612,20 @@ function DiagnosisContent() {
                 return (
                   <div
                     key={`${strength.name}-${idx}`}
-                    className="flex flex-col justify-between p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10 transition-colors hover:bg-emerald-500/10"
+                    className="flex flex-col justify-between p-3 rounded-lg bg-success/5 border border-success/10 transition-colors hover:bg-success/10"
                   >
                     <div className="flex justify-between items-start gap-1">
                       <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
                         {strength.name}
                       </span>
-                      <span className="text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-bold shrink-0">
+                      <span className="text-[9px] text-success/80 dark:text-success/80 font-bold shrink-0">
                         {strength.demandPercentage}% DEMANDA
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-[10px] text-muted-foreground">{strength.level}</span>
                       {strength.category && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-success/10 text-success dark:text-success font-medium">
                           {strength.category === 'hard_skill'
                             ? 'Habilidad'
                             : strength.category === 'tool'
@@ -658,8 +654,8 @@ function DiagnosisContent() {
       <Sheet open={isGapsDrawerOpen} onOpenChange={setIsGapsDrawerOpen}>
         <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
           <SheetHeader className="pb-4">
-            <SheetTitle className="flex items-center gap-2 text-red-600 dark:text-red-500 font-bold">
-              <AlertCircle className="h-5 w-5 text-red-500" />
+            <SheetTitle className="flex items-center gap-2 text-destructive dark:text-destructive font-bold">
+              <AlertCircle className="h-5 w-5 text-destructive" />
               Brechas Prioritarias
             </SheetTitle>
             <SheetDescription className="text-xs text-muted-foreground mt-1">
@@ -689,12 +685,12 @@ function DiagnosisContent() {
                 const demand = gap.market_demand_percentage || 50;
                 const borderClass =
                   crit === 'critical'
-                    ? 'border-red-500/30 bg-red-500/5 hover:border-red-500/50 hover:bg-red-500/10'
-                    : 'border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50 hover:bg-amber-500/10';
+                    ? 'border-destructive/30 bg-destructive/5 hover:border-destructive/50 hover:bg-destructive/10'
+                    : 'border-warning/30 bg-warning/5 hover:border-amber-500/50 hover:bg-warning/10';
                 const textClass =
                   crit === 'critical'
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-amber-600 dark:text-amber-400';
+                    ? 'text-destructive dark:text-destructive'
+                    : 'text-warning dark:text-warning';
                 const critLabel =
                   crit === 'critical'
                     ? 'Crítica'
@@ -705,8 +701,8 @@ function DiagnosisContent() {
                         : crit;
                 const tagClass =
                   crit === 'critical'
-                    ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+                    ? 'bg-destructive/10 text-destructive dark:text-destructive'
+                    : 'bg-warning/10 text-warning dark:text-warning';
 
                 return (
                   <div

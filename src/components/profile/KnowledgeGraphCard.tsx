@@ -14,7 +14,7 @@ export function KnowledgeGraphCard() {
     <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Network className="h-5 w-5 text-indigo-500" />
+          <Network className="h-5 w-5 text-info" />
           <h2 className="text-lg font-semibold text-foreground">Mapa Semántico de Conocimiento</h2>
         </div>
         <div className="flex items-center gap-3">
@@ -31,18 +31,21 @@ export function KnowledgeGraphCard() {
       </div>
 
       <div className="text-sm text-muted-foreground">
-        Explora las conexiones entre las tecnologías de tu perfil y aquellas que el mercado demanda en tu especialidad.
+        Explora las conexiones entre las tecnologías de tu perfil y aquellas que el mercado demanda
+        en tu especialidad.
       </div>
 
       {error ? (
-        <div className="flex h-[600px] w-full items-center justify-center rounded-xl border border-white/10 bg-black/40">
-          <p className="text-sm text-red-400">Hubo un error cargando el grafo de conocimiento.</p>
+        <div className="flex h-[600px] w-full items-center justify-center rounded-xl border border-border bg-destructive/5">
+          <p className="text-sm text-destructive">
+            Hubo un error cargando el grafo de conocimiento.
+          </p>
         </div>
       ) : (
-        <div className="relative h-[600px] w-full overflow-hidden rounded-xl border border-border bg-[#0B0C10] shadow-xs">
-          <KnowledgeGraphVisualization 
-            data={data || { nodes: [], links: [] }} 
-            isLoading={isLoading} 
+        <div className="relative h-[600px] w-full overflow-hidden rounded-xl border border-border bg-secondary/15 shadow-xs">
+          <KnowledgeGraphVisualization
+            data={data || { nodes: [], links: [] }}
+            isLoading={isLoading}
           />
         </div>
       )}

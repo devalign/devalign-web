@@ -21,16 +21,16 @@ export function AlignmentWidget({
     if (score >= 75)
       return {
         label: 'Alta afinidad',
-        color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/35 hover:bg-emerald-500/10',
+        color: 'text-success bg-success/10 border-success/35 hover:bg-success/10',
       };
     if (score >= 50)
       return {
         label: 'Media afinidad',
-        color: 'text-amber-500 bg-amber-500/10 border-amber-500/35 hover:bg-amber-500/10',
+        color: 'text-warning bg-warning/10 border-warning/35 hover:bg-warning/10',
       };
     return {
       label: 'Baja afinidad',
-      color: 'text-red-500 bg-red-500/10 border-red-500/35 hover:bg-red-500/10',
+      color: 'text-destructive bg-destructive/10 border-destructive/35 hover:bg-destructive/10',
     };
   };
 
@@ -40,7 +40,7 @@ export function AlignmentWidget({
     <div className="relative overflow-hidden bg-background/60 backdrop-blur-xl border border-border/40 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4 pointer-events-auto w-full">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex items-center justify-center gap-2">
-          <Loader2 className="h-4 w-4 text-indigo-500 animate-spin" />
+          <Loader2 className="h-4 w-4 text-info animate-spin" />
         </div>
       )}
 
@@ -68,8 +68,6 @@ export function AlignmentWidget({
             {primarySpecialty}
           </h4>
         </div>
-
-
       </div>
     </div>
   );

@@ -50,7 +50,9 @@ export function AffinityRadarChart({
     });
 
     const marketPoints = DOMAIN_CONFIGS.map((config, index) => {
-      const dbDemand = domainAffinities?.find((d) => d.domain.toLowerCase() === config.key.toLowerCase())?.market_demand;
+      const dbDemand = domainAffinities?.find(
+        (d) => d.domain.toLowerCase() === config.key.toLowerCase(),
+      )?.market_demand;
       const demandVal = dbDemand !== undefined ? Math.round(dbDemand * 100) : config.marketDemand;
       const angle = (index * 360) / DOMAIN_CONFIGS.length;
       return convert(demandVal, angle);
@@ -114,7 +116,7 @@ export function AffinityRadarChart({
   );
 
   const renderRadarSVG = () => (
-    <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-square my-4">
+    <div className="relative w-full max-w-[290px] sm:max-w-[380px] md:max-w-[420px] aspect-square my-4 mx-auto">
       <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
         {/* Background rings */}
         {[20, 40, 60, 80, 100].map((r) => {
@@ -178,11 +180,15 @@ export function AffinityRadarChart({
         {/* Market and User polygons */}
         <polygon
           points={radarPoints.market}
-          className="fill-slate-800/10 stroke-slate-500/50 stroke-1.5"
+          fill="hsl(var(--muted-foreground))"
+          fillOpacity={0.08}
+          className="stroke-muted-foreground/30 stroke-1.5"
         />
         <polygon
           points={radarPoints.user}
-          className="fill-primary/25 stroke-primary stroke-2 transition-all duration-300"
+          fill="hsl(var(--primary))"
+          fillOpacity={0.25}
+          className="stroke-primary stroke-2 transition-all duration-300"
         />
 
         {/* Market dots */}
@@ -215,11 +221,17 @@ export function AffinityRadarChart({
 
   if (standalone) {
     return (
-      <Card className={`card-glass relative overflow-hidden flex flex-col h-full ${className || ''}`}>
+      <Card
+        className={`card-glass relative overflow-hidden flex flex-col h-full ${className || ''}`}
+      >
         {renderContent()}
       </Card>
     );
   }
 
-  return <div className={`relative flex flex-col h-full w-full min-h-0 ${className || ''}`}>{renderContent()}</div>;
+  return (
+    <div className={`relative flex flex-col h-full w-full min-h-0 ${className || ''}`}>
+      {renderContent()}
+    </div>
+  );
 }

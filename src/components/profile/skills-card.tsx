@@ -29,15 +29,15 @@ export default function SkillsCard({
   skillGaps,
   isPlaceholder = false,
 }: SkillsCardProps) {
-  const [activeTab, setActiveTab] = useState<
-    'tecnologias' | 'conceptos' | 'blandas'
-  >('tecnologias');
+  const [activeTab, setActiveTab] = useState<'tecnologias' | 'conceptos' | 'blandas'>(
+    'tecnologias',
+  );
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editSkillsList, setEditSkillsList] = useState<SkillItem[]>([]);
   const [newSkillName, setNewSkillName] = useState('');
-  const [newSkillCategory, setNewSkillCategory] = useState<
-    'tecnologias' | 'conceptos' | 'blandas'
-  >('tecnologias');
+  const [newSkillCategory, setNewSkillCategory] = useState<'tecnologias' | 'conceptos' | 'blandas'>(
+    'tecnologias',
+  );
 
   const updateSkillsMutation = useUpdateUserSkills();
 
@@ -48,9 +48,7 @@ export default function SkillsCard({
   ];
 
   // Helper to categorize skills into the 3 clean SkillNature categories
-  const getSkillCategory = (
-    type: string,
-  ): 'tecnologias' | 'conceptos' | 'blandas' => {
+  const getSkillCategory = (type: string): 'tecnologias' | 'conceptos' | 'blandas' => {
     const t = type ? type.toLowerCase() : '';
     if (t === 'soft' || t === 'soft_skill') return 'blandas';
     if (t === 'concept' || t === 'methodology') return 'conceptos';
@@ -193,13 +191,13 @@ export default function SkillsCard({
                   key={skill.name}
                   className={`px-3 py-1.5 rounded-full border text-xs font-medium flex items-center gap-1.5 transition-all ${
                     isGap
-                      ? 'border-dashed border-amber-300 bg-amber-50/10 text-amber-700 dark:text-amber-500 dark:border-amber-900/30'
+                      ? 'border-dashed border-amber-300 bg-amber-50/10 text-warning dark:text-warning dark:border-amber-900/30'
                       : 'border-border bg-secondary/40 text-foreground hover:bg-secondary/60'
                   }`}
                 >
                   <span>{skill.name}</span>
                   {isGap && (
-                    <span className="text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                    <span className="text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-warning px-1.5 py-0.5 rounded-full uppercase tracking-wide">
                       Brecha
                     </span>
                   )}
@@ -246,9 +244,7 @@ export default function SkillsCard({
                 id="new-cat"
                 value={newSkillCategory}
                 onChange={(e) =>
-                  setNewSkillCategory(
-                    e.target.value as 'tecnologias' | 'conceptos' | 'blandas',
-                  )
+                  setNewSkillCategory(e.target.value as 'tecnologias' | 'conceptos' | 'blandas')
                 }
                 className="h-9 rounded-md border border-input bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               >

@@ -29,9 +29,9 @@ export function CVUpdateBanner({ source = 'cv-analysis', show, onSync }: CVUpdat
       : 'Hemos procesado tu nuevo CV. Haz clic en sincronizar para actualizar tus habilidades, diagnóstico y plan de acción.';
 
   return (
-    <div className="mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/20 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-300">
+    <div className="mb-6 p-4 rounded-xl border border-success/20 bg-success/5 dark:bg-success/15 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-300">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
+        <div className="rounded-lg bg-success/10 p-2 text-success dark:text-success">
           <Sparkles className="h-5 w-5 animate-pulse" />
         </div>
         <div className="space-y-0.5 text-center sm:text-left">

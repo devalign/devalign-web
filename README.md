@@ -50,10 +50,12 @@ src/
 ## ⚙️ Configuración y Desarrollo
 
 ### Requisitos Previos
+
 - Node.js 20+ o 22+
 - **pnpm** instalado (`npm i -g pnpm`) (Nota: No utilice `npm` ni `package-lock.json` en este repositorio).
 
 ### Variables de Entorno
+
 Crea un archivo `.env.local` en la raíz del proyecto basándote en `.env.example`:
 
 ```env

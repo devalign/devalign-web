@@ -111,7 +111,7 @@ export default function CVAtsPreviewModal({
           <div class="item">
             <div class="item-header">
               <span>${exp.role}</span>
-              <span style="font-weight: normal; color: #4b5563;">${exp.start_date} &ndash; ${exp.current ? 'Presente' : exp.end_date || ''}</span>
+              <span style="font-weight: normal; color: var(--print-muted);">${exp.start_date} &ndash; ${exp.current ? 'Presente' : exp.end_date || ''}</span>
             </div>
             <div class="item-subheader">
               <span>${exp.company}</span>
@@ -149,7 +149,7 @@ export default function CVAtsPreviewModal({
           <div class="item">
             <div class="item-header">
               <span>${edu.degree}</span>
-              <span style="font-weight: normal; color: #4b5563;">${edu.start_date} &ndash; ${edu.end_date || 'Presente'}</span>
+              <span style="font-weight: normal; color: var(--print-muted);">${edu.start_date} &ndash; ${edu.end_date || 'Presente'}</span>
             </div>
             <div class="item-subheader">
               <span>${edu.institution}</span>
@@ -209,8 +209,8 @@ export default function CVAtsPreviewModal({
             (cert) => `
           <div class="item" style="margin-bottom: 8px;">
             <div class="item-header" style="font-size: 9.5pt;">
-              <span>${cert.name} ${cert.issuer ? `<span style="font-weight: normal; color: #4b5563;"> &mdash; ${cert.issuer}</span>` : ''}</span>
-              ${cert.date ? `<span style="font-weight: normal; color: #4b5563;">${cert.date}</span>` : ''}
+              <span>${cert.name} ${cert.issuer ? `<span style="font-weight: normal; color: var(--print-muted);"> &mdash; ${cert.issuer}</span>` : ''}</span>
+              ${cert.date ? `<span style="font-weight: normal; color: var(--print-muted);">${cert.date}</span>` : ''}
             </div>
           </div>
         `,
@@ -221,7 +221,7 @@ export default function CVAtsPreviewModal({
     const contactParts = [];
     if (userEmail)
       contactParts.push(
-        `<span style="color: #2563eb; text-decoration: underline;">${userEmail}</span>`,
+        `<span style="color: var(--print-primary); text-decoration: underline;">${userEmail}</span>`,
       );
     if (profile.location) contactParts.push(`<span>${profile.location}</span>`);
     if (profile.preferred_modality) contactParts.push(`<span>${profile.preferred_modality}</span>`);
@@ -251,6 +251,13 @@ export default function CVAtsPreviewModal({
     `;
   };
 
+  const getPrintColor = (varName: string, fallback: string): string => {
+    if (typeof window === 'undefined') return fallback;
+    return (
+      window.getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || fallback
+    );
+  };
+
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -262,6 +269,12 @@ export default function CVAtsPreviewModal({
 
     const printContent = generatePrintHtml();
 
+    const printForeground = getPrintColor('--print-foreground', '#111827');
+    const printMuted = getPrintColor('--print-muted', '#4b5563');
+    const printPrimary = getPrintColor('--print-primary', '#2563eb');
+    const printBorder = getPrintColor('--print-border', '#d1d5db');
+    const printDark = getPrintColor('--print-dark', '#374151');
+
     // Generate plain, clean HTML document for absolute ATS text fidelity on print/PDF save
     printWindow.document.write(`
       <html>
@@ -269,9 +282,16 @@ export default function CVAtsPreviewModal({
           <title>CV_${profile.full_name?.replace(/\s+/g, '_') || 'Devalign'}</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+            :root {
+              --print-foreground: ${printForeground};
+              --print-muted: ${printMuted};
+              --print-primary: ${printPrimary};
+              --print-border: ${printBorder};
+              --print-dark: ${printDark};
+            }
             body {
               font-family: 'Inter', Arial, sans-serif;
-              color: #111827;
+              color: var(--print-foreground);
               line-height: 1.5;
               padding: 40px;
               max-width: 800px;
@@ -285,22 +305,22 @@ export default function CVAtsPreviewModal({
               font-size: 18pt;
               font-weight: 700;
               margin: 0 0 4px 0;
-              color: #111827;
+              color: var(--print-foreground);
               letter-spacing: -0.02em;
             }
             .title-role {
               font-size: 10pt;
               font-weight: 600;
-              color: #2563eb;
+              color: var(--print-primary);
               margin: 0 0 10px 0;
               text-transform: uppercase;
               letter-spacing: 0.05em;
             }
             .contact-info {
               font-size: 8pt;
-              color: #4b5563;
+              color: var(--print-muted);
               margin-bottom: 20px;
-              border-bottom: 1px solid #d1d5db;
+              border-bottom: 1px solid var(--print-border);
               padding-bottom: 12px;
             }
             .section-title {
@@ -308,16 +328,16 @@ export default function CVAtsPreviewModal({
               font-weight: 700;
               text-transform: uppercase;
               letter-spacing: 0.05em;
-              border-bottom: 2px solid #111827;
+              border-bottom: 2px solid var(--print-foreground);
               padding-bottom: 2px;
               margin: 24px 0 12px 0;
-              color: #111827;
+              color: var(--print-foreground);
             }
             .summary {
               font-size: 8.5pt;
               margin-bottom: 16px;
               text-align: justify;
-              color: #374151;
+              color: var(--print-dark);
             }
             .item {
               margin-bottom: 16px;
@@ -327,20 +347,20 @@ export default function CVAtsPreviewModal({
               justify-content: space-between;
               font-weight: 600;
               font-size: 9.2pt;
-              color: #111827;
+              color: var(--print-foreground);
               margin-bottom: 2px;
             }
             .item-subheader {
               display: flex;
               justify-content: space-between;
               font-size: 8.2pt;
-              color: #4b5563;
+              color: var(--print-muted);
               font-style: italic;
               margin-bottom: 6px;
             }
             .item-description {
               font-size: 8.5pt;
-              color: #374151;
+              color: var(--print-dark);
               margin: 0;
               padding-left: 18px;
               text-align: justify;
@@ -351,11 +371,11 @@ export default function CVAtsPreviewModal({
             .skills-block {
               font-size: 8.5pt;
               margin-bottom: 8px;
-              color: #374151;
+              color: var(--print-dark);
             }
             .skills-label {
               font-weight: 600;
-              color: #111827;
+              color: var(--print-foreground);
             }
             @media print {
               body {
@@ -415,37 +435,37 @@ export default function CVAtsPreviewModal({
           <div className="flex-1 bg-zinc-100 dark:bg-zinc-950/70 p-6 overflow-y-auto flex justify-center items-start scrollbar-thin">
             <div
               ref={cvPrintRef}
-              className="bg-white text-zinc-900 p-8 shadow-lg border border-zinc-200 rounded-xs w-full max-w-[680px] min-h-[900px] font-sans leading-relaxed my-2"
+              className="bg-card text-foreground p-8 shadow-lg border border-border rounded-xs w-full max-w-[680px] min-h-[900px] font-sans leading-relaxed my-2"
             >
               {/* Header / Contact Details */}
               <div className="text-center">
-                <h1 className="text-lg font-bold text-zinc-900 tracking-tight">
+                <h1 className="text-lg font-bold text-foreground tracking-tight">
                   {profile.full_name?.toUpperCase() || 'DESARROLLADOR'}
                 </h1>
-                <div className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mt-1">
+                <div className="text-[10px] font-semibold text-primary uppercase tracking-wider mt-1">
                   {profile.current_job_role || 'Software Engineer'}
                   {profile.primary_specialty && ` | ${profile.primary_specialty.toUpperCase()}`}
                   {profile.seniority && ` | ${profile.seniority.toUpperCase()}`}
                 </div>
-                <div className="text-[9px] text-zinc-500 mt-2 pb-3 border-b border-zinc-300 flex justify-center gap-4 flex-wrap">
+                <div className="text-[9px] text-muted-foreground mt-2 pb-3 border-b border-border flex justify-center gap-4 flex-wrap">
                   {userEmail && (
-                    <span className="text-blue-600 underline font-medium">{userEmail}</span>
+                    <span className="text-primary underline font-medium">{userEmail}</span>
                   )}
                   {profile.location && (
                     <>
-                      <span className="text-zinc-400 font-normal">&bull;</span>
+                      <span className="text-muted-foreground/60 font-normal">&bull;</span>
                       <span>{profile.location}</span>
                     </>
                   )}
                   {profile.preferred_modality && (
                     <>
-                      <span className="text-zinc-400 font-normal">&bull;</span>
+                      <span className="text-muted-foreground/60 font-normal">&bull;</span>
                       <span>{profile.preferred_modality}</span>
                     </>
                   )}
                   {profile.availability && (
                     <>
-                      <span className="text-zinc-400 font-normal">&bull;</span>
+                      <span className="text-muted-foreground/60 font-normal">&bull;</span>
                       <span>Disponibilidad: {profile.availability}</span>
                     </>
                   )}
@@ -454,10 +474,10 @@ export default function CVAtsPreviewModal({
 
               {/* Profile Summary */}
               <div className="mt-5">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-2">
                   Perfil Profesional
                 </div>
-                <p className="text-[9.5px] text-zinc-700 text-justify leading-relaxed">
+                <p className="text-[9.5px] text-foreground/90 text-justify leading-relaxed">
                   {defaultDescription}
                 </p>
               </div>
@@ -465,26 +485,26 @@ export default function CVAtsPreviewModal({
               {/* Professional Experience */}
               {profile.work_experience && profile.work_experience.length > 0 && (
                 <div className="mt-5">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-3">
                     Experiencia Laboral
                   </div>
                   <div className="space-y-4">
                     {profile.work_experience.map((exp, idx) => (
                       <div key={idx} className="text-[9.5px]">
-                        <div className="flex justify-between items-baseline font-semibold text-zinc-900">
+                        <div className="flex justify-between items-baseline font-semibold text-foreground">
                           <span className="text-[10.5px]">{exp.role}</span>
-                          <span className="text-zinc-500 font-normal text-[9.5px]">
+                          <span className="text-muted-foreground font-normal text-[9.5px]">
                             {exp.start_date} &ndash; {exp.current ? 'Presente' : exp.end_date || ''}
                           </span>
                         </div>
-                        <div className="flex justify-between items-baseline text-zinc-600 italic mt-0.5 text-[9.5px]">
+                        <div className="flex justify-between items-baseline text-muted-foreground/80 italic mt-0.5 text-[9.5px]">
                           <span>{exp.company}</span>
                           {profile.location && (
                             <span className="font-normal not-italic">{profile.location}</span>
                           )}
                         </div>
                         {exp.description && (
-                          <ul className="list-disc pl-4 mt-2 text-zinc-700 space-y-1 text-justify">
+                          <ul className="list-disc pl-4 mt-2 text-foreground/90 space-y-1 text-justify">
                             {exp.description.split('\n').map((bullet, bIdx) => {
                               const trimmed = bullet.replace(/^[-\s*•]+/, '').trim();
                               if (!trimmed) return null;
@@ -505,19 +525,21 @@ export default function CVAtsPreviewModal({
               {/* Education */}
               {profile.education && profile.education.length > 0 && (
                 <div className="mt-5">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-3">
                     Educación
                   </div>
                   <div className="space-y-3">
                     {profile.education.map((edu, idx) => (
                       <div key={idx} className="text-[9.5px]">
-                        <div className="flex justify-between items-baseline font-semibold text-zinc-900">
+                        <div className="flex justify-between items-baseline font-semibold text-foreground">
                           <span className="text-[10.5px]">{edu.degree}</span>
-                          <span className="text-zinc-500 font-normal text-[9.5px]">
+                          <span className="text-muted-foreground font-normal text-[9.5px]">
                             {edu.start_date} &ndash; {edu.end_date || 'Presente'}
                           </span>
                         </div>
-                        <div className="text-zinc-600 mt-0.5 text-[9.5px]">{edu.institution}</div>
+                        <div className="text-muted-foreground/80 mt-0.5 text-[9.5px]">
+                          {edu.institution}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -530,19 +552,21 @@ export default function CVAtsPreviewModal({
                 softSkills.length > 0 ||
                 methodologySkills.length > 0) && (
                 <div className="mt-5">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-2">
                     Habilidades
                   </div>
-                  <div className="space-y-1.5 text-[9.5px] text-zinc-700">
+                  <div className="space-y-1.5 text-[9.5px] text-foreground/90">
                     {technicalSkills.length > 0 && (
                       <div className="leading-relaxed">
-                        <span className="font-semibold text-zinc-900">Habilidades Técnicas: </span>
+                        <span className="font-semibold text-foreground">
+                          Habilidades Técnicas:{' '}
+                        </span>
                         {technicalSkills.join(', ')}
                       </div>
                     )}
                     {toolSkills.length > 0 && (
                       <div className="leading-relaxed">
-                        <span className="font-semibold text-zinc-900">
+                        <span className="font-semibold text-foreground">
                           Herramientas y Tecnologías:{' '}
                         </span>
                         {toolSkills.join(', ')}
@@ -550,13 +574,13 @@ export default function CVAtsPreviewModal({
                     )}
                     {softSkills.length > 0 && (
                       <div className="leading-relaxed">
-                        <span className="font-semibold text-zinc-900">Habilidades Blandas: </span>
+                        <span className="font-semibold text-foreground">Habilidades Blandas: </span>
                         {softSkills.join(', ')}
                       </div>
                     )}
                     {methodologySkills.length > 0 && (
                       <div className="leading-relaxed">
-                        <span className="font-semibold text-zinc-900">Metodologías: </span>
+                        <span className="font-semibold text-foreground">Metodologías: </span>
                         {methodologySkills.join(', ')}
                       </div>
                     )}
@@ -567,20 +591,20 @@ export default function CVAtsPreviewModal({
               {/* Certifications */}
               {profile.certifications && profile.certifications.length > 0 && (
                 <div className="mt-5">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 border-b-2 border-zinc-900 pb-0.5 mb-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-2">
                     Certificaciones
                   </div>
-                  <div className="space-y-1 text-[9.5px] text-zinc-700">
+                  <div className="space-y-1 text-[9.5px] text-foreground/90">
                     {profile.certifications.map((cert, idx) => (
                       <div key={idx} className="flex justify-between items-baseline">
                         <div>
-                          <span className="font-semibold text-zinc-900">{cert.name}</span>
+                          <span className="font-semibold text-foreground">{cert.name}</span>
                           {cert.issuer && (
-                            <span className="text-zinc-500"> &mdash; {cert.issuer}</span>
+                            <span className="text-muted-foreground"> &mdash; {cert.issuer}</span>
                           )}
                         </div>
                         {cert.date && (
-                          <span className="text-zinc-500 text-[9.5px]">{cert.date}</span>
+                          <span className="text-muted-foreground text-[9.5px]">{cert.date}</span>
                         )}
                       </div>
                     ))}
