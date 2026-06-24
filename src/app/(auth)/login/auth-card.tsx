@@ -9,13 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 type AuthMode = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
@@ -79,8 +72,6 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const supabase = createClient();
 
@@ -100,8 +91,6 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
         setIsLoading(false);
-        setShowTerms(false);
-        setShowPrivacy(false);
         onOpenChange?.(false);
 
         // Radix UI DismissableLayer sets body.style.pointerEvents = "none"
@@ -261,9 +250,9 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
   const headerInfo = getHeaderInfo();
 
   return (
-    <Card className="w-full shadow-2xl shadow-black/5 border-border/50 bg-card/95 backdrop-blur-xl py-8!">
-      <CardHeader className="text-center space-y-2 pb-6">
-        <CardTitle className="text-xl font-bold tracking-tight">{headerInfo.title}</CardTitle>
+    <Card className="w-full shadow-2xl shadow-black/5 border-border/50 bg-card/95 backdrop-blur-xl py-5 md:py-8!">
+      <CardHeader className="text-center pb-2">
+        <CardTitle className="text-lg font-bold tracking-tight">{headerInfo.title}</CardTitle>
         <CardDescription className="text-muted-foreground font-medium">
           {headerInfo.description}
         </CardDescription>
@@ -275,11 +264,15 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
           <>
             <Button
               variant="outline"
-              className="w-full h-12 font-medium border-border text-foreground bg-card hover:bg-secondary relative"
+              className="w-full h-10 md:h-12 text-xs md:text-sm font-medium border-border text-foreground bg-card hover:bg-secondary hover:text-foreground relative flex items-center justify-center"
               onClick={handleOAuthLogin}
               disabled={isLoading}
             >
-              <svg className="w-5 h-5 absolute left-4" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-4 h-4 md:w-5 md:h-5 absolute left-4 top-1/2 -translate-y-1/2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -327,7 +320,7 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
                 id="fullName"
                 type="text"
                 placeholder="Nombre completo"
-                className="h-12 bg-secondary/30"
+                className="h-10 md:h-12 text-xs md:text-sm bg-secondary/30"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
@@ -346,7 +339,7 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
                 id="email"
                 type="email"
                 placeholder="Correo electrónico"
-                className="h-12 bg-secondary/30"
+                className="h-10 md:h-12 text-xs md:text-sm bg-secondary/30"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -366,7 +359,7 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder={isResetPassword ? 'Nueva contraseña' : 'Contraseña'}
-                  className="h-12 bg-secondary/30 pr-10"
+                  className="h-10 md:h-12 text-xs md:text-sm bg-secondary/30 pr-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -410,7 +403,7 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Repetir contraseña"
-                  className="h-12 bg-secondary/30 pr-10"
+                  className="h-10 md:h-12 text-xs md:text-sm bg-secondary/30 pr-10"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -459,7 +452,7 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
 
           <Button
             type="submit"
-            className="w-full h-12 text-sm font-semibold shadow-none transition-colors"
+            className="w-full h-10 md:h-12 text-xs md:text-sm font-semibold shadow-none transition-colors"
             disabled={isLoading}
           >
             {isLoading
@@ -531,113 +524,26 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
         {/* Terms and Privacy */}
         <p className="text-center text-[10px] text-muted-foreground/70 font-medium px-4 leading-relaxed">
           AL CONTINUAR, ACEPTAS NUESTROS{' '}
-          <button
-            type="button"
-            onClick={() => setShowTerms(true)}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
             className="underline hover:text-foreground font-semibold cursor-pointer focus:outline-none transition-colors"
           >
             TÉRMINOS DE SERVICIO
-          </button>{' '}
+          </a>{' '}
           Y LA{' '}
-          <button
-            type="button"
-            onClick={() => setShowPrivacy(true)}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
             className="underline hover:text-foreground font-semibold cursor-pointer focus:outline-none transition-colors"
           >
             POLÍTICA DE PRIVACIDAD
-          </button>
+          </a>
           .
         </p>
       </CardContent>
-
-      {/* Modales de Términos y Privacidad */}
-      <Dialog open={showTerms} onOpenChange={setShowTerms}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Términos de Servicio</DialogTitle>
-            <DialogDescription>Última actualización: Mayo 2026</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
-            <p>
-              Bienvenido a <strong>Devalign</strong>. Al utilizar nuestra plataforma, aceptas
-              cumplir con los siguientes términos y condiciones que rigen el uso del software de
-              alineación técnica y generación de roadmaps profesionales.
-            </p>
-            <h4 className="font-bold text-foreground">1. Uso del Servicio</h4>
-            <p>
-              Devalign es una herramienta de diagnóstico basada en Inteligencia Artificial. Está
-              diseñada para analizar perfiles técnicos, identificar brechas de habilidades y
-              recomendar rutas de aprendizaje personalizadas de acuerdo a las demandas del mercado
-              TI.
-            </p>
-            <h4 className="font-bold text-foreground">2. Carga de Documentos (CV)</h4>
-            <p>
-              Al subir tu CV (hoja de vida) en formato PDF o DOCX, garantizas que la información es
-              verídica y que tienes el derecho legal de compartirla. Autorizas a Devalign a procesar
-              y analizar el contenido para generar las métricas de afinidad técnica
-              correspondientes.
-            </p>
-            <h4 className="font-bold text-foreground">3. Limitación de Responsabilidad</h4>
-            <p>
-              Las recomendaciones y sugerencias de aprendizaje generadas por la IA son de carácter
-              informativo y de orientación profesional. Devalign no garantiza contratación laboral
-              ni se hace responsable por decisiones profesionales tomadas en base a los
-              diagnósticos.
-            </p>
-            <h4 className="font-bold text-foreground">4. Propiedad Intelectual</h4>
-            <p>
-              El código, el diseño, la marca y los algoritmos propietarios de Devalign son propiedad
-              intelectual exclusiva de la empresa y no pueden ser reproducidos ni distribuidos sin
-              consentimiento expreso por escrito.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showPrivacy} onOpenChange={setShowPrivacy}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Política de Privacidad</DialogTitle>
-            <DialogDescription>Última actualización: Mayo 2026</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
-            <p>
-              En <strong>Devalign</strong>, nos tomamos muy en serio la seguridad y confidencialidad
-              de tus datos personales. Esta política detalla cómo recopilamos, usamos y protegemos
-              tu información.
-            </p>
-            <h4 className="font-bold text-foreground">1. Información Recopilada</h4>
-            <p>
-              Recopilamos información necesaria para el funcionamiento del servicio, incluyendo: tu
-              nombre completo, correo electrónico, credenciales de inicio de sesión y la información
-              contenida en el documento de CV que decidas cargar de forma voluntaria.
-            </p>
-            <h4 className="font-bold text-foreground">2. Uso de la Información</h4>
-            <p>Utilizamos tus datos únicamente para:</p>
-            <ul className="list-disc pl-4 space-y-1">
-              <li>Autenticar tu cuenta y proteger el acceso al sistema.</li>
-              <li>
-                Analizar tu CV mediante modelos de procesamiento de lenguaje natural (NLP) e IA para
-                calcular tu brecha de habilidades.
-              </li>
-              <li>Generar y personalizar tu roadmap de aprendizaje técnico.</li>
-            </ul>
-            <h4 className="font-bold text-foreground">3. Proveedores de Servicios</h4>
-            <p>
-              Tus datos son almacenados de forma segura utilizando la infraestructura de{' '}
-              <strong>Supabase</strong>. Los análisis de perfil técnico se ejecutan a través de APIs
-              cifradas de proveedores de IA líderes del mercado, garantizando que tu información no
-              se utilice para entrenar modelos públicos.
-            </p>
-            <h4 className="font-bold text-foreground">4. Control sobre tus Datos</h4>
-            <p>
-              Puedes solicitar la eliminación permanente de tu cuenta, tu perfil y cualquier CV
-              subido a la plataforma en cualquier momento desde tu panel de usuario o comunicándote
-              con nuestro soporte de forma directa.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 }

@@ -839,7 +839,8 @@ function ProfileContent() {
                     size="sm"
                     className="h-9 px-4 text-xs font-semibold cursor-pointer shrink-0"
                   >
-                    <Plus className="w-4 h-4 mr-1" /> Añadir
+                    <Plus className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Añadir</span>
                   </Button>
                 </form>
               </CardContent>
@@ -861,7 +862,7 @@ function ProfileContent() {
                   className="text-primary hover:bg-primary/10 border-primary/30 text-xs h-7 gap-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Añadir
+                  <span className="hidden sm:inline">Añadir</span>
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -1039,7 +1040,7 @@ function ProfileContent() {
                   className="text-primary hover:bg-primary/10 border-primary/30 text-xs h-7 gap-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Añadir puesto
+                  <span className="hidden sm:inline">Añadir puesto</span>
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -1216,7 +1217,7 @@ function ProfileContent() {
                   className="text-primary hover:bg-primary/10 border-primary/30 text-xs h-7 gap-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Añadir certificación
+                  <span className="hidden sm:inline">Añadir certificación</span>
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">

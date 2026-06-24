@@ -37,6 +37,7 @@ interface KnowledgeGraphVisualization3DProps {
   isLoading: boolean;
   onNodeClick?: (node: GraphNode) => void;
   highlightMode?: 'all' | 'strengths' | 'gaps';
+  isLegendHidden?: boolean;
 }
 
 export function KnowledgeGraphVisualization3D({
@@ -44,6 +45,7 @@ export function KnowledgeGraphVisualization3D({
   isLoading,
   onNodeClick,
   highlightMode = 'all',
+  isLegendHidden = false,
 }: KnowledgeGraphVisualization3DProps) {
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const { isDark, colors } = useGraphTheme();
@@ -126,7 +128,7 @@ export function KnowledgeGraphVisualization3D({
         id="graph-container-3d"
         className="relative w-full h-full overflow-hidden bg-transparent"
       >
-        <GraphLegend />
+        {!isLegendHidden && <GraphLegend />}
 
         <ForceGraph3D
           width={dimensions.width}

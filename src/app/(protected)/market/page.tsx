@@ -150,7 +150,7 @@ function TopologyContent() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2 mt-1">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-2 mt-1">
             <Network className="w-6 h-6 text-primary shrink-0" />
             Topología del Mercado IT
           </h1>
@@ -166,8 +166,8 @@ function TopologyContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Technical details & metadata */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="card-standard overflow-hidden">
-            <CardHeader className="border-b border-border/40 pb-4 bg-muted/20">
+          <Card className="card-standard overflow-hidden gap-0 py-0">
+            <CardHeader className="border-b border-border/40 py-3.5 bg-muted/20 px-4 sm:px-6">
               <div className="flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-primary" />
                 <CardTitle className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
@@ -175,7 +175,7 @@ function TopologyContent() {
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="pt-5 space-y-4">
+            <CardContent className="pt-4 pb-5 space-y-4 px-4 sm:px-6">
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Este análisis agrupa ofertas laborales de TI en base a la co-ocurrencia de
                 habilidades técnicas utilizando técnicas avanzadas de minería de datos.

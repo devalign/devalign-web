@@ -43,7 +43,7 @@ export default function AuthShell({ children, headerActions }: AuthShellProps) {
         </span>
       </div>
 
-      <div className="absolute top-14 left-4 md:top-16 md:left-8 z-50 flex items-center gap-4">
+      <div className="fixed top-14 left-4 md:top-16 md:left-8 z-50 flex items-center gap-4">
         <button
           onClick={toggleTheme}
           className="p-2.5 rounded-full border border-border bg-background/50 backdrop-blur-md text-foreground shadow-sm hover:bg-muted/80 transition-all cursor-pointer"
@@ -66,16 +66,16 @@ export default function AuthShell({ children, headerActions }: AuthShellProps) {
 
       <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-4 pt-10 pb-20">
         <div className="text-center max-w-3xl mb-10 mt-6 flex flex-col items-center">
-          <div className="flex items-center justify-center gap-2 mb-6 font-bold text-xl tracking-tight text-slate-900 dark:text-slate-400">
+          <div className="flex items-center justify-center gap-2 mb-6 font-bold text-sm lg:text-xl tracking-tight text-slate-900 dark:text-slate-400">
             <Hexagon className="w-6 h-6 fill-slate-900 text-slate-900 dark:text-slate-400" />
             DEV-ALIGN
           </div>
 
-          <h1 className="text-4xl md:text-[3.5rem] font-black text-slate-900 dark:text-slate-400 tracking-tighter leading-[1.05] mb-6 uppercase max-w-2xl">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-[3.2rem] font-black text-slate-900 dark:text-slate-400 tracking-tighter leading-[1.05] mb-6 uppercase max-w-xl">
             Cierra la brecha técnica entre tu perfil y la demanda real del mercado TI
           </h1>
 
-          <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg max-w-lg mx-auto">
+          <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm md:text-base max-w-lg mx-auto">
             Accede a infraestructura de aprendizaje y mentoría para potenciar tu perfil profesional
             hoy mismo.
           </p>
@@ -84,16 +84,8 @@ export default function AuthShell({ children, headerActions }: AuthShellProps) {
         <div className="w-full max-w-4xl px-4">{children}</div>
       </main>
 
-      <footer className="py-6 text-center text-xs font-bold text-slate-500 tracking-widest relative z-10 flex flex-wrap justify-center gap-6">
-        <a href="#alcance" className="hover:text-slate-900 transition-colors">
-          ALCANCE
-        </a>
-        <a href="#documentacion" className="hover:text-slate-900 transition-colors">
-          DOCUMENTACIÓN
-        </a>
-        <a href="#soporte" className="hover:text-slate-900 transition-colors">
-          SOPORTE
-        </a>
+      <footer className="w-full py-6 text-center text-xs font-semibold text-slate-500 tracking-wider relative z-10 border-t border-foreground/15">
+        &copy; {new Date().getFullYear()} DevAlign. Todos los derechos reservados.
       </footer>
     </div>
   );

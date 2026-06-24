@@ -36,6 +36,7 @@ interface KnowledgeGraphVisualizationProps {
   isLoading: boolean;
   onNodeClick?: (node: GraphNode) => void;
   highlightMode?: 'all' | 'strengths' | 'gaps';
+  isLegendHidden?: boolean;
 }
 
 export function KnowledgeGraphVisualization({
@@ -43,6 +44,7 @@ export function KnowledgeGraphVisualization({
   isLoading,
   onNodeClick,
   highlightMode = 'all',
+  isLegendHidden = false,
 }: KnowledgeGraphVisualizationProps) {
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const { isDark, colors } = useGraphTheme();
@@ -120,9 +122,9 @@ export function KnowledgeGraphVisualization({
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-transparent">
-      <div id="graph-container" className="relative w-full h-full overflow-hidden bg-transparent">
-        <GraphLegend />
+    <div className="relative w-full h-full overflow-hidden bg-transparent touch-none">
+      <div id="graph-container" className="relative w-full h-full overflow-hidden bg-transparent touch-none">
+        {!isLegendHidden && <GraphLegend />}
 
         <ForceGraph2D
           width={dimensions.width}

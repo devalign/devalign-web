@@ -12,8 +12,9 @@ import { toast } from 'sonner';
 
 // Custom Overview components
 import { OverviewEmptyState } from '@/components/overview/overview-empty-state';
-import { OverviewSideDrawer } from '@/components/overview/overview-side-drawer';
-import { GraphFilterDock, FilterMode } from '@/components/overview/graph-filter-dock';
+import { OverviewSideDrawer, FilterMode } from '@/components/overview/overview-side-drawer';
+import { useSidebar } from '@/components/layout/sidebar-context';
+import { cn } from '@/lib/utils';
 
 // UI components
 import {
@@ -42,6 +43,8 @@ export default function OverviewPage() {
   // Node selection & view states
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [highlightMode, setHighlightMode] = useState<FilterMode>('all');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const { isMobile } = useSidebar();
 
   // Derived state
   const hasCV = !!(cvData && cvData.cvs && cvData.cvs.length > 0);
@@ -265,7 +268,7 @@ export default function OverviewPage() {
     : 'Recientemente';
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-background flex flex-col">
+    <div className="relative w-full h-screen bg-background flex flex-col">
       {/* 1. Background Neural Network Graph */}
       <div className="absolute inset-0 z-0 bg-transparent">
         {graphError ? (
@@ -280,6 +283,7 @@ export default function OverviewPage() {
             isLoading={isGraphLoading}
             onNodeClick={(node) => setSelectedNode(node)}
             highlightMode={highlightMode}
+            isLegendHidden={false}
           />
         )}
       </div>
@@ -298,117 +302,117 @@ export default function OverviewPage() {
       {/* 4. Controls & Side Details Stack */}
       {hasCV && (
         <>
-          {/* Bottom Dock (Center, floating) */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-            <GraphFilterDock
-              activeFilter={highlightMode}
-              onFilterChange={(filter) => setHighlightMode(filter)}
-            />
-          </div>
-
-          {/* Right Floating Stack (Drawer/Details Card) */}
-          <div className="absolute top-24 right-6 bottom-6 z-20 pointer-events-none flex flex-col gap-4 items-end">
-            <div className="flex-1 min-h-0 pointer-events-auto">
+          {/* Global Bottom Sheet / Right Panel Wrapper */}
+          <div className="absolute bottom-2 lg:bottom-6 left-0 right-0 lg:left-auto lg:right-6 top-auto z-20 pointer-events-none flex flex-col items-center lg:items-end justify-end px-2 lg:px-0">
+            <div className="w-full h-full lg:w-96 pointer-events-none flex flex-col justify-end">
               {selectedNode ? (
-                <Card className="card-glass w-96 h-full flex flex-col overflow-hidden transition-all duration-300">
-                  <CardHeader className="pb-4 border-b border-border/40 bg-muted/[0.03] flex flex-row items-center justify-between space-y-0">
-                    <div className="min-w-0 pr-4">
-                      <CardTitle
-                        className="text-base font-bold text-foreground leading-tight truncate"
-                        title={selectedNode.label}
-                      >
-                        {selectedNode.label}
-                      </CardTitle>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {selectedNode.status === 'acquired' && (
-                          <Badge
-                            variant="outline"
-                            className="bg-success/10 text-success dark:text-success border-success/20 text-[9px] py-0 px-1.5 font-bold"
-                          >
-                            Adquirida
-                          </Badge>
-                        )}
-                        {selectedNode.status === 'gap' && (
-                          <Badge
-                            variant="outline"
-                            className="bg-warning/10 text-warning dark:text-warning border-warning/20 text-[9px] py-0 px-1.5 font-bold"
-                          >
-                            Brecha
-                          </Badge>
-                        )}
-                        {selectedNode.status === 'neutral' && (
-                          <Badge
-                            variant="outline"
-                            className="bg-info/10 text-info dark:text-info border-info/20 text-[9px] py-0 px-1.5 font-bold"
-                          >
-                            Relacionada
-                          </Badge>
-                        )}
-                        <Badge
-                          variant="secondary"
-                          className="bg-muted/30 text-muted-foreground border border-border/30 text-[9px] py-0 px-1.5 hover:bg-muted/30"
+                <div className="w-full pointer-events-auto animate-in slide-in-from-bottom duration-300">
+                  <Card className="card-glass! w-full min-h-[80vh] flex flex-col overflow-hidden rounded-3xl border shadow-2xl">
+                    <CardHeader className="pb-0 border-b border-border/80 bg-muted/[0.03] flex flex-row items-center justify-between space-y-0">
+                      <div className="min-w-0 pr-4">
+                        <CardTitle
+                          className="text-base font-bold text-foreground leading-tight truncate"
+                          title={selectedNode.label}
                         >
-                          {selectedNode.group}
-                        </Badge>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 rounded-full hover:bg-muted text-muted-foreground shrink-0 cursor-pointer"
-                      onClick={() => setSelectedNode(null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </CardHeader>
-                  <CardContent className="pt-6 space-y-6 flex-1 overflow-y-auto scrollbar-none">
-                    <div className="space-y-2">
-                      <h4 className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                        <Layers className="h-3.5 w-3.5" />
-                        Dominios de Aplicación
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {selectedNode.domains.map((domain) => (
-                          <span
-                            key={domain}
-                            className="px-2 py-0.5 text-[10px] font-medium rounded-lg bg-muted/30 text-foreground border border-border/30"
+                          {selectedNode.label}
+                        </CardTitle>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {selectedNode.status === 'acquired' && (
+                            <Badge
+                              variant="outline"
+                              className="bg-success/10 text-success dark:text-success border-success/20 text-[9px] py-0 px-1.5 font-bold"
+                            >
+                              Adquirida
+                            </Badge>
+                          )}
+                          {selectedNode.status === 'gap' && (
+                            <Badge
+                              variant="outline"
+                              className="bg-warning/10 text-warning dark:text-warning border-warning/20 text-[9px] py-0 px-1.5 font-bold"
+                            >
+                              Brecha
+                            </Badge>
+                          )}
+                          {selectedNode.status === 'neutral' && (
+                            <Badge
+                              variant="outline"
+                              className="bg-info/10 text-info dark:text-info border-info/20 text-[9px] py-0 px-1.5 font-bold"
+                            >
+                              Relacionada
+                            </Badge>
+                          )}
+                          <Badge
+                            variant="secondary"
+                            className="bg-muted/30 text-muted-foreground border border-border/30 text-[9px] py-0 px-1.5 hover:bg-muted/30"
                           >
-                            {domain}
-                          </span>
-                        ))}
+                            {selectedNode.group}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="space-y-3 rounded-xl bg-info/5 border border-info/10 p-4 mt-6">
-                      <div className="flex items-center gap-2 text-info dark:text-info">
-                        <Info className="h-3.5 w-3.5" />
-                        <h4 className="text-[10px] font-bold uppercase tracking-wider">
-                          Análisis Contextual
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-full hover:bg-muted text-muted-foreground shrink-0 cursor-pointer"
+                        onClick={() => setSelectedNode(null)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="pt-2 space-y-6 flex-1 overflow-y-auto scrollbar-none">
+                      <div className="space-y-2">
+                        <h4 className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                          <Layers className="h-3.5 w-3.5" />
+                          Dominios de Aplicación
                         </h4>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {selectedNode.domains.map((domain) => (
+                            <span
+                              key={domain}
+                              className="px-2 py-0.5 text-[10px] font-medium rounded-lg bg-muted/30 text-foreground border border-border/30"
+                            >
+                              {domain}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        Esta tecnología se conecta con otras herramientas en tu grafo basadas en la
-                        demanda actual del mercado.
-                        {selectedNode.status === 'gap'
-                          ? ' Al ser una brecha en tu perfil, adquirir esta habilidad fortalecería tu posición para roles que demandan este stack.'
-                          : selectedNode.status === 'acquired'
-                            ? ' Ya posees esta habilidad, lo que te posiciona favorablemente en su respectivo dominio.'
-                            : ' Es una tecnología relacionada frecuentemente con tu stack actual.'}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+
+                      <div className="space-y-3 rounded-xl bg-info/5 border border-info/10 p-4 mt-6 mb-4">
+                        <div className="flex items-center gap-2 text-info dark:text-info">
+                          <Info className="h-3.5 w-3.5" />
+                          <h4 className="text-[10px] font-bold uppercase tracking-wider">
+                            Análisis Contextual
+                          </h4>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Esta tecnología se conecta con otras herramientas en tu grafo basadas en
+                          la demanda actual del mercado.
+                          {selectedNode.status === 'gap'
+                            ? ' Al ser una brecha en tu perfil, adquirir esta habilidad fortalecería tu posición para roles que demandan este stack.'
+                            : selectedNode.status === 'acquired'
+                              ? ' Ya posees esta habilidad, lo que te posiciona favorablemente en su respectivo dominio.'
+                              : ' Es una tecnología relacionada frecuentemente con tu stack actual.'}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               ) : (
-                <OverviewSideDrawer
-                  domainAffinities={profile?.domain_affinities || []}
-                  techSkills={techSkills}
-                  fullName={fullName}
-                  roleTitle={roleTitle}
-                  seniority={seniority}
-                  alignmentScore={activeScore}
-                  primarySpecialty={activeCluster?.cluster_name}
-                  isLoading={isAnalyzing}
-                />
+                <div className="w-full pointer-events-auto">
+                  <OverviewSideDrawer
+                    domainAffinities={profile?.domain_affinities || []}
+                    techSkills={techSkills}
+                    fullName={fullName}
+                    roleTitle={roleTitle}
+                    seniority={seniority}
+                    alignmentScore={activeScore}
+                    primarySpecialty={activeCluster?.cluster_name}
+                    isLoading={isAnalyzing}
+                    isOpen={isDrawerOpen}
+                    onOpenChange={setIsDrawerOpen}
+                    activeFilter={highlightMode}
+                    onFilterChange={setHighlightMode}
+                  />
+                </div>
               )}
             </div>
           </div>

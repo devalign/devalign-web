@@ -225,9 +225,14 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
       <p className="text-[10px] text-center text-muted-foreground leading-relaxed max-w-md mx-auto">
         <Lock className="h-3 w-3 inline-block mr-1 align-text-bottom text-muted-foreground/80" />
         Al subir tu CV, aceptas nuestros{' '}
-        <span className="underline hover:text-foreground cursor-pointer">
+        <a
+          href="/terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-foreground cursor-pointer font-medium"
+        >
           términos de servicio
-        </span>{' '}
+        </a>{' '}
         y protocolos de análisis profesional encriptado.
       </p>
     </div>
