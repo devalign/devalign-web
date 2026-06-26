@@ -26,7 +26,7 @@ export function CVUpdateBanner({ source = 'cv-analysis', show, onSync }: CVUpdat
   const description =
     source === 'profile-recalculation'
       ? 'Tu perfil se ha guardado y el diagnóstico ha sido recalculado. Sincroniza para actualizar tus datos.'
-      : 'Hemos procesado tu nuevo CV. Haz clic en sincronizar para actualizar tus habilidades, diagnóstico y plan de acción.';
+      : 'Hemos procesado tu nuevo CV. Haz clic en sincronizar para actualizar a una nueva versión de tu perfil y diagnóstico de brechas.';
 
   return (
     <div className="mb-6 p-4 rounded-xl border border-success/20 bg-success/5 dark:bg-success/15 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-300">
