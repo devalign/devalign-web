@@ -74,7 +74,7 @@ export function OverviewSideDrawer({
     <>
       {/* UNIFIED VERTICAL COLLAPSING CARD */}
       <div className="flex pointer-events-auto w-full">
-        <Card className="py-0 flex flex-col w-full  card-glass! rounded-t-3xl lg:rounded-2xl border-t border-x border-b-0 lg:border border-border/30 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.4)] transition-all duration-300 ease-in-out">
+        <Card className="overflow-hidden py-0 flex flex-col w-full card-glass! rounded-t-3xl lg:rounded-2xl border border-x border-b-0 lg:border border-border/30 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.4)] transition-all duration-300 ease-in-out">
           {/* Header (Mini Card) - Always visible, acts as toggle */}
           <div
             className="flex flex-col cursor-pointer p-4 pb-3 border-b border-border/10 hover:bg-muted/30 transition-colors rounded-t-3xl lg:rounded-t-2xl"
@@ -169,7 +169,7 @@ export function OverviewSideDrawer({
             )}
           >
             {/* User Info & Adjust */}
-            <div className="p-4 flex justify-between items-start gap-4 border-b border-border/10 shrink-0 bg-muted/5">
+            <div className="p-4 flex justify-between items-start gap-4 border-y border-border shrink-0 bg-muted/5">
               <div className="space-y-1 flex-1 min-w-0">
                 <h2 className="text-sm font-black tracking-tight text-foreground truncate">
                   {fullName}
@@ -206,7 +206,7 @@ export function OverviewSideDrawer({
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-border/10 bg-muted shrink-0">
+            <div className="p-3 border-b border-border/10 bg-muted shrink-0">
               <Link href="/diagnosis" className="block w-full">
                 <Button
                   variant="ghost"

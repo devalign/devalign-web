@@ -414,8 +414,8 @@ function ProfileContent() {
 
   // Construct dynamicProfile for ATS PDF Preview
   const dynamicProfile: UserProfileData = {
-    user_id: user?.id || 'mock-user-id',
-    cv_id: profile?.cv_id || 'mock-cv-id',
+    user_id: user?.id || profile?.user_id || '',
+    cv_id: profile?.cv_id || null,
     full_name: fullName,
     current_job_role: roleTitle,
     seniority: seniority,

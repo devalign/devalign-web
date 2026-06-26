@@ -22,16 +22,28 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
 
   let response: Response;
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
+      signal: controller.signal,
       cache: 'no-store',
     });
+    clearTimeout(timeoutId);
   } catch (netError) {
-    console.error('Error de red al llamar a la API:', netError);
-    throw new Error(
-      'El servidor de análisis no responde. Por favor, comprueba tu conexión o inténtalo más tarde.',
-    );
+    if (netError instanceof DOMException && netError.name === 'AbortError') {
+      throw new Error(
+        'El servidor de análisis no responde (timeout). Verifica que el backend esté ejecutándose.',
+      );
+    }
+    const message =
+      netError instanceof TypeError && netError.message === 'Failed to fetch'
+        ? 'No se pudo conectar con el servidor de análisis. Verifica que el backend esté encendido.'
+        : netError instanceof Error
+          ? netError.message
+          : 'Error de conexión con el servidor de análisis.';
+    throw new Error(message);
   }
 
   if (!response.ok) {

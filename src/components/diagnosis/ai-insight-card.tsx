@@ -36,18 +36,18 @@ export function AiInsightCard({ marketGaps, isLoading = false }: AiInsightCardPr
         <div className="flex items-center justify-center py-2 gap-3 w-full">
           <Loader2 className="w-5 h-5 text-primary animate-spin" />
           <span className="text-xs font-semibold text-muted-foreground animate-pulse">
-            Generando recomendación de IA...
+            Generando recomendación...
           </span>
         </div>
       ) : (
         <>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 flex-1">
+          <div className="flex flex-col sm:flex-row items-start justify-start gap-3.5 flex-1">
             <div className="p-2 bg-primary/10 text-primary rounded-lg shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
             <div className="space-y-0.5">
               <span className="text-[11px] font-bold font-mono text-primary uppercase tracking-wider block">
-                Recomendación IA
+                Recomendación
               </span>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Fortalecer habilidades clave como{' '}

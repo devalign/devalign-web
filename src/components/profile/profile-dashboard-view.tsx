@@ -28,6 +28,7 @@ import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
 import CVHistoryModal from '@/components/profile/cv-history-modal';
 import CVUploader from '@/components/profile/cv-uploader';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { ErrorFallback } from '@/components/shared/error-fallback';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -169,8 +170,8 @@ function EmptyProfileState({ onUpload }: { onUpload: () => void }) {
 export default function ProfileDashboardView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const { data: profile, isLoading: isProfileLoading, refetch: refetchProfile } = useUserProfile();
+  const { data: user, isLoading: isUserLoading, error: userError } = useCurrentUser();
+  const { data: profile, isLoading: isProfileLoading, error: profileError, refetch: refetchProfile } = useUserProfile();
   const { data: cvData, isLoading: isCvLoading } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
   const { startAnalysis } = useCVAnalysis();
@@ -238,7 +239,7 @@ export default function ProfileDashboardView() {
   }, [profile?.detected_skills, skills]);
 
   const dynamicProfile: UserProfileData = {
-    user_id: user?.id || profile?.user_id || 'mock-user-id',
+    user_id: user?.id || profile?.user_id || '',
     cv_id: profile?.cv_id || currentCV?.cv_id || null,
     full_name: fullName,
     current_job_role: roleTitle,
@@ -312,6 +313,18 @@ export default function ProfileDashboardView() {
   };
 
   const isLoading = isUserLoading || isProfileLoading || isCvLoading;
+
+  const queryError = userError || profileError;
+  if (queryError) {
+    return (
+      <ErrorFallback
+        error={queryError}
+        onRetry={() => refetchProfile()}
+        onHome={() => window.location.href = '/'}
+        fullPage
+      />
+    );
+  }
 
   if (isLoading) {
     return (

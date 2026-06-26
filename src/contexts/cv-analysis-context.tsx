@@ -90,10 +90,6 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
       setAnalyzedCvId(cvId);
       saveState(true, false, cvId);
 
-      toast.info(
-        'El análisis de tu CV se está ejecutando en segundo plano. Puedes seguir navegando.',
-      );
-
       runPolling(cvId);
     },
     [runPolling],

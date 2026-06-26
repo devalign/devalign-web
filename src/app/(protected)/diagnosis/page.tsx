@@ -6,6 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { toast } from 'sonner';
+import { ErrorFallback } from '@/components/shared/error-fallback';
 import CVUploader from '@/components/profile/cv-uploader';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
@@ -45,7 +46,6 @@ import {
 } from 'lucide-react';
 
 // Refactored modular subcomponents
-import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
 import { PriorityGapsCard } from '@/components/diagnosis/priority-gaps-card';
 
 import { StrengthsCard } from '@/components/diagnosis/strengths-card';
@@ -58,15 +58,12 @@ import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
 import { KnowledgeGraphCard } from '@/components/profile/KnowledgeGraphCard';
 
 function DiagnosisContent() {
-  const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const { data: user, isLoading: isUserLoading, error: userError } = useCurrentUser();
   const { data: cvData, isLoading: isCVLoading, refetch: refetchCVs } = useUserCVs();
-  const { data: profile, refetch: refetchProfile } = useUserProfile();
+  const { data: profile, error: profileError, refetch: refetchProfile } = useUserProfile();
   const { startAnalysis, isAnalysisReady, isAnalyzing, commitUpdate } = useCVAnalysis();
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // Onboarding & CV Upload Simulation State
-  const [hasCV, setHasCV] = useState(true);
 
   // Drawers states
   const [isStrengthsDrawerOpen, setIsStrengthsDrawerOpen] = useState(false);
@@ -114,9 +111,6 @@ function DiagnosisContent() {
   // ML Gap items (skills the user DOES NOT have but the market demands)
   const [marketGaps, setMarketGaps] = useState<SkillItem[]>([]);
 
-  // ML Engine simulated recalculating state
-  const [isRecalculating, setIsRecalculating] = useState(false);
-
   // Modal visibility states linked to URL query param
   const [isAtsOpen, setIsAtsOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -155,15 +149,6 @@ function DiagnosisContent() {
       router.push('/diagnosis');
     }
   };
-
-  // Sync hasCV with hook data
-  useEffect(() => {
-    if (cvData && cvData.cvs && cvData.cvs.length > 0) {
-      setTimeout(() => setHasCV(true), 0);
-    } else {
-      setTimeout(() => setHasCV(false), 0);
-    }
-  }, [cvData]);
 
   // Synchronize profile data with API hook
   useEffect(() => {
@@ -227,106 +212,13 @@ function DiagnosisContent() {
   // Active Cluster Index for navigation
   const [activeClusterIndex, setActiveClusterIndex] = useState(0);
 
-  // Get all affinities with fallback if not provided by backend (Top 3 only)
   const allAffinities = React.useMemo(() => {
-    let list = [];
     if (profile?.all_affinities && profile.all_affinities.length > 0) {
-      list = [...profile.all_affinities].sort((a, b) => b.affinity_score - a.affinity_score);
-    } else {
-      list = [
-        {
-          cluster_id: '1',
-          cluster_name: 'Backend Java',
-          affinity_score: 0.78,
-          is_primary: true,
-          market_insights: {
-            average_salary_pen: 8500,
-            salary_differential_percentage: 32,
-            market_share_percentage: 23,
-            total_demand: 145,
-            growth_percentage: 28,
-          },
-          compatible_roles: [
-            { title: 'Backend Java Developer', match: 'Alta' as const },
-            { title: 'Java Cloud Engineer', match: 'Alta' as const },
-            { title: 'Backend Microservices Developer', match: 'Media' as const },
-          ],
-        },
-        {
-          cluster_id: '2',
-          cluster_name: 'DevOps Cloud',
-          affinity_score: 0.63,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 9500,
-            salary_differential_percentage: 42,
-            market_share_percentage: 20,
-            total_demand: 125,
-            growth_percentage: 35,
-          },
-          compatible_roles: [
-            { title: 'DevOps Engineer', match: 'Alta' as const },
-            { title: 'Cloud Architect', match: 'Media' as const },
-            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const },
-          ],
-        },
-        {
-          cluster_id: '3',
-          cluster_name: 'Data Engineering',
-          affinity_score: 0.41,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 9000,
-            salary_differential_percentage: 38,
-            market_share_percentage: 24,
-            total_demand: 148,
-            growth_percentage: 31,
-          },
-          compatible_roles: [
-            { title: 'Data Engineer', match: 'Alta' as const },
-            { title: 'Big Data Developer', match: 'Alta' as const },
-            { title: 'Analytics Engineer', match: 'Media' as const },
-          ],
-        },
-        {
-          cluster_id: '4',
-          cluster_name: 'Frontend React',
-          affinity_score: 0.3,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 7000,
-            salary_differential_percentage: 15,
-            market_share_percentage: 17,
-            total_demand: 190,
-            growth_percentage: 18,
-          },
-          compatible_roles: [
-            { title: 'Frontend Developer', match: 'Alta' as const },
-            { title: 'React Developer', match: 'Alta' as const },
-            { title: 'UI Engineer', match: 'Media' as const },
-          ],
-        },
-        {
-          cluster_id: '5',
-          cluster_name: 'QA & Automation',
-          affinity_score: 0.25,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 6500,
-            salary_differential_percentage: 12,
-            market_share_percentage: 14,
-            total_demand: 84,
-            growth_percentage: 15,
-          },
-          compatible_roles: [
-            { title: 'QA Automation Engineer', match: 'Alta' as const },
-            { title: 'Software Development Engineer in Test (SDET)', match: 'Alta' as const },
-            { title: 'QA Analyst', match: 'Media' as const },
-          ],
-        },
-      ];
+      return [...profile.all_affinities]
+        .sort((a, b) => b.affinity_score - a.affinity_score)
+        .slice(0, 3);
     }
-    return list.slice(0, 3);
+    return [];
   }, [profile]);
 
   // Sync activeClusterIndex with primary specialty or URL parameter on load/change
@@ -424,8 +316,8 @@ function DiagnosisContent() {
 
   // Construct profile payload for ATS Modal preview
   const dynamicProfile: UserProfileData = {
-    user_id: user?.id || 'mock-user-id',
-    cv_id: profile?.cv_id || 'mock-cv-id',
+    user_id: user?.id || profile?.user_id || '',
+    cv_id: profile?.cv_id || cvData?.cvs?.[0]?.cv_id || null,
     full_name: fullName,
     current_job_role: roleTitle,
     seniority: seniority,
@@ -449,6 +341,19 @@ function DiagnosisContent() {
     certifications: certifications,
   };
 
+  // Error State
+  const queryError = userError || profileError;
+  if (queryError) {
+    return (
+      <ErrorFallback
+        error={queryError}
+        onRetry={() => refetchProfile()}
+        onHome={() => (window.location.href = '/')}
+        fullPage
+      />
+    );
+  }
+
   if (isUserLoading || isCVLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -459,20 +364,6 @@ function DiagnosisContent() {
           </p>
         </div>
       </div>
-    );
-  }
-
-  // EMPTY STATE FLOW
-  if (!hasCV) {
-    return (
-      <DashboardEmptyState
-        onUploadSuccess={(newCvId) => {
-          setHasCV(true);
-          if (newCvId) {
-            startAnalysis(newCvId);
-          }
-        }}
-      />
     );
   }
 
@@ -511,7 +402,7 @@ function DiagnosisContent() {
             <div className="relative shrink-0">
               <button
                 onClick={() => setIsSpecialtyOpen(!isSpecialtyOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-primary hover:bg-primary/10 transition-colors cursor-pointer border border-primary/20"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-bold text-primary hover:bg-primary/10 transition-colors cursor-pointer border border-primary/20"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Cambiar especialidad
@@ -578,7 +469,7 @@ function DiagnosisContent() {
           totalSkills={techSkills.length + conceptSkills.length + softSkills.length}
           totalStrengths={activeStrengths.length}
           totalGaps={activeGaps.length}
-          isLoading={isRecalculating}
+          isLoading={false}
           lastAnalysisDate={formattedDate}
         />
 
@@ -592,7 +483,7 @@ function DiagnosisContent() {
                 setStrengthsSearch('');
                 setIsStrengthsDrawerOpen(true);
               }}
-              isLoading={isRecalculating}
+              isLoading={false}
             />
             <PriorityGapsCard
               marketGaps={activeGaps}
@@ -600,7 +491,7 @@ function DiagnosisContent() {
                 setGapsSearch('');
                 setIsGapsDrawerOpen(true);
               }}
-              isLoading={isRecalculating}
+              isLoading={false}
             />
           </div>
 
@@ -609,7 +500,7 @@ function DiagnosisContent() {
             <AffinityRadarChart
               domainAffinities={dynamicProfile.domain_affinities}
               techSkills={techSkills}
-              isLoading={isRecalculating}
+              isLoading={false}
               className="w-full"
             />
           </div>
@@ -627,14 +518,14 @@ function DiagnosisContent() {
             <ClusterDemandCard
               clusterName={activeCluster?.cluster_name || dynamicProfile.primary_specialty}
               marketInsights={activeCluster?.market_insights}
-              isLoading={isRecalculating}
+              isLoading={false}
             />
             <MarketImpactCard
               marketGaps={activeGaps}
               marketInsights={activeCluster?.market_insights}
-              isLoading={isRecalculating}
+              isLoading={false}
             />
-            <AiInsightCard marketGaps={activeGaps} isLoading={isRecalculating} />
+            <AiInsightCard marketGaps={activeGaps} isLoading={false} />
           </div>
         </div>
       </div>
