@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings2, Loader2, Compass, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
+import { Settings2, Loader2, User, Briefcase, Target, Clock3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface UserHeroCardProps {
@@ -17,6 +17,7 @@ interface UserHeroCardProps {
   totalStrengths?: number;
   totalGaps?: number;
   isLoading?: boolean;
+  lastAnalysisDate?: string;
   className?: string;
 }
 
@@ -26,10 +27,8 @@ export function UserHeroCard({
   seniority,
   currentScore,
   primarySpecialty,
-  totalSkills = 0,
-  totalStrengths = 0,
-  totalGaps = 0,
   isLoading = false,
+  lastAnalysisDate,
   className,
 }: UserHeroCardProps) {
   const getScoreState = (score: number) => {
@@ -51,73 +50,71 @@ export function UserHeroCard({
 
   const scoreState = getScoreState(currentScore);
 
+  const summaryMessage =
+    currentScore >= 75
+      ? 'Excelente alineación con el perfil objetivo.'
+      : currentScore >= 50
+        ? 'Media afinidad — hay oportunidades de mejora.'
+        : 'Baja afinidad — se recomienda reforzar habilidades clave.';
+
   return (
-    <Card
-      className={cn(
-        'card-glass relative overflow-hidden flex flex-col justify-between h-full p-6 sm:p-8 gap-6',
-        className,
-      )}
-    >
+    <div className={cn('relative overflow-hidden', className)}>
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
         </div>
       )}
 
-      {/* Top Section: Identity & Specialty Split */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-6 pb-6 border-b border-border/40">
-        {/* Left Side: User Identity */}
-        <div className="flex justify-between items-start gap-4 w-full md:w-auto flex-1">
-          <div className="space-y-2.5 min-w-0">
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground truncate">
-              {fullName}
-            </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-xs text-muted-foreground font-bold leading-none">
-                {roleTitle || 'Sin rol especificado'}
-              </p>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold font-mono bg-primary/10 text-primary uppercase">
-                {seniority}
-              </span>
-            </div>
+      {/* Four compact blocks */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Perfil analizado */}
+        <div className="flex items-start gap-2.5 p-3 card-standard!">
+          <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+            <User className="w-3.5 h-3.5" />
           </div>
-          <div className="shrink-0 md:ml-4">
-            <Link href="/profile">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-primary hover:bg-primary/10 text-[10px] h-7 cursor-pointer gap-1.5 px-2.5 font-bold"
-              >
-                <Settings2 className="w-3.5 h-3.5" />
-                Ajustar
-              </Button>
-            </Link>
+          <div className="min-w-0">
+            <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block">
+              Perfil analizado
+            </span>
+            <span className="text-sm font-black text-foreground block truncate">{fullName}</span>
+            <span className="text-[10px] text-muted-foreground block truncate">
+              {roleTitle || 'Sin rol'} ·{' '}
+              <span className="font-semibold text-primary uppercase">{seniority}</span>
+            </span>
           </div>
         </div>
 
-        {/* Right Side: Specialty Target & Affinity Score */}
-        <div className="flex flex-col gap-2 w-full md:w-auto shrink-0 md:items-end">
-          <div className="flex items-center gap-2 md:justify-end">
-            <div className="p-1.5 rounded-full bg-primary/10 flex items-center justify-center">
-              <Compass className="w-4 h-4 text-primary" />
-            </div>
-            <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest">
-              Especialidad Objetivo
-            </p>
+        {/* Especialidad analizada */}
+        <div className="flex items-start gap-2.5 p-3 card-standard!">
+          <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+            <Briefcase className="w-3.5 h-3.5" />
           </div>
-
-          <div className="space-y-1 md:text-right">
-            <p className="text-base sm:text-lg font-black text-foreground tracking-tight truncate leading-tight max-w-[280px]">
+          <div className="min-w-0">
+            <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block">
+              Especialidad analizada
+            </span>
+            <span className="text-sm font-black text-foreground block truncate">
               {primarySpecialty}
-            </p>
+            </span>
+          </div>
+        </div>
 
-            <div className="flex items-baseline gap-3 mt-1.5 md:justify-end">
-              <span className="text-4xl sm:text-5xl font-black text-foreground tracking-tighter leading-none">
+        {/* Afinidad */}
+        <div className="flex items-start gap-2.5 p-3 card-standard!">
+          <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+            <Target className="w-3.5 h-3.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block">
+              Afinidad
+            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-lg font-black text-foreground tracking-tight">
                 {currentScore}%
               </span>
               <span
                 className={cn(
-                  'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black border shrink-0',
+                  'inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black border',
                   scoreState.color,
                 )}
               >
@@ -126,67 +123,22 @@ export function UserHeroCard({
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Bottom Section: Indicadores Clave */}
-      <div className="flex flex-col gap-4">
-        <div className="space-y-0.5">
-          <h3 className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest">
-            Indicadores Clave
-          </h3>
-          <p className="text-xs text-muted-foreground leading-normal">
-            Resumen del análisis técnico de tu perfil profesional frente a la especialidad objetivo.
-          </p>
-        </div>
-
-        {/* Grid for key indicators */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-1">
-          {/* Habilidades */}
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/15 border border-border/30 hover:border-success/20 hover:bg-secondary/25 transition-all">
-            <div className="p-2 rounded-lg bg-success/10 text-success shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block">
-                Habilidades
-              </span>
-              <span className="text-sm font-black text-foreground block truncate">
-                {totalSkills} Detectadas
-              </span>
-            </div>
+        {/* Último análisis */}
+        <div className="flex items-start gap-2.5 p-3 card-standard!">
+          <div className="p-1.5 rounded-lg bg-info/10 text-info shrink-0 mt-0.5">
+            <Clock3 className="w-3.5 h-3.5" />
           </div>
-
-          {/* Fortalezas */}
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/15 border border-border/30 hover:border-yellow-500/20 hover:bg-secondary/25 transition-all">
-            <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-500 shrink-0">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block">
-                Fortalezas
-              </span>
-              <span className="text-sm font-black text-foreground block truncate">
-                {totalStrengths} Principales
-              </span>
-            </div>
-          </div>
-
-          {/* Brechas */}
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/15 border border-border/30 hover:border-destructive/20 hover:bg-secondary/25 transition-all">
-            <div className="p-2 rounded-lg bg-destructive/10 text-destructive shrink-0">
-              <AlertCircle className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block">
-                Brechas
-              </span>
-              <span className="text-sm font-black text-foreground block truncate">
-                {totalGaps} Por Cubrir
-              </span>
-            </div>
+          <div className="min-w-0">
+            <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block">
+              Último análisis
+            </span>
+            <span className="text-sm font-black text-foreground block truncate">
+              {lastAnalysisDate || 'Recientemente'}
+            </span>
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

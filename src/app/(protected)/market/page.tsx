@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  Network,
   Cpu,
   Database,
   Binary,
@@ -134,32 +133,22 @@ function TopologyContent() {
 
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Back Button */}
-      <div className="flex items-center justify-between mb-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push('/overview')}
-          className="text-muted-foreground hover:text-foreground hover:bg-secondary/40 text-xs gap-1 h-8 cursor-pointer pl-2 pr-3"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Volver al Overview
-        </Button>
-      </div>
-
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-2 mt-1">
-            <Network className="w-6 h-6 text-primary shrink-0" />
-            Topología del Mercado IT
-          </h1>
-          <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
-            Descubre los {clusters.length} clusters de especialidades técnicas que estructuran la
-            demanda laboral de tecnología en el mercado local, identificados mediante algoritmos no
-            supervisados.
-          </p>
-        </div>
+      <div className="flex flex-col gap-2 mt-6">
+        <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-1">
+          <button
+            onClick={() => router.push('/overview')}
+            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer -ml-1"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          Topología del Mercado IT
+        </h1>
+        <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
+          Descubre los {clusters.length} clusters de especialidades técnicas que estructuran la
+          demanda laboral de tecnología en el mercado local, identificados mediante algoritmos no
+          supervisados.
+        </p>
       </div>
 
       {/* Grid: 2 Columns on desktop. Left column: Technical specs. Right/bottom: Grid of clusters */}

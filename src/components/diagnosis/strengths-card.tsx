@@ -18,18 +18,16 @@ interface StrengthsCardProps {
   isLoading?: boolean;
 }
 
-const categoryLabel = (cat: string) => {
-  const c = cat ? cat.toLowerCase() : '';
-  if (c === 'hard_skill' || c === 'tech') return 'Tecnología';
-  if (c === 'tool') return 'Herramienta';
-  if (c === 'methodology' || c === 'concept') return 'Concepto';
-  if (c === 'soft') return 'Blanda';
-  return cat;
+const levelBadge = (level: string) => {
+  if (level === 'Avanzado') return 'bg-success/10 text-success dark:text-success border-success/20';
+  if (level === 'Intermedio')
+    return 'bg-warning/10 text-warning dark:text-warning border-warning/20';
+  return 'bg-secondary/20 text-muted-foreground border-border/40';
 };
 
 export function StrengthsCard({ strengths, onViewAll, isLoading = false }: StrengthsCardProps) {
   return (
-    <Card className="card-standard flex flex-col h-full relative overflow-hidden min-h-[280px]">
+    <Card className="flex flex-col h-full relative overflow-hidden min-h-[200px]">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -39,12 +37,10 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
         </div>
       )}
 
-      <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
-            Fortalezas principales
-          </span>
-        </div>
+      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+        <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+          Fortalezas principales
+        </span>
         {strengths.length > 0 && (
           <button
             onClick={onViewAll}
@@ -54,39 +50,28 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
           </button>
         )}
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col justify-between pt-0 space-y-3">
+      <CardContent className="flex-1 pt-1 space-y-1.5">
         {strengths.length === 0 ? (
-          <div className="p-4 rounded-lg bg-secondary/35 border border-dashed border-border text-center text-xs text-muted-foreground my-auto">
+          <div className="py-6 text-center text-xs text-muted-foreground">
             No se identificaron fortalezas clave específicas para este cluster.
           </div>
         ) : (
-          <>
-            <div className="space-y-2">
-              {strengths.slice(0, 4).map((s) => (
-                <div
-                  key={s.name}
-                  className="flex flex-col justify-between p-2.5 rounded-lg bg-success/5 border border-success/10"
-                >
-                  <div className="flex justify-between items-start gap-1">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                      {s.name}
-                    </span>
-                    <span className="text-[9px] text-success/80 font-bold shrink-0">
-                      {s.demandPercentage}% DEMANDA
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-[10px] text-muted-foreground">{s.level}</span>
-                    {s.category && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-success/10 text-success font-medium">
-                        {categoryLabel(s.category)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+          strengths.slice(0, 4).map((s) => (
+            <div
+              key={s.name}
+              className="flex items-center justify-between py-1.5 px-1 border-b border-border/20 last:border-b-0"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
+                <span className="text-xs font-semibold text-foreground truncate">{s.name}</span>
+              </div>
+              <span
+                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ml-2 ${levelBadge(s.level)}`}
+              >
+                {s.level}
+              </span>
             </div>
-          </>
+          ))
         )}
       </CardContent>
     </Card>

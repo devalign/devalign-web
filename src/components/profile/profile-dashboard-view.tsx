@@ -355,7 +355,7 @@ export default function ProfileDashboardView() {
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
         <CVUpdateBanner />
 
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:mt-10">
           <div className="space-y-1">
             <h1 className="text-2xl font-black tracking-tight text-foreground">Mi Perfil</h1>
             <p className="text-xs text-muted-foreground">
@@ -585,70 +585,45 @@ export default function ProfileDashboardView() {
                   <div className="flex flex-col items-start gap-2">
                     <div className="flex gap-2 items-center">
                       <Clock3 className="h-5 w-5 text-info" />
-                      <h3 className="text-sm font-black text-foreground">Ultimos CVs cargados</h3>
+                      <h3 className="text-sm font-black text-foreground">Último análisis</h3>
                     </div>
                     <div>
                       <p className="text-[11px] text-muted-foreground mt-1">
-                        Ultimos currículum base cargados para el análisis.
+                        CV analizado más recientemente.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  {cvs.slice(0, 3).map((cv) => {
-                    const isActive = cv.cv_id === currentCV?.cv_id;
-                    return (
-                      <div
-                        key={cv.cv_id}
-                        className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border"
+                {currentCV && (
+                  <div className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border">
+                    <div className="h-9 w-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-black text-foreground flex items-center gap-1.5 min-w-0">
+                        <span className="truncate">{currentCV.original_filename}</span>
+                        <BadgeCheck className="h-3.5 w-3.5 text-success shrink-0" />
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {formatDate(currentCV.uploaded_at)} · {formatFileSize(currentCV.size_bytes)}
+                      </p>
+                    </div>
+                    {currentCV.download_url && (
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg shrink-0"
+                        title="Vista previa del CV"
                       >
-                        <div className="h-9 w-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
-                          <FileText className="h-4 w-4" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-black text-foreground flex items-center gap-1.5 min-w-0">
-                            <span className="truncate">{cv.original_filename}</span>
-                            {isActive && (
-                              <BadgeCheck className="h-3.5 w-3.5 text-success shrink-0" />
-                            )}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {formatDate(cv.uploaded_at)} · {formatFileSize(cv.size_bytes)}
-                          </p>
-                        </div>
-                        {cv.download_url && (
-                          <Button
-                            asChild
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg shrink-0"
-                            title="Vista previa del CV"
-                          >
-                            <a href={cv.download_url} target="_blank" rel="noreferrer">
-                              <Eye className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsUploadOpen(true)}
-                  className={cn(
-                    'w-full rounded-xl border border-dashed border-primary/35 bg-primary/[0.03]',
-                    'px-4 py-4 text-center text-primary hover:bg-primary/[0.06] transition-colors',
-                  )}
-                >
-                  <Upload className="h-5 w-5 mx-auto mb-1" />
-                  <span className="block text-xs font-black">Subir nuevo CV</span>
-                  <span className="block text-[10px] text-muted-foreground mt-0.5">
-                    PDF, DOCX (máx. 10MB)
-                  </span>
-                </button>
+                        <a href={currentCV.download_url} target="_blank" rel="noreferrer">
+                          <Eye className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </aside>

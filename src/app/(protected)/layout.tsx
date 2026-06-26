@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isOverview = pathname === '/overview';
+  const showGlobalHeader = pathname === '/overview';
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background font-sans antialiased">
@@ -22,16 +22,13 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
           suppressHydrationWarning
           className="flex-1 overflow-y-auto overflow-x-hidden bg-background flex flex-col relative pb-16 lg:pb-6"
         >
-          <div
-            className={cn(
-              'z-30 w-full pointer-events-none pt-3 px-3 lg:pt-6 lg:px-6',
-              isOverview ? 'absolute top-0 left-0 right-0' : 'sticky top-0',
-            )}
-          >
-            <div className="pointer-events-auto pb-4">
-              <GlobalHeader />
+          {showGlobalHeader && (
+            <div className="z-30 w-full pointer-events-none pt-3 px-3 lg:pt-6 lg:px-6 absolute top-0 left-0 right-0">
+              <div className="pointer-events-auto pb-4">
+                <GlobalHeader />
+              </div>
             </div>
-          </div>
+          )}
           <div className="flex-1 min-h-0 w-full relative">{children}</div>
         </main>
 

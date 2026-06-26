@@ -275,11 +275,14 @@ button:hover {
 /* ======================== */
 
 @utility card-standard {
-  @apply bg-card border border-border rounded-xl;
+  @apply bg-primary/[0.03] dark:bg-primary/[0.05] border border-border rounded-xl;
+}
+@utility card-soft {
+  @apply bg-secondary/15 border border-border rounded-xl;
 }
 
 @utility card-elevated {
-  @apply border border-border bg-card p-6 rounded-xl;
+  @apply bg-card border border-border p-6 rounded-xl;
 }
 
 @utility card-tinted {
