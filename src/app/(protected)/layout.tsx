@@ -20,6 +20,12 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
   const isOnboarding = pathname === '/onboarding';
   const hasCV = !!(cvData?.cvs && cvData.cvs.length > 0);
 
+  React.useEffect(() => {
+    if (!isOnboarding && !isLoading && !isError && !hasCV) {
+      router.replace('/onboarding');
+    }
+  }, [isOnboarding, isLoading, isError, hasCV, router]);
+
   if (isOnboarding) {
     return <>{children}</>;
   }
@@ -44,7 +50,6 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
   }
 
   if (!hasCV) {
-    router.replace('/onboarding');
     return null;
   }
 

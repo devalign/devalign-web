@@ -579,13 +579,22 @@ export default function ProfileDashboardView() {
                   )}
                 </div>
 
-                {affinities.length > 4 && (
+                {affinities.length > 3 ? (
                   <Button
                     variant="outline"
                     onClick={() => router.push('/diagnosis')}
                     className="w-full justify-between h-9 text-xs text-primary font-bold"
                   >
                     Ver todas las afinidades ({affinities.length})
+                    <TrendingUp className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/market')}
+                    className="w-full justify-between h-9 text-xs text-primary font-bold border-dashed hover:bg-primary/5"
+                  >
+                    Explorar más especialidades
                     <TrendingUp className="h-4 w-4" />
                   </Button>
                 )}

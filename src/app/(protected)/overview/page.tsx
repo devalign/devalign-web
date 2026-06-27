@@ -351,7 +351,6 @@ export default function OverviewPage() {
                 <div className="w-full pointer-events-auto">
                   <OverviewSideDrawer
                     domainAffinities={profile?.domain_affinities || []}
-                    techSkills={techSkills}
                     fullName={fullName}
                     roleTitle={roleTitle}
                     seniority={seniority}

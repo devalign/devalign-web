@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getUserProfile, updateUserProfile, updateUserProfileSkills } from '@/lib/api';
+import { getUserProfile, updateUserProfile, updateUserProfileSkills, resetAccount } from '@/lib/api';
 import { UserProfileData, SkillItem } from '@/lib/api/types';
 
 export function useUserProfile() {
@@ -35,3 +35,21 @@ export function useUpdateUserSkills() {
     },
   });
 }
+
+export function useResetAccount() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: resetAccount,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['userCVs'] });
+    },
+    onSettled: () => {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('devalign_cv_analysis_state');
+      }
+    },
+  });
+}
+

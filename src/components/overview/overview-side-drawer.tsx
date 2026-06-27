@@ -16,14 +16,13 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
-import { AffinityRadarChart } from '@/components/diagnosis/affinity-radar-chart';
+import { SimpleAffinityRadar } from '@/components/diagnosis/simple-affinity-radar';
 import { cn } from '@/lib/utils';
 
 export type FilterMode = 'all' | 'strengths' | 'gaps';
 
 interface OverviewSideDrawerProps {
   domainAffinities: any[];
-  techSkills: string[];
   fullName: string;
   roleTitle: string;
   seniority: string;
@@ -38,7 +37,6 @@ interface OverviewSideDrawerProps {
 
 export function OverviewSideDrawer({
   domainAffinities,
-  techSkills,
   fullName,
   roleTitle,
   seniority,
@@ -195,13 +193,11 @@ export function OverviewSideDrawer({
               </div>
             </div>
 
-            {/* Radar Chart */}
-            <div className="flex-1 overflow-y-auto scrollbar-none min-h-[200px] flex flex-col">
-              <AffinityRadarChart
+            {/* Simple Radar Chart */}
+            <div className="flex-1 overflow-y-auto scrollbar-none min-h-[200px] flex flex-col items-center justify-center py-4">
+              <SimpleAffinityRadar
                 domainAffinities={domainAffinities}
-                techSkills={techSkills}
                 isLoading={isLoading}
-                standalone={false}
               />
             </div>
 

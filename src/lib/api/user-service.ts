@@ -85,3 +85,23 @@ export async function updateUserProfileSkills(skills: SkillItem[]): Promise<User
 export async function getMarketClusters(): Promise<Cluster[]> {
   return apiClient<Cluster[]>('/profile/clusters');
 }
+
+/**
+ * Evaluates the user's profile against a specific tech cluster to generate a diagnostic.
+ */
+export async function evaluateClusterDiagnostic(clusterName: string): Promise<UserProfileData> {
+  return apiClient<UserProfileData>(`/profile/evaluate-cluster/${encodeURIComponent(clusterName)}`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Resets the user's account (deletes profile, CVs, diagnostics).
+ */
+export async function resetAccount(): Promise<void> {
+  return apiClient<void>('/users/me/reset', {
+    method: 'POST',
+  });
+}
+
+
