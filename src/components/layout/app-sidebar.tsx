@@ -4,16 +4,14 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useUserProfile } from '@/hooks/use-user-profile';
+import { useUserCVs } from '@/hooks/use-user-cvs';
 
 import {
   Hexagon,
   Activity,
-  Map,
   Network,
   Settings,
   LogOut,
-  Sun,
-  Moon,
   TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
@@ -32,19 +30,21 @@ interface NavItem {
   disabled?: boolean;
 }
 
-const navItems: NavItem[] = [
-  { name: 'Overview', href: '/overview', icon: Network },
-  { name: 'Mercado', href: '/market', icon: TrendingUp },
-  { name: 'Diagnóstico', href: '/diagnosis', icon: Activity },
-];
-
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: profile } = useUserProfile();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const { data: cvData } = useUserCVs();
+  const hasCV = !!(cvData?.cvs && cvData.cvs.length > 0);
   const cluster = searchParams.get('cluster') || profile?.primary_specialty || '';
+
+  const navItems: NavItem[] = React.useMemo(() => [
+    { name: 'Overview', href: '/overview', icon: Network, disabled: !hasCV },
+    { name: 'Mercado', href: '/market', icon: TrendingUp, disabled: true },
+    { name: 'Diagnóstico', href: '/diagnosis', icon: Activity, disabled: !hasCV },
+  ], [hasCV]);
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);

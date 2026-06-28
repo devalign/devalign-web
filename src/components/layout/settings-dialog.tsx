@@ -14,6 +14,9 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+import { useResetAccount } from '@/hooks/use-user-profile';
+import { ResetAccountDialog } from './reset-account-dialog';
+
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,6 +25,24 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDialogProps) {
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = React.useState(false);
+
+  const { mutate: reset, isPending: isResetting } = useResetAccount();
+
+  const handleResetConfirm = () => {
+    reset(undefined, {
+      onSuccess: () => {
+        toast.success('Cuenta restablecida correctamente.');
+        setIsResetConfirmOpen(false);
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        console.error('Error resetting account:', error);
+        const message = error instanceof Error ? error.message : 'Ocurrió un error desconocido';
+        toast.error(`Error: ${message}`);
+      },
+    });
+  };
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -105,9 +126,7 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  toast.error('Esta acción simula la eliminación de todos tus datos.');
-                }}
+                onClick={() => setIsResetConfirmOpen(true)}
                 className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive text-[10px] h-7 shrink-0 cursor-pointer"
               >
                 Restablecer
@@ -163,6 +182,13 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <ResetAccountDialog
+        open={isResetConfirmOpen}
+        onOpenChange={setIsResetConfirmOpen}
+        onConfirm={handleResetConfirm}
+        isLoading={isResetting}
+      />
     </Dialog>
   );
 }

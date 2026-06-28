@@ -11,7 +11,6 @@ interface HeaderBarProps {
   activeCluster: ClusterAffinityItem | null;
   onSelectCluster: (clusterName: string) => void;
   isAnalyzing?: boolean;
-  isAnalysisReady?: boolean;
   lastAnalysisDate?: string;
 }
 
@@ -20,7 +19,6 @@ export function HeaderBar({
   activeCluster,
   onSelectCluster,
   isAnalyzing = false,
-  isAnalysisReady = false,
   lastAnalysisDate,
 }: HeaderBarProps) {
   const pathname = usePathname();
@@ -42,7 +40,7 @@ export function HeaderBar({
         items.push({ label: clusterName, isClusterSelector: true });
       }
     } else if (pathname.startsWith('/profile')) {
-      items.push({ label: 'Perfil Profesional' });
+      items.push({ label: 'Mi Perfil' });
     }
 
     return items;
@@ -61,15 +59,9 @@ export function HeaderBar({
 
       <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-muted-foreground font-medium select-none shrink-0">
         {isAnalyzing && (
-          <span className="hidden md:flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-full border border-primary/20 font-semibold animate-pulse">
-            <Loader2 className="h-3 w-3 animate-spin text-primary" />
+          <span className="hidden md:flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full border border-success/20 font-semibold animate-pulse">
+            <Loader2 className="h-3 w-3 animate-spin text-success" />
             <span className="hidden lg:inline">Analizando CV...</span>
-          </span>
-        )}
-        {isAnalysisReady && (
-          <span className="hidden md:flex items-center gap-1.5 bg-success/10 text-success px-2.5 py-1 rounded-full border border-success/20 font-semibold">
-            <span className="h-1.5 w-1.5 rounded-full bg-success shrink-0" />
-            <span className="hidden lg:inline">Actualización Lista</span>
           </span>
         )}
         {lastAnalysisDate && (

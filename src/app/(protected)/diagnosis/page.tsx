@@ -6,6 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { toast } from 'sonner';
+import { ErrorFallback } from '@/components/shared/error-fallback';
 import CVUploader from '@/components/profile/cv-uploader';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
@@ -32,10 +33,19 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Lightbulb } from 'lucide-react';
+import {
+  Sparkles,
+  Search,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Lightbulb,
+  ChevronLeft,
+  RefreshCw,
+  ChevronDown,
+} from 'lucide-react';
 
 // Refactored modular subcomponents
-import { DashboardEmptyState } from '@/components/diagnosis/dashboard-empty-state';
 import { PriorityGapsCard } from '@/components/diagnosis/priority-gaps-card';
 
 import { StrengthsCard } from '@/components/diagnosis/strengths-card';
@@ -48,19 +58,19 @@ import { MarketImpactCard } from '@/components/diagnosis/market-impact-card';
 import { KnowledgeGraphCard } from '@/components/profile/KnowledgeGraphCard';
 
 function DiagnosisContent() {
-  const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const { data: user, isLoading: isUserLoading, error: userError } = useCurrentUser();
   const { data: cvData, isLoading: isCVLoading, refetch: refetchCVs } = useUserCVs();
-  const { data: profile, refetch: refetchProfile } = useUserProfile();
+  const { data: profile, error: profileError, refetch: refetchProfile } = useUserProfile();
   const { startAnalysis, isAnalysisReady, isAnalyzing, commitUpdate } = useCVAnalysis();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Onboarding & CV Upload Simulation State
-  const [hasCV, setHasCV] = useState(true);
-
   // Drawers states
   const [isStrengthsDrawerOpen, setIsStrengthsDrawerOpen] = useState(false);
   const [isGapsDrawerOpen, setIsGapsDrawerOpen] = useState(false);
+
+  // Specialty dropdown state
+  const [isSpecialtyOpen, setIsSpecialtyOpen] = useState(false);
 
   // Search states for drawers
   const [strengthsSearch, setStrengthsSearch] = useState('');
@@ -101,9 +111,6 @@ function DiagnosisContent() {
   // ML Gap items (skills the user DOES NOT have but the market demands)
   const [marketGaps, setMarketGaps] = useState<SkillItem[]>([]);
 
-  // ML Engine simulated recalculating state
-  const [isRecalculating, setIsRecalculating] = useState(false);
-
   // Modal visibility states linked to URL query param
   const [isAtsOpen, setIsAtsOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -142,15 +149,6 @@ function DiagnosisContent() {
       router.push('/diagnosis');
     }
   };
-
-  // Sync hasCV with hook data
-  useEffect(() => {
-    if (cvData && cvData.cvs && cvData.cvs.length > 0) {
-      setTimeout(() => setHasCV(true), 0);
-    } else {
-      setTimeout(() => setHasCV(false), 0);
-    }
-  }, [cvData]);
 
   // Synchronize profile data with API hook
   useEffect(() => {
@@ -214,106 +212,13 @@ function DiagnosisContent() {
   // Active Cluster Index for navigation
   const [activeClusterIndex, setActiveClusterIndex] = useState(0);
 
-  // Get all affinities with fallback if not provided by backend (Top 3 only)
   const allAffinities = React.useMemo(() => {
-    let list = [];
     if (profile?.all_affinities && profile.all_affinities.length > 0) {
-      list = [...profile.all_affinities].sort((a, b) => b.affinity_score - a.affinity_score);
-    } else {
-      list = [
-        {
-          cluster_id: '1',
-          cluster_name: 'Backend Java',
-          affinity_score: 0.78,
-          is_primary: true,
-          market_insights: {
-            average_salary_pen: 8500,
-            salary_differential_percentage: 32,
-            market_share_percentage: 23,
-            total_demand: 145,
-            growth_percentage: 28,
-          },
-          compatible_roles: [
-            { title: 'Backend Java Developer', match: 'Alta' as const },
-            { title: 'Java Cloud Engineer', match: 'Alta' as const },
-            { title: 'Backend Microservices Developer', match: 'Media' as const },
-          ],
-        },
-        {
-          cluster_id: '2',
-          cluster_name: 'DevOps Cloud',
-          affinity_score: 0.63,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 9500,
-            salary_differential_percentage: 42,
-            market_share_percentage: 20,
-            total_demand: 125,
-            growth_percentage: 35,
-          },
-          compatible_roles: [
-            { title: 'DevOps Engineer', match: 'Alta' as const },
-            { title: 'Cloud Architect', match: 'Media' as const },
-            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const },
-          ],
-        },
-        {
-          cluster_id: '3',
-          cluster_name: 'Data Engineering',
-          affinity_score: 0.41,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 9000,
-            salary_differential_percentage: 38,
-            market_share_percentage: 24,
-            total_demand: 148,
-            growth_percentage: 31,
-          },
-          compatible_roles: [
-            { title: 'Data Engineer', match: 'Alta' as const },
-            { title: 'Big Data Developer', match: 'Alta' as const },
-            { title: 'Analytics Engineer', match: 'Media' as const },
-          ],
-        },
-        {
-          cluster_id: '4',
-          cluster_name: 'Frontend React',
-          affinity_score: 0.3,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 7000,
-            salary_differential_percentage: 15,
-            market_share_percentage: 17,
-            total_demand: 190,
-            growth_percentage: 18,
-          },
-          compatible_roles: [
-            { title: 'Frontend Developer', match: 'Alta' as const },
-            { title: 'React Developer', match: 'Alta' as const },
-            { title: 'UI Engineer', match: 'Media' as const },
-          ],
-        },
-        {
-          cluster_id: '5',
-          cluster_name: 'QA & Automation',
-          affinity_score: 0.25,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 6500,
-            salary_differential_percentage: 12,
-            market_share_percentage: 14,
-            total_demand: 84,
-            growth_percentage: 15,
-          },
-          compatible_roles: [
-            { title: 'QA Automation Engineer', match: 'Alta' as const },
-            { title: 'Software Development Engineer in Test (SDET)', match: 'Alta' as const },
-            { title: 'QA Analyst', match: 'Media' as const },
-          ],
-        },
-      ];
+      return [...profile.all_affinities]
+        .sort((a, b) => b.affinity_score - a.affinity_score)
+        .slice(0, 3);
     }
-    return list.slice(0, 3);
+    return [];
   }, [profile]);
 
   // Sync activeClusterIndex with primary specialty or URL parameter on load/change
@@ -343,6 +248,12 @@ function DiagnosisContent() {
       params.set('cluster', cluster.cluster_name);
       router.push(`?${params.toString()}`, { scroll: false });
     }
+  };
+
+  const handleChangeSpecialty = (clusterName: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('cluster', clusterName);
+    router.push(`?${params.toString()}`, { scroll: false });
   };
 
   const activeCluster = allAffinities[activeClusterIndex] || allAffinities[0];
@@ -405,8 +316,8 @@ function DiagnosisContent() {
 
   // Construct profile payload for ATS Modal preview
   const dynamicProfile: UserProfileData = {
-    user_id: user?.id || 'mock-user-id',
-    cv_id: profile?.cv_id || 'mock-cv-id',
+    user_id: user?.id || profile?.user_id || '',
+    cv_id: profile?.cv_id || cvData?.cvs?.[0]?.cv_id || null,
     full_name: fullName,
     current_job_role: roleTitle,
     seniority: seniority,
@@ -430,6 +341,19 @@ function DiagnosisContent() {
     certifications: certifications,
   };
 
+  // Error State
+  const queryError = userError || profileError;
+  if (queryError) {
+    return (
+      <ErrorFallback
+        error={queryError}
+        onRetry={() => refetchProfile()}
+        onHome={() => (window.location.href = '/')}
+        fullPage
+      />
+    );
+  }
+
   if (isUserLoading || isCVLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -440,20 +364,6 @@ function DiagnosisContent() {
           </p>
         </div>
       </div>
-    );
-  }
-
-  // EMPTY STATE FLOW
-  if (!hasCV) {
-    return (
-      <DashboardEmptyState
-        onUploadSuccess={(newCvId) => {
-          setHasCV(true);
-          if (newCvId) {
-            startAnalysis(newCvId);
-          }
-        }}
-      />
     );
   }
 
@@ -473,72 +383,149 @@ function DiagnosisContent() {
         {/* Banner de Sincronización Diferida */}
         <CVUpdateBanner />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Content (80% / 4 cols) */}
-          <div className="lg:col-span-3 flex flex-col gap-6">
-            {/* Top Row: User Hero Card */}
-            <div className="w-full">
-              <UserHeroCard
-                fullName={fullName}
-                roleTitle={roleTitle}
-                seniority={seniority}
-                currentScore={activeScore}
-                primarySpecialty={
-                  activeCluster?.cluster_name ||
-                  dynamicProfile.primary_specialty ||
-                  'Software Engineering'
-                }
-                totalSkills={techSkills.length + conceptSkills.length + softSkills.length}
-                totalStrengths={activeStrengths.length}
-                totalGaps={activeGaps.length}
-                isLoading={isRecalculating}
-              />
-            </div>
+        {/* Page header: back arrow in title + cambiar especialidad dropdown */}
+        <div className="flex flex-col gap-2 my-10">
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-1">
+              <button
+                onClick={() => router.push('/overview')}
+                className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer -ml-1"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              Diagnóstico ·{' '}
+              {activeCluster?.cluster_name ||
+                dynamicProfile.primary_specialty ||
+                'Software Engineering'}
+            </h1>
 
-            {/* Competency breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <StrengthsCard
-                strengths={activeStrengths}
-                onViewAll={() => {
-                  setStrengthsSearch('');
-                  setIsStrengthsDrawerOpen(true);
-                }}
-                isLoading={isRecalculating}
-              />
-              <PriorityGapsCard
-                marketGaps={activeGaps}
-                onViewAll={() => {
-                  setGapsSearch('');
-                  setIsGapsDrawerOpen(true);
-                }}
-                isLoading={isRecalculating}
-              />
-            </div>
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setIsSpecialtyOpen(!isSpecialtyOpen)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-bold text-primary hover:bg-primary/10 transition-colors cursor-pointer border border-primary/20"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Cambiar especialidad
+                <ChevronDown
+                  className={`w-3 h-3 transition-transform duration-200 ${isSpecialtyOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
 
-            {/* Row 3: Affinity Radar Chart (Full width deep dive) */}
-            <div className="w-full">
-              <AffinityRadarChart
-                domainAffinities={dynamicProfile.domain_affinities}
-                techSkills={techSkills}
-                isLoading={isRecalculating}
-                className="w-full"
-              />
+              {isSpecialtyOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsSpecialtyOpen(false)} />
+                  <div className="absolute right-0 top-full mt-1.5 w-56 bg-card border border-border rounded-lg shadow-lg z-50 p-1">
+                    {allAffinities.map((cluster) => {
+                      const isActive = cluster.cluster_name === activeCluster?.cluster_name;
+                      return (
+                        <button
+                          key={cluster.cluster_name}
+                          onClick={() => {
+                            handleChangeSpecialty(cluster.cluster_name);
+                            setIsSpecialtyOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold text-left transition-colors cursor-pointer ${
+                            isActive
+                              ? 'bg-primary/10 text-primary'
+                              : 'text-foreground hover:bg-secondary/50'
+                          }`}
+                        >
+                          {cluster.cluster_name}
+                        </button>
+                      );
+                    })}
+                    <div className="border-t border-border/60 my-1" />
+                    <button
+                      onClick={() => {
+                        router.push('/market');
+                        setIsSpecialtyOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-primary hover:bg-primary/10 transition-colors font-semibold text-xs cursor-pointer"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 animate-pulse" />
+                      <span>Explorar más especialidades...</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
+          <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
+            Análisis de tu perfil frente a las competencias más demandadas en esta especialidad.
+          </p>
+        </div>
 
-          {/* Aside panel (20% / 1 col) */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
+        {/* Hero card with diagnostic info blocks */}
+        <UserHeroCard
+          fullName={fullName}
+          roleTitle={roleTitle}
+          seniority={seniority}
+          currentScore={activeScore}
+          primarySpecialty={
+            activeCluster?.cluster_name ||
+            dynamicProfile.primary_specialty ||
+            'Software Engineering'
+          }
+          totalSkills={techSkills.length + conceptSkills.length + softSkills.length}
+          totalStrengths={activeStrengths.length}
+          totalGaps={activeGaps.length}
+          isLoading={false}
+          lastAnalysisDate={formattedDate}
+        />
+
+        {/* Main two-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
+          {/* Left column (narrower): Fortalezas + Brechas */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <StrengthsCard
+              strengths={activeStrengths}
+              onViewAll={() => {
+                setStrengthsSearch('');
+                setIsStrengthsDrawerOpen(true);
+              }}
+              isLoading={false}
+            />
+            <PriorityGapsCard
+              marketGaps={activeGaps}
+              onViewAll={() => {
+                setGapsSearch('');
+                setIsGapsDrawerOpen(true);
+              }}
+              isLoading={false}
+            />
+          </div>
+
+          {/* Right column (wider): Radar */}
+          <div className="lg:col-span-3">
+            <AffinityRadarChart
+              domainAffinities={dynamicProfile.domain_affinities}
+              techSkills={techSkills}
+              isLoading={false}
+              className="w-full"
+            />
+          </div>
+        </div>
+
+        {/* Bottom section: Contexto de mercado */}
+        <div className="mt-8 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
+              Contexto de mercado
+            </span>
+            <div className="h-px flex-1 bg-border/40" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <ClusterDemandCard
               clusterName={activeCluster?.cluster_name || dynamicProfile.primary_specialty}
               marketInsights={activeCluster?.market_insights}
-              isLoading={isRecalculating}
+              isLoading={false}
             />
             <MarketImpactCard
               marketGaps={activeGaps}
               marketInsights={activeCluster?.market_insights}
-              isLoading={isRecalculating}
+              isLoading={false}
             />
-            <AiInsightCard marketGaps={activeGaps} isLoading={isRecalculating} />
+            <AiInsightCard marketGaps={activeGaps} isLoading={false} />
           </div>
         </div>
       </div>

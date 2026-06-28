@@ -1,0 +1,1503 @@
+'use client';
+
+import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import {
+  useUserProfile,
+  useUpdateUserProfile,
+  useUpdateUserSkills,
+} from '@/hooks/use-user-profile';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  Award,
+  Briefcase,
+  GraduationCap,
+  Plus,
+  Sparkles,
+  X,
+  ChevronLeft,
+  Save,
+  Trash2,
+  Pencil,
+  Check,
+  FileText,
+  HardDrive,
+  Download,
+  Eye,
+  ShieldCheck,
+  Info,
+  Upload,
+  Loader2,
+  History,
+} from 'lucide-react';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
+import CVUploader from '@/components/profile/cv-uploader';
+import CVHistoryModal from '@/components/profile/cv-history-modal';
+import { useUserCVs, useReanalyzeCV } from '@/hooks/use-user-cvs';
+import { UserProfileData } from '@/lib/api/types';
+import { useCVAnalysis } from '@/contexts/cv-analysis-context';
+import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+
+interface Experience {
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+}
+
+interface Certification {
+  name: string;
+  issuer: string;
+  date: string;
+}
+
+interface Education {
+  degree: string;
+  institution: string;
+  start_date: string;
+  end_date: string | null;
+}
+
+function ProfileContent() {
+  const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const { data: profile, isLoading: isProfileLoading, refetch: refetchProfile } = useUserProfile();
+  const { data: cvData, isLoading: isCvLoading, refetch: refetchCVs } = useUserCVs();
+  const { startAnalysis, isAnalysisReady, commitUpdate } = useCVAnalysis();
+  const currentCV = profile?.cv_id
+    ? cvData?.cvs?.find((cv) => cv.cv_id === profile.cv_id) || cvData?.cvs?.[0]
+    : cvData?.cvs?.[0];
+  const updateProfileMutation = useUpdateUserProfile();
+  const updateSkillsMutation = useUpdateUserSkills();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Local States
+  const [fullName, setFullName] = useState('');
+  const [roleTitle, setRoleTitle] = useState('');
+  const [seniority, setSeniority] = useState('mid');
+
+  // Edit states
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [editingExperienceIdx, setEditingExperienceIdx] = useState<number | null>(null);
+  const [editingEducationIdx, setEditingEducationIdx] = useState<number | null>(null);
+  const [editingCertIdx, setEditingCertIdx] = useState<number | null>(null);
+
+  // Education State
+  const [educationList, setEducationList] = useState<Education[]>([]);
+
+  // Experience State
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+
+  // Certifications State
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+
+  // Skills Lists
+  const [techSkills, setTechSkills] = useState<string[]>([]);
+  const [conceptSkills, setConceptSkills] = useState<string[]>([]);
+  const [softSkills, setSoftSkills] = useState<string[]>([]);
+
+  // Active Tab for Skills editing
+  const [activeTab, setActiveTab] = useState<'tech' | 'concept' | 'soft'>('tech');
+  const [newSkillText, setNewSkillText] = useState('');
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [isRecalculationReady, setIsRecalculationReady] = useState(false);
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false);
+
+  interface SnapshotData {
+    fullName: string;
+    roleTitle: string;
+    seniority: string;
+    educationList: Education[];
+    experiences: Experience[];
+    certifications: Certification[];
+    techSkills: string[];
+    conceptSkills: string[];
+    softSkills: string[];
+  }
+
+  const [initialSnapshot, setInitialSnapshot] = useState<SnapshotData | null>(null);
+
+  const reanalyzeMutation = useReanalyzeCV();
+
+  // Modal actions from query parameters
+  const action = searchParams.get('action');
+  const [isCVManagerOpen, setIsCVManagerOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (action === 'preview-ats') {
+        setIsCVManagerOpen(true);
+      } else {
+        setIsCVManagerOpen(false);
+      }
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [action]);
+
+  const handleCloseCVManager = (open: boolean) => {
+    setIsCVManagerOpen(open);
+    if (!open && action === 'preview-ats') {
+      router.push('/profile');
+    }
+  };
+
+  // Load profile data into state once loaded
+  useEffect(() => {
+    const loadProfileData = () => {
+      if (profile) {
+        const newFullName =
+          profile.full_name || user?.full_name || user?.email?.split('@')[0] || 'Desarrollador';
+        const newRoleTitle = profile.current_job_role || '';
+        const newSeniority = profile.seniority || 'mid';
+
+        const newEducationList = profile.education?.length
+          ? profile.education.map((edu) => ({
+              degree: edu.degree,
+              institution: edu.institution,
+              start_date: edu.start_date || '2021',
+              end_date: edu.end_date || '2026',
+            }))
+          : [];
+
+        const newExperiences = profile.work_experience?.length
+          ? profile.work_experience.map((exp) => ({
+              role: exp.role,
+              company: exp.company,
+              period: `${exp.start_date} — ${exp.current ? 'Presente' : exp.end_date || ''}`,
+              description: exp.description || '',
+            }))
+          : [];
+
+        const newCertifications = profile.certifications?.length
+          ? profile.certifications.map((c) => ({
+              name: c.name,
+              issuer: c.issuer || '',
+              date: c.date || '',
+            }))
+          : [];
+
+        const newTechSkills: string[] = [];
+        const newConceptSkills: string[] = [];
+        const newSoftSkills: string[] = [];
+
+        if (profile.detected_skills?.length) {
+          profile.detected_skills.forEach((s) => {
+            const typeLower = s.skill_type ? s.skill_type.toLowerCase() : '';
+            if (typeLower === 'soft' || typeLower === 'soft_skill') {
+              newSoftSkills.push(s.name);
+            } else if (typeLower === 'concept' || typeLower === 'methodology') {
+              newConceptSkills.push(s.name);
+            } else {
+              newTechSkills.push(s.name);
+            }
+          });
+        }
+
+        setFullName(newFullName);
+        setRoleTitle(newRoleTitle);
+        setSeniority(newSeniority);
+        setEducationList(newEducationList);
+        setExperiences(newExperiences);
+        setCertifications(newCertifications);
+        setTechSkills(newTechSkills);
+        setConceptSkills(newConceptSkills);
+        setSoftSkills(newSoftSkills);
+
+        setInitialSnapshot({
+          fullName: newFullName,
+          roleTitle: newRoleTitle,
+          seniority: newSeniority,
+          educationList: newEducationList,
+          experiences: newExperiences,
+          certifications: newCertifications,
+          techSkills: newTechSkills,
+          conceptSkills: newConceptSkills,
+          softSkills: newSoftSkills,
+        });
+      } else if (user) {
+        const newFullName = user.full_name || user.email?.split('@')[0] || 'Desarrollador';
+
+        setFullName(newFullName);
+        setRoleTitle('');
+        setSeniority('mid');
+        setEducationList([]);
+        setExperiences([]);
+        setCertifications([]);
+        setTechSkills([]);
+        setConceptSkills([]);
+        setSoftSkills([]);
+
+        setInitialSnapshot({
+          fullName: newFullName,
+          roleTitle: '',
+          seniority: 'mid',
+          educationList: [],
+          experiences: [],
+          certifications: [],
+          techSkills: [],
+          conceptSkills: [],
+          softSkills: [],
+        });
+      }
+    };
+
+    const timeoutId = setTimeout(loadProfileData, 0);
+    return () => clearTimeout(timeoutId);
+  }, [profile, user]);
+
+  // Detect pending changes against initial snapshot
+  const hasChanges = useMemo(() => {
+    if (!initialSnapshot) return false;
+    const snap = initialSnapshot;
+    return (
+      snap.fullName !== fullName ||
+      snap.roleTitle !== roleTitle ||
+      snap.seniority !== seniority ||
+      JSON.stringify(snap.educationList) !== JSON.stringify(educationList) ||
+      JSON.stringify(snap.experiences) !== JSON.stringify(experiences) ||
+      JSON.stringify(snap.certifications) !== JSON.stringify(certifications) ||
+      JSON.stringify(snap.techSkills) !== JSON.stringify(techSkills) ||
+      JSON.stringify(snap.conceptSkills) !== JSON.stringify(conceptSkills) ||
+      JSON.stringify(snap.softSkills) !== JSON.stringify(softSkills)
+    );
+  }, [
+    initialSnapshot,
+    fullName,
+    roleTitle,
+    seniority,
+    educationList,
+    experiences,
+    certifications,
+    techSkills,
+    conceptSkills,
+    softSkills,
+  ]);
+
+  // Skill Handling Actions
+  const handleAddSkill = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSkillText.trim()) return;
+    const skillName = newSkillText.trim();
+
+    if (activeTab === 'tech') {
+      if (techSkills.includes(skillName)) return toast.error('Habilidad ya añadida');
+      setTechSkills([...techSkills, skillName]);
+    } else if (activeTab === 'soft') {
+      if (softSkills.includes(skillName)) return toast.error('Habilidad ya añadida');
+      setSoftSkills([...softSkills, skillName]);
+    } else {
+      if (conceptSkills.includes(skillName)) return toast.error('Habilidad ya añadida');
+      setConceptSkills([...conceptSkills, skillName]);
+    }
+
+    setNewSkillText('');
+    toast.success(`Habilidad "${skillName}" añadida localmente.`);
+  };
+
+  const handleDeleteSkill = (skillName: string, type: 'tech' | 'soft' | 'concept') => {
+    if (type === 'tech') setTechSkills(techSkills.filter((s) => s !== skillName));
+    if (type === 'soft') setSoftSkills(softSkills.filter((s) => s !== skillName));
+    if (type === 'concept') setConceptSkills(conceptSkills.filter((s) => s !== skillName));
+    toast.info(`Habilidad "${skillName}" removida.`);
+  };
+
+  // List Modification Actions
+  const handleAddExperience = () => {
+    const newIdx = experiences.length;
+    setExperiences([...experiences, { role: '', company: '', period: '', description: '' }]);
+    setEditingExperienceIdx(newIdx);
+  };
+
+  const handleRemoveExperience = (idx: number) => {
+    setExperiences(experiences.filter((_, i) => i !== idx));
+    if (editingExperienceIdx === idx) {
+      setEditingExperienceIdx(null);
+    } else if (editingExperienceIdx !== null && editingExperienceIdx > idx) {
+      setEditingExperienceIdx(editingExperienceIdx - 1);
+    }
+  };
+
+  const handleAddEducation = () => {
+    const newIdx = educationList.length;
+    setEducationList([
+      ...educationList,
+      { degree: '', institution: '', start_date: '2021', end_date: '2026' },
+    ]);
+    setEditingEducationIdx(newIdx);
+  };
+
+  const handleRemoveEducation = (idx: number) => {
+    setEducationList(educationList.filter((_, i) => i !== idx));
+    if (editingEducationIdx === idx) {
+      setEditingEducationIdx(null);
+    } else if (editingEducationIdx !== null && editingEducationIdx > idx) {
+      setEditingEducationIdx(editingEducationIdx - 1);
+    }
+  };
+
+  const handleAddCertification = () => {
+    const newIdx = certifications.length;
+    setCertifications([...certifications, { name: '', issuer: '', date: '' }]);
+    setEditingCertIdx(newIdx);
+  };
+
+  const handleRemoveCertification = (idx: number) => {
+    setCertifications(certifications.filter((_, i) => i !== idx));
+    if (editingCertIdx === idx) {
+      setEditingCertIdx(null);
+    } else if (editingCertIdx !== null && editingCertIdx > idx) {
+      setEditingCertIdx(editingCertIdx - 1);
+    }
+  };
+
+  // Construct payload formatted for backend/API
+  const workExperiencePayload = experiences.map((exp) => {
+    // Split by any common dash: em-dash, en-dash, or simple hyphen
+    const parts = exp.period.split(/[—–-]/).map((p) => p.trim());
+    const isCurrent = parts[1]?.toLowerCase().includes('presente') || false;
+    return {
+      company: exp.company,
+      role: exp.role,
+      description: exp.description,
+      start_date: parts[0] || '2025',
+      end_date: isCurrent ? null : parts[1] || null,
+      current: isCurrent,
+    };
+  });
+
+  const educationPayload = educationList.map((edu) => ({
+    degree: edu.degree,
+    institution: edu.institution,
+    start_date: edu.start_date || '2021',
+    end_date: edu.end_date || null,
+  }));
+
+  const certificationsPayload = certifications.map((c) => ({
+    name: c.name,
+    issuer: c.issuer,
+    date: c.date,
+  }));
+
+  const detectedSkillsPayload = [
+    ...techSkills.map((s) => ({
+      name: s,
+      skill_type: 'tech',
+      market_importance: 'consolidated',
+    })),
+    ...softSkills.map((s) => ({
+      name: s,
+      skill_type: 'soft',
+      market_importance: 'consolidated',
+    })),
+    ...conceptSkills.map((s) => ({
+      name: s,
+      skill_type: 'concept',
+      market_importance: 'consolidated',
+    })),
+  ];
+
+  // Construct dynamicProfile for ATS PDF Preview
+  const dynamicProfile: UserProfileData = {
+    user_id: user?.id || profile?.user_id || '',
+    cv_id: profile?.cv_id || null,
+    full_name: fullName,
+    current_job_role: roleTitle,
+    seniority: seniority,
+    years_experience: profile?.years_experience || 2,
+    location: profile?.location || 'Lima, Peru',
+    preferred_modality: profile?.preferred_modality || 'Híbrido / Presencial',
+    availability: profile?.availability || 'Inmediata',
+    alignment_score: profile?.alignment_score || 72,
+    primary_specialty: profile?.primary_specialty || 'Data Engineering',
+    secondary_affinities: profile?.secondary_affinities || [],
+    detected_skills: detectedSkillsPayload,
+    skill_gaps: profile?.skill_gaps || [],
+    education: educationPayload,
+    work_experience: workExperiencePayload,
+    certifications: certificationsPayload,
+  };
+
+  // Submit profile updates
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    const toastId = toast.loading('Guardando perfil y recalculando diagnóstico...');
+
+    try {
+      // 1. Save profile fields (PATCH /profile/me)
+      await updateProfileMutation.mutateAsync({
+        full_name: fullName,
+        current_job_role: roleTitle,
+        seniority: seniority,
+        work_experience: workExperiencePayload,
+        education: educationPayload,
+        certifications: certificationsPayload,
+      });
+
+      // 2. Save skills list (PUT /profile/skills)
+      await updateSkillsMutation.mutateAsync(detectedSkillsPayload);
+
+      // Invalidate queries & refetch directly to sync data immediately
+      await refetchProfile();
+
+      toast.dismiss(toastId);
+
+      // Update snapshot so save button gets disabled immediately (no unsaved changes)
+      setInitialSnapshot({
+        fullName,
+        roleTitle,
+        seniority,
+        educationList,
+        experiences,
+        certifications,
+        techSkills,
+        conceptSkills,
+        softSkills,
+      });
+
+      toast.success('¡Perfil guardado y diagnóstico recalculado con éxito!');
+    } catch (error) {
+      console.warn('API error updating profile:', error);
+      toast.dismiss(toastId);
+      toast.error('Error al guardar el perfil. Intenta de nuevo.');
+    }
+
+    setIsSaving(false);
+  };
+
+  const handleDiscardChanges = () => {
+    if (!initialSnapshot) return;
+    const snap = initialSnapshot;
+    setFullName(snap.fullName);
+    setRoleTitle(snap.roleTitle);
+    setSeniority(snap.seniority);
+    setEducationList(snap.educationList);
+    setExperiences(snap.experiences);
+    setCertifications(snap.certifications);
+    setTechSkills(snap.techSkills);
+    setSoftSkills(snap.softSkills);
+    setConceptSkills(snap.conceptSkills);
+    setShowDiscardDialog(false);
+    toast.info('Cambios descartados');
+  };
+
+  const handleSyncRecalculation = async () => {
+    const toastId = toast.loading('Sincronizando cambios...');
+    try {
+      await refetchProfile();
+      await refetchCVs();
+
+      setIsRecalculationReady(false);
+      setInitialSnapshot({
+        fullName,
+        roleTitle,
+        seniority,
+        educationList,
+        experiences,
+        certifications,
+        techSkills,
+        conceptSkills,
+        softSkills,
+      });
+
+      toast.dismiss(toastId);
+      toast.success('¡Perfil y diagnóstico actualizados con éxito!');
+      router.push('/overview');
+    } catch (error) {
+      console.error('Error syncing recalculation:', error);
+      toast.dismiss(toastId);
+      toast.error('Error al sincronizar los cambios.');
+    }
+  };
+
+  if (isUserLoading || isProfileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-xs text-muted-foreground font-semibold">Cargando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-12">
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-6 py-6 relative">
+        {/* Banner de Sincronización Diferida */}
+        <CVUpdateBanner />
+        {isRecalculationReady && (
+          <CVUpdateBanner
+            source="profile-recalculation"
+            show={true}
+            onSync={handleSyncRecalculation}
+          />
+        )}
+
+        {/* Back Button & CV Export Action */}
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push('/overview')}
+            className="text-muted-foreground hover:text-foreground hover:bg-secondary/40 text-xs gap-1 h-8 cursor-pointer pl-2 pr-3"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Volver al Overview
+          </Button>
+
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => router.push('/profile?action=preview-ats')}
+            className="text-xs font-semibold gap-1.5 h-8 cursor-pointer pl-3 pr-4"
+          >
+            <FileText className="w-4 h-4" />
+            Exportar CV ATS
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start transition-opacity duration-300">
+          {/* Left Column (Info Principal, Habilidades, Educación) - Width 5/12 */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* 1. Información Principal */}
+            <Card className="card-standard">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+                  Información Profesional
+                </CardTitle>
+                {!isEditingInfo ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsEditingInfo(true)}
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg cursor-pointer"
+                    title="Editar información principal"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsEditingInfo(false)}
+                    className="h-8 w-8 text-success hover:text-success hover:bg-success/10 dark:hover:bg-success/15 rounded-lg cursor-pointer"
+                    title="Listo"
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!isEditingInfo ? (
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Nombre Completo
+                      </p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">
+                        {fullName || 'Sin nombre registrado'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Cargo / Rol de Interés
+                      </p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">
+                        {roleTitle || 'Sin cargo registrado'}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Nombre Completo
+                      </label>
+                      <Input
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="h-10 text-sm font-semibold bg-secondary/20 hover:bg-secondary/35 focus:bg-card transition-colors"
+                        placeholder="Tu nombre completo"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Cargo / Rol de Interés
+                      </label>
+                      <Input
+                        value={roleTitle}
+                        onChange={(e) => setRoleTitle(e.target.value)}
+                        className="h-10 text-sm font-semibold bg-secondary/20 hover:bg-secondary/35 focus:bg-card transition-colors"
+                        placeholder="Ej. Data Engineer, Backend Developer..."
+                      />
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Currículum Base Card */}
+            <Card className="card-standard">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+                  Currículum Base
+                </CardTitle>
+                {currentCV && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 text-xs text-success dark:text-success font-bold bg-success/5 border border-success/20 px-2.5 py-0.5 rounded-full cursor-help">
+                        <ShieldCheck className="h-3.5 w-3.5 text-success" />
+                        Alta (94%)
+                        <Info className="h-3 w-3 text-success/60" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-[11px] max-w-[220px]">
+                      Calidad de la información extraída automáticamente de tu CV.
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isCvLoading ? (
+                  <div className="space-y-2 py-2">
+                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                  </div>
+                ) : currentCV ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border/40">
+                      <div className="rounded-xl bg-destructive/10 p-2 text-destructive shrink-0 dark:bg-destructive/15">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <p
+                          className="text-xs font-semibold text-foreground truncate max-w-[180px] sm:max-w-[220px]"
+                          title={currentCV.original_filename}
+                        >
+                          {currentCV.original_filename}
+                        </p>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
+                          <span className="flex items-center gap-0.5 shrink-0">
+                            <HardDrive className="h-3 w-3 text-muted-foreground/60" />
+                            {(currentCV.size_bytes / 1024 / 1024).toFixed(2)} MB
+                          </span>
+                          {currentCV.uploaded_at && (
+                            <>
+                              <span>&bull;</span>
+                              <span>{new Date(currentCV.uploaded_at).toLocaleDateString()}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {currentCV.download_url && (
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg shrink-0"
+                          title="Vista previa del CV"
+                        >
+                          <a href={currentCV.download_url} target="_blank" rel="noreferrer">
+                            <Eye className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border bg-secondary/5 p-4 text-center">
+                    <FileText className="h-6 w-6 text-muted-foreground/50 mx-auto mb-2" />
+                    <p className="text-xs font-semibold text-foreground">
+                      No tienes ningún currículum activo
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                      Sube tu CV en PDF o Word para calcular tu diagnóstico técnico de forma
+                      automática.
+                    </p>
+                  </div>
+                )}
+
+                <div className="pt-2 border-t border-border/50 flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="w-full text-xs font-semibold gap-1.5 h-9 cursor-pointer border-dashed border-primary/30 hover:border-primary/50 text-primary hover:bg-primary/5 transition-colors"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Actualizar CV
+                  </Button>
+                  {cvData?.cvs && cvData.cvs.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsHistoryModalOpen(true)}
+                      className="w-full text-xs font-semibold gap-1.5 h-9 cursor-pointer text-muted-foreground hover:text-foreground hover:bg-secondary/10 transition-colors"
+                    >
+                      <History className="w-4 h-4" />
+                      Historial de versiones
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 2. Habilidades */}
+            <Card className="card-standard">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+                    Habilidades
+                  </CardTitle>
+                </div>
+
+                {/* Tabs */}
+                <div className="grid grid-cols-3 gap-1 bg-secondary/35 p-0.5 rounded-lg border border-border/50 mt-3">
+                  {(['tech', 'concept', 'soft'] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveTab(tab)}
+                      className={`py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer ${
+                        activeTab === tab
+                          ? 'bg-card text-foreground shadow-xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {tab === 'tech' ? 'Tecnologías' : tab === 'concept' ? 'Conceptos' : 'Blandas'}
+                    </button>
+                  ))}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Chips Grid */}
+                <div className="flex flex-wrap items-start content-start gap-1.5 min-h-24 p-3 rounded-lg border border-dashed border-border bg-secondary/5">
+                  {(activeTab === 'tech'
+                    ? techSkills
+                    : activeTab === 'soft'
+                      ? softSkills
+                      : conceptSkills
+                  ).length === 0 ? (
+                    <p className="text-[10px] text-muted-foreground m-auto">
+                      No hay habilidades en esta categoría.
+                    </p>
+                  ) : (
+                    Array.from(
+                      new Set(
+                        activeTab === 'tech'
+                          ? techSkills
+                          : activeTab === 'soft'
+                            ? softSkills
+                            : conceptSkills,
+                      ),
+                    ).map((skill, idx) => (
+                      <div
+                        key={`${skill}-${idx}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 transition-all hover:bg-primary/20 group"
+                      >
+                        <span>{skill}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSkill(skill, activeTab)}
+                          className="opacity-50 hover:opacity-100 hover:text-destructive transition-opacity cursor-pointer focus:outline-hidden"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Add Skill Form */}
+                <form onSubmit={handleAddSkill} className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Ej. Docker, AWS, React, Inglés..."
+                    value={newSkillText}
+                    onChange={(e) => setNewSkillText(e.target.value)}
+                    className="h-9 text-xs bg-secondary/20 hover:bg-secondary/35 focus:bg-card transition-colors"
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="h-9 px-4 text-xs font-semibold cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Añadir</span>
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* 3. Educación Académica (Movido aquí para balancear el scroll) */}
+            <Card className="card-standard">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-4.5 h-4.5 text-primary" />
+                  <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+                    Educación Académica
+                  </CardTitle>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddEducation}
+                  className="text-primary hover:bg-primary/10 border-primary/30 text-xs h-7 gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Añadir</span>
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {educationList.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No has registrado educación académica.
+                  </p>
+                ) : (
+                  educationList.map((edu, idx) => {
+                    const isEditing = editingEducationIdx === idx;
+                    return (
+                      <div
+                        key={idx}
+                        className="p-3 rounded-xl border border-border bg-secondary/5 space-y-2 relative group transition-all duration-200"
+                      >
+                        {!isEditing ? (
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1">
+                              <h4 className="text-xs font-bold text-foreground">
+                                {edu.degree || 'Sin título registrado'}
+                              </h4>
+                              <p className="text-[11px] text-muted-foreground">
+                                {edu.institution || 'Sin institución registrada'}
+                              </p>
+                              {(edu.start_date || edu.end_date) && (
+                                <p className="text-[10px] text-muted-foreground/85 font-medium">
+                                  {edu.start_date} — {edu.end_date || 'Presente'}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setEditingEducationIdx(idx)}
+                                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg cursor-pointer"
+                                title="Editar educación"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveEducation(idx)}
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer"
+                                title="Eliminar educación"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                                Editando Educación
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setEditingEducationIdx(null)}
+                                  className="h-7 w-7 text-success hover:text-success hover:bg-success/10 dark:hover:bg-success/15 rounded-lg cursor-pointer"
+                                  title="Listo"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleRemoveEducation(idx)}
+                                  className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer"
+                                  title="Eliminar educación"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2 pr-6">
+                              <div className="space-y-0.5">
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Título / Carrera
+                                </label>
+                                <Input
+                                  value={edu.degree}
+                                  onChange={(e) => {
+                                    const newEdus = [...educationList];
+                                    newEdus[idx].degree = e.target.value;
+                                    setEducationList(newEdus);
+                                  }}
+                                  placeholder="Ej. Ingeniería de Sistemas..."
+                                  className="h-8 text-xs bg-card"
+                                />
+                              </div>
+
+                              <div className="space-y-0.5">
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Institución
+                                </label>
+                                <Input
+                                  value={edu.institution}
+                                  onChange={(e) => {
+                                    const newEdus = [...educationList];
+                                    newEdus[idx].institution = e.target.value;
+                                    setEducationList(newEdus);
+                                  }}
+                                  placeholder="Ej. Universidad UPC..."
+                                  className="h-8 text-xs bg-card"
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-0.5">
+                                  <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                    Año Inicio
+                                  </label>
+                                  <Input
+                                    value={edu.start_date || ''}
+                                    onChange={(e) => {
+                                      const newEdus = [...educationList];
+                                      newEdus[idx].start_date = e.target.value;
+                                      setEducationList(newEdus);
+                                    }}
+                                    placeholder="Ej. 2021"
+                                    className="h-8 text-xs bg-card"
+                                  />
+                                </div>
+                                <div className="space-y-0.5">
+                                  <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                    Año Fin
+                                  </label>
+                                  <Input
+                                    value={edu.end_date || ''}
+                                    onChange={(e) => {
+                                      const newEdus = [...educationList];
+                                      newEdus[idx].end_date = e.target.value || null;
+                                      setEducationList(newEdus);
+                                    }}
+                                    placeholder="Ej. 2026"
+                                    className="h-8 text-xs bg-card"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column (Experience & Certifications) - Width 7/12 */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* 1. Experiencia Laboral (Diseño Minimalista y Compacto) */}
+            <Card className="card-standard">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-primary" />
+                  <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+                    Experiencia Laboral
+                  </CardTitle>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddExperience}
+                  className="text-primary hover:bg-primary/10 border-primary/30 text-xs h-7 gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Añadir puesto</span>
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {experiences.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No has registrado puestos laborales.
+                  </p>
+                ) : (
+                  experiences.map((exp, idx) => {
+                    const isEditing = editingExperienceIdx === idx;
+                    return (
+                      <div
+                        key={idx}
+                        className="p-3 rounded-xl border border-border bg-secondary/5 space-y-2 relative group transition-all duration-200"
+                      >
+                        {!isEditing ? (
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1">
+                              <h4 className="text-xs font-bold text-foreground">
+                                {exp.role || 'Sin cargo registrado'}
+                              </h4>
+                              <p className="text-[11px] text-muted-foreground font-medium">
+                                {exp.company || 'Sin empresa registrada'} &bull;{' '}
+                                <span className="text-[10px] text-muted-foreground/85 font-normal">
+                                  {exp.period || 'Sin periodo'}
+                                </span>
+                              </p>
+                              {exp.description && (
+                                <p className="text-[11px] text-muted-foreground/80 leading-normal line-clamp-2 mt-1 whitespace-pre-line">
+                                  {exp.description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setEditingExperienceIdx(idx)}
+                                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg cursor-pointer"
+                                title="Editar experiencia"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveExperience(idx)}
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer"
+                                title="Eliminar experiencia"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                                Editando Experiencia
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setEditingExperienceIdx(null)}
+                                  className="h-7 w-7 text-success hover:text-success hover:bg-success/10 dark:hover:bg-success/15 rounded-lg cursor-pointer"
+                                  title="Listo"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleRemoveExperience(idx)}
+                                  className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer"
+                                  title="Eliminar experiencia"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pr-6">
+                              <div className="space-y-0.5">
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Cargo
+                                </label>
+                                <Input
+                                  value={exp.role}
+                                  onChange={(e) => {
+                                    const newExps = [...experiences];
+                                    newExps[idx].role = e.target.value;
+                                    setExperiences(newExps);
+                                  }}
+                                  placeholder="Ej. Líder Técnico..."
+                                  className="h-8 text-xs bg-card"
+                                />
+                              </div>
+
+                              <div className="space-y-0.5">
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Empresa
+                                </label>
+                                <Input
+                                  value={exp.company}
+                                  onChange={(e) => {
+                                    const newExps = [...experiences];
+                                    newExps[idx].company = e.target.value;
+                                    setExperiences(newExps);
+                                  }}
+                                  placeholder="Ej. BCP..."
+                                  className="h-8 text-xs bg-card"
+                                />
+                              </div>
+
+                              <div className="space-y-0.5">
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Periodo
+                                </label>
+                                <Input
+                                  value={exp.period}
+                                  onChange={(e) => {
+                                    const newExps = [...experiences];
+                                    newExps[idx].period = e.target.value;
+                                    setExperiences(newExps);
+                                  }}
+                                  placeholder="Ej. Junio 2025 — Presente"
+                                  className="h-8 text-xs bg-card"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-0.5 pr-6">
+                              <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                Descripción del Cargo
+                              </label>
+                              <textarea
+                                value={exp.description}
+                                onChange={(e) => {
+                                  const newExps = [...experiences];
+                                  newExps[idx].description = e.target.value;
+                                  setExperiences(newExps);
+                                }}
+                                className="w-full text-xs bg-card border border-border rounded-lg p-2 min-h-12 focus:outline-primary/50"
+                                placeholder="Describe tus principales responsabilidades y logros..."
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </CardContent>
+            </Card>
+
+            {/* 2. Certificaciones (Diseño Minimalista y Compacto) */}
+            <Card className="card-standard">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-primary" />
+                  <CardTitle className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+                    Certificaciones
+                  </CardTitle>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddCertification}
+                  className="text-primary hover:bg-primary/10 border-primary/30 text-xs h-7 gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Añadir certificación</span>
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {certifications.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    No has registrado certificaciones.
+                  </p>
+                ) : (
+                  certifications.map((c, idx) => {
+                    const isEditing = editingCertIdx === idx;
+                    return (
+                      <div
+                        key={idx}
+                        className="p-3 rounded-xl border border-border bg-secondary/5 space-y-2 relative group transition-all duration-200"
+                      >
+                        {!isEditing ? (
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1">
+                              <h4 className="text-xs font-bold text-foreground">
+                                {c.name || 'Sin nombre de certificación'}
+                              </h4>
+                              <p className="text-[11px] text-muted-foreground font-medium">
+                                {c.issuer || 'Sin emisor registrado'} &bull;{' '}
+                                <span className="text-[10px] text-muted-foreground/85 font-normal">
+                                  {c.date || 'Sin fecha'}
+                                </span>
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setEditingCertIdx(idx)}
+                                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg cursor-pointer"
+                                title="Editar certificación"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveCertification(idx)}
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer"
+                                title="Eliminar certificación"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                                Editando Certificación
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setEditingCertIdx(null)}
+                                  className="h-7 w-7 text-success hover:text-success hover:bg-success/10 dark:hover:bg-success/15 rounded-lg cursor-pointer"
+                                  title="Listo"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleRemoveCertification(idx)}
+                                  className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer"
+                                  title="Eliminar certificación"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pr-6">
+                              <div className="space-y-0.5">
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Nombre de Certificación
+                                </label>
+                                <Input
+                                  value={c.name}
+                                  onChange={(e) => {
+                                    const newCerts = [...certifications];
+                                    newCerts[idx].name = e.target.value;
+                                    setCertifications(newCerts);
+                                  }}
+                                  placeholder="Ej. AWS Solutions Architect..."
+                                  className="h-8 text-xs bg-card"
+                                />
+                              </div>
+
+                              <div className="space-y-0.5">
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Emisor
+                                </label>
+                                <Input
+                                  value={c.issuer}
+                                  onChange={(e) => {
+                                    const newCerts = [...certifications];
+                                    newCerts[idx].issuer = e.target.value;
+                                    setCertifications(newCerts);
+                                  }}
+                                  placeholder="Ej. AWS, IBM..."
+                                  className="h-8 text-xs bg-card"
+                                />
+                              </div>
+
+                              <div className="space-y-0.5">
+                                <label className="text-[9px] font-bold text-muted-foreground uppercase">
+                                  Fecha
+                                </label>
+                                <Input
+                                  value={c.date}
+                                  onChange={(e) => {
+                                    const newCerts = [...certifications];
+                                    newCerts[idx].date = e.target.value;
+                                    setCertifications(newCerts);
+                                  }}
+                                  placeholder="Ej. Octubre 2025"
+                                  className="h-8 text-xs bg-card"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Global Actions Card - only shows when there are pending changes */}
+            {hasChanges && !isRecalculationReady && (
+              <Card className="sticky bottom-6 z-10 border-primary/20 bg-primary/5 shadow-lg shadow-primary/10 backdrop-blur-xl">
+                <CardContent className="py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-center sm:text-left">
+                    <h4 className="text-xs font-bold text-foreground flex items-center justify-center sm:justify-start gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span>Calibración de Diagnóstico por IA</span>
+                    </h4>
+                    <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                      Al guardar, el motor recalculará tu porcentaje de afinidad con el mercado.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowDiscardDialog(true)}
+                      className="flex-1 sm:flex-initial text-xs h-9 cursor-pointer"
+                    >
+                      Descartar
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleSaveProfile}
+                      disabled={isSaving}
+                      className="flex-1 sm:flex-initial text-xs h-9 font-bold bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer gap-1.5"
+                    >
+                      {isSaving ? (
+                        <>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                          <span>Recalculando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          <span>Guardar y Recalcular</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Descartar Changes Confirmation Dialog */}
+            <Dialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
+              <DialogContent className="sm:max-w-[400px] border-none shadow-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-sm font-extrabold uppercase tracking-wider text-foreground">
+                    Descartar cambios
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-muted-foreground pt-1">
+                    ¿Estás seguro de descartar los cambios realizados? Los datos nuevos agregados se
+                    perderán y no podrás recuperarlos.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex gap-2 justify-end pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowDiscardDialog(false)}
+                    className="text-xs h-9 cursor-pointer"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDiscardChanges}
+                    className="text-xs h-9 cursor-pointer"
+                  >
+                    Sí, descartar
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </div>
+
+      {/* Unified CV Manager Modal */}
+      {isCVManagerOpen && (
+        <CVAtsPreviewModal
+          isOpen={isCVManagerOpen}
+          onOpenChange={handleCloseCVManager}
+          profile={dynamicProfile}
+          userEmail={user?.email || undefined}
+        />
+      )}
+
+      {/* Actualizar CV Modal */}
+      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+        <DialogContent className="sm:max-w-[500px] border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-extrabold uppercase tracking-wider text-foreground">
+              Actualizar Currículum
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Carga tu CV más reciente (PDF o Word) para actualizar tu diagnóstico técnico de forma
+              automática.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="pt-4">
+            <CVUploader
+              onUploadSuccess={(newCvId: string) => {
+                setIsUploadModalOpen(false);
+                startAnalysis(newCvId);
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Historial de CVs Modal */}
+      <CVHistoryModal
+        isOpen={isHistoryModalOpen}
+        onOpenChange={setIsHistoryModalOpen}
+        activeCvId={profile?.cv_id}
+        onReanalyzeTriggered={(cvId: string) => {
+          startAnalysis(cvId);
+        }}
+      />
+    </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-xs text-muted-foreground font-semibold">Cargando perfil...</p>
+          </div>
+        </div>
+      }
+    >
+      <ProfileContent />
+    </Suspense>
+  );
+}

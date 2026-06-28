@@ -9,9 +9,10 @@ import { useUserProfile } from '@/hooks/use-user-profile';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { useKnowledgeGraph } from '@/hooks/use-knowledge-graph';
 import { toast } from 'sonner';
+import { ErrorFallback } from '@/components/shared/error-fallback';
+import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 
 // Custom Overview components
-import { OverviewEmptyState } from '@/components/overview/overview-empty-state';
 import { OverviewSideDrawer, FilterMode } from '@/components/overview/overview-side-drawer';
 import { useSidebar } from '@/components/layout/sidebar-context';
 import { cn } from '@/lib/utils';
@@ -30,10 +31,10 @@ import { Button } from '@/components/ui/button';
 import { EducationItem, WorkExperienceItem, CertificationItem, SkillItem } from '@/lib/api/types';
 
 export default function OverviewPage() {
-  const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const { data: cvData, isLoading: isCVLoading } = useUserCVs();
-  const { data: profile } = useUserProfile();
-  const { startAnalysis, isAnalysisReady, isAnalyzing } = useCVAnalysis();
+  const { data: user, isLoading: isUserLoading, error: userError } = useCurrentUser();
+  const { data: cvData, isLoading: isCVLoading, error: cvError, refetch: refetchCVs } = useUserCVs();
+  const { data: profile, error: profileError, refetch: refetchProfile } = useUserProfile();
+  const { isAnalyzing } = useCVAnalysis();
   const { data: graphData, isLoading: isGraphLoading, error: graphError } = useKnowledgeGraph();
 
   const router = useRouter();
@@ -45,9 +46,6 @@ export default function OverviewPage() {
   const [highlightMode, setHighlightMode] = useState<FilterMode>('all');
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const { isMobile } = useSidebar();
-
-  // Derived state
-  const hasCV = !!(cvData && cvData.cvs && cvData.cvs.length > 0);
 
   // Profile data states for sync
   const [fullName, setFullName] = useState('');
@@ -106,70 +104,13 @@ export default function OverviewPage() {
     syncProfileData();
   }, [profile, user]);
 
-  // Cluster Affinities with fallback
   const allAffinities = React.useMemo(() => {
-    let list = [];
     if (profile?.all_affinities && profile.all_affinities.length > 0) {
-      list = [...profile.all_affinities].sort((a, b) => b.affinity_score - a.affinity_score);
-    } else {
-      list = [
-        {
-          cluster_id: '1',
-          cluster_name: 'Backend Java',
-          affinity_score: 0.78,
-          is_primary: true,
-          market_insights: {
-            average_salary_pen: 8500,
-            salary_differential_percentage: 32,
-            market_share_percentage: 23,
-            total_demand: 145,
-            growth_percentage: 28,
-          },
-          compatible_roles: [
-            { title: 'Backend Java Developer', match: 'Alta' as const },
-            { title: 'Java Cloud Engineer', match: 'Alta' as const },
-            { title: 'Backend Microservices Developer', match: 'Media' as const },
-          ],
-        },
-        {
-          cluster_id: '2',
-          cluster_name: 'DevOps Cloud',
-          affinity_score: 0.63,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 9500,
-            salary_differential_percentage: 42,
-            market_share_percentage: 20,
-            total_demand: 125,
-            growth_percentage: 35,
-          },
-          compatible_roles: [
-            { title: 'DevOps Engineer', match: 'Alta' as const },
-            { title: 'Cloud Architect', match: 'Media' as const },
-            { title: 'Site Reliability Engineer (SRE)', match: 'Alta' as const },
-          ],
-        },
-        {
-          cluster_id: '3',
-          cluster_name: 'Data Engineering',
-          affinity_score: 0.41,
-          is_primary: false,
-          market_insights: {
-            average_salary_pen: 9000,
-            salary_differential_percentage: 38,
-            market_share_percentage: 24,
-            total_demand: 148,
-            growth_percentage: 31,
-          },
-          compatible_roles: [
-            { title: 'Data Engineer', match: 'Alta' as const },
-            { title: 'Big Data Developer', match: 'Alta' as const },
-            { title: 'Analytics Engineer', match: 'Media' as const },
-          ],
-        },
-      ];
+      return [...profile.all_affinities]
+        .sort((a, b) => b.affinity_score - a.affinity_score)
+        .slice(0, 3);
     }
-    return list.slice(0, 3);
+    return [];
   }, [profile]);
 
   // Derive activeClusterIndex from URL parameter or default specialty
@@ -245,6 +186,22 @@ export default function OverviewPage() {
     return { strengths, gaps };
   }, [activeCluster]);
 
+  // Error State
+  const queryError = cvError || profileError || userError || graphError;
+  if (queryError) {
+    return (
+      <ErrorFallback
+        error={queryError}
+        onRetry={() => {
+          refetchCVs();
+          refetchProfile();
+        }}
+        onHome={() => window.location.href = '/'}
+        fullPage
+      />
+    );
+  }
+
   // Loading Session
   if (isUserLoading || isCVLoading) {
     return (
@@ -269,6 +226,13 @@ export default function OverviewPage() {
 
   return (
     <div className="relative w-full h-screen bg-background flex flex-col">
+      {/* CV Update Banner */}
+      <div className="absolute top-20 lg:top-24 left-3 lg:left-6 right-3 lg:right-6 z-10 max-w-2xl pointer-events-none">
+        <div className="pointer-events-auto">
+          <CVUpdateBanner />
+        </div>
+      </div>
+
       {/* 1. Background Neural Network Graph */}
       <div className="absolute inset-0 z-0 bg-transparent">
         {graphError ? (
@@ -288,20 +252,7 @@ export default function OverviewPage() {
         )}
       </div>
 
-      {/* 3. Empty State (Zero-state Overlay with Blur) */}
-      {!hasCV && (
-        <OverviewEmptyState
-          onUploadSuccess={(newCvId) => {
-            if (newCvId) {
-              startAnalysis(newCvId);
-            }
-          }}
-        />
-      )}
-
-      {/* 4. Controls & Side Details Stack */}
-      {hasCV && (
-        <>
+      {/* 3. Controls & Side Details Stack */}
           {/* Global Bottom Sheet / Right Panel Wrapper */}
           <div className="absolute bottom-2 lg:bottom-6 left-0 right-0 lg:left-auto lg:right-6 top-auto z-20 pointer-events-none flex flex-col items-center lg:items-end justify-end px-2 lg:px-0">
             <div className="w-full h-full lg:w-96 pointer-events-none flex flex-col justify-end">
@@ -400,7 +351,6 @@ export default function OverviewPage() {
                 <div className="w-full pointer-events-auto">
                   <OverviewSideDrawer
                     domainAffinities={profile?.domain_affinities || []}
-                    techSkills={techSkills}
                     fullName={fullName}
                     roleTitle={roleTitle}
                     seniority={seniority}
@@ -416,8 +366,6 @@ export default function OverviewPage() {
               )}
             </div>
           </div>
-        </>
-      )}
     </div>
   );
 }

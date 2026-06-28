@@ -50,6 +50,7 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/diagnosis') ||
     request.nextUrl.pathname.startsWith('/profile') ||
     request.nextUrl.pathname.startsWith('/overview') ||
+    request.nextUrl.pathname.startsWith('/onboarding') ||
     request.nextUrl.pathname.startsWith('/market') ||
     request.nextUrl.pathname.startsWith('/upload') ||
     request.nextUrl.pathname.startsWith('/analysis') ||

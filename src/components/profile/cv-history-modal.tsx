@@ -372,13 +372,13 @@ export default function CVHistoryModal({
                         ) : (
                           <Button
                             type="button"
-                            variant="outline"
-                            size="sm"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setConfirmingCvId(cv.cv_id)}
-                            className="h-8 text-[10px] font-bold gap-1 cursor-pointer border-border hover:bg-secondary/15 text-foreground hover:text-primary transition-all"
+                            className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 cursor-pointer rounded-lg border border-border/30 hover:border-primary/40"
+                            title="Re-analizar esta versión"
                           >
-                            <RefreshCw className="h-3 w-3 shrink-0" />
-                            Re-analizar
+                            <RefreshCw className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
