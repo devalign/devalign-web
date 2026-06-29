@@ -269,12 +269,15 @@ function DiagnosisContent() {
       score: number;
       demandPercentage: number;
       category: string;
+      ict_score?: number;
+      trend?: 'growing' | 'stable' | 'shrinking' | null;
     }
     interface SkillGap {
       name: string;
       skill_type: string;
       market_importance: string;
       market_demand_percentage: number;
+      trend?: 'growing' | 'stable' | 'shrinking' | null;
     }
 
     const strengths: TechStrength[] = (activeCluster.detected_skills || []).map((s) => {
@@ -285,6 +288,8 @@ function DiagnosisContent() {
         score: level === 'Avanzado' ? 3 : 2,
         demandPercentage: s.market_demand_percentage ?? 100,
         category: s.skill_type,
+        ict_score: s.ict_score,
+        trend: s.trend,
       };
     });
 
@@ -293,6 +298,7 @@ function DiagnosisContent() {
       skill_type: g.skill_type,
       market_importance: g.market_importance ?? 'medium',
       market_demand_percentage: g.market_demand_percentage ?? 100,
+      trend: g.trend,
     }));
 
     // Sort strengths: by demand desc, secondary by level (Avanzado > Intermedio)
@@ -602,15 +608,34 @@ function DiagnosisContent() {
                     className="flex flex-col justify-between p-3 rounded-lg bg-success/5 border border-success/10 transition-colors hover:bg-success/10"
                   >
                     <div className="flex justify-between items-start gap-1">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
-                        {strength.name}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
+                          {strength.name}
+                        </span>
+                        {strength.trend === 'growing' && (
+                          <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/25 shrink-0">
+                            Creciente
+                          </span>
+                        )}
+                        {strength.trend === 'shrinking' && (
+                          <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/25 shrink-0">
+                            Decreciente
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[9px] text-success/80 dark:text-success/80 font-bold shrink-0">
                         {strength.demandPercentage}% DEMANDA
                       </span>
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-[10px] text-muted-foreground">{strength.level}</span>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-muted-foreground">{strength.level}</span>
+                        {strength.ict_score !== undefined && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/15">
+                            ICT {strength.ict_score.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
                       {strength.category && (
                         <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-success/10 text-success dark:text-success font-medium">
                           {strength.category === 'hard_skill'
@@ -697,9 +722,21 @@ function DiagnosisContent() {
                     className={`flex flex-col justify-between p-3 rounded-lg border border-dashed transition-colors ${borderClass}`}
                   >
                     <div className="flex justify-between items-start gap-1">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
-                        {gap.name}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
+                          {gap.name}
+                        </span>
+                        {gap.trend === 'growing' && (
+                          <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/25 shrink-0">
+                            Creciente
+                          </span>
+                        )}
+                        {gap.trend === 'shrinking' && (
+                          <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/25 shrink-0">
+                            Decreciente
+                          </span>
+                        )}
+                      </div>
                       <span className={`text-[9px] font-bold shrink-0 ${textClass} opacity-80`}>
                         {demand}% DEMANDA
                       </span>

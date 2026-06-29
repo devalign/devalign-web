@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getUserProfile, updateUserProfile, updateUserProfileSkills, resetAccount } from '@/lib/api';
+import { getUserProfile, updateUserProfile, updateUserProfileSkills, resetAccount, deleteAccount } from '@/lib/api';
 import { UserProfileData, SkillItem } from '@/lib/api/types';
 
 export function useUserProfile() {
@@ -48,6 +48,20 @@ export function useResetAccount() {
     onSettled: () => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('devalign_cv_analysis_state');
+      }
+    },
+  });
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteAccount,
+    onSuccess: () => {
+      queryClient.clear();
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
       }
     },
   });

@@ -100,6 +100,14 @@ export default function MarketExplorerPage() {
                     Relacionada
                   </Badge>
                 )}
+                {selectedNode.status === 'market' && (
+                  <Badge
+                    variant="outline"
+                    className="bg-muted/30 text-muted-foreground border border-border/30 text-[10px] py-0.5"
+                  >
+                    Mercado
+                  </Badge>
+                )}
                 <Badge
                   variant="secondary"
                   className="bg-muted/30 text-muted-foreground border border-border/30 text-[10px] py-0.5 hover:bg-muted/30"
@@ -140,7 +148,9 @@ export default function MarketExplorerPage() {
                     ? ' Al ser una brecha en tu perfil, adquirir esta habilidad fortalecería tu posición para roles que demandan este stack.'
                     : selectedNode.status === 'acquired'
                       ? ' Ya posees esta habilidad, lo que te posiciona favorablemente en su respectivo dominio.'
-                      : ' Es una tecnología relacionada frecuentemente con tu stack actual.'}
+                      : selectedNode.status === 'neutral'
+                        ? ' Es una tecnología relacionada frecuentemente con tu stack actual.'
+                        : ' Es una habilidad general del mercado tecnológico no requerida por el cluster actual.'}
                 </p>
               </div>
             </CardContent>

@@ -9,6 +9,7 @@ interface CVAnalysisContextType {
   analyzedCvId: string | null;
   startAnalysis: (cvId: string) => void;
   commitUpdate: () => Promise<void>;
+  cancelAnalysis: () => void;
 }
 
 const CVAnalysisContext = createContext<CVAnalysisContextType | undefined>(undefined);
@@ -95,6 +96,16 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
     [runPolling],
   );
 
+  const cancelAnalysis = useCallback(() => {
+    setIsAnalyzing(false);
+    setIsAnalysisReady(false);
+    setAnalyzedCvId(null);
+    pollingRef.current = false;
+    targetCvIdRef.current = null;
+    saveState(false, false, null);
+    toast.info('Análisis cancelado.');
+  }, []);
+
   const commitUpdate = useCallback(async () => {
     const toastId = toast.loading('Aplicando nuevos datos de análisis a tu perfil...');
     try {
@@ -162,6 +173,7 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
         analyzedCvId,
         startAnalysis,
         commitUpdate,
+        cancelAnalysis,
       }}
     >
       {children}

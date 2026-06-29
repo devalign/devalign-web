@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   // Redirect to profile by default if no next query param is present
-  const next = searchParams.get('next') ?? '/onboarding';
+  const next = searchParams.get('next') ?? '/profile';
 
   if (code) {
     const supabase = await createClient();

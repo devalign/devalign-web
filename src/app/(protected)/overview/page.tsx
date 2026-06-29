@@ -35,11 +35,11 @@ export default function OverviewPage() {
   const { data: cvData, isLoading: isCVLoading, error: cvError, refetch: refetchCVs } = useUserCVs();
   const { data: profile, error: profileError, refetch: refetchProfile } = useUserProfile();
   const { isAnalyzing } = useCVAnalysis();
-  const { data: graphData, isLoading: isGraphLoading, error: graphError } = useKnowledgeGraph();
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const clusterParam = searchParams.get('cluster');
+
+  const { data: graphData, isLoading: isGraphLoading, error: graphError } = useKnowledgeGraph(clusterParam || profile?.primary_specialty);
 
   // Node selection & view states
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
@@ -292,6 +292,14 @@ export default function OverviewPage() {
                               Relacionada
                             </Badge>
                           )}
+                          {selectedNode.status === 'market' && (
+                            <Badge
+                              variant="outline"
+                              className="bg-muted/30 text-muted-foreground border-border/30 text-[9px] py-0 px-1.5 font-bold"
+                            >
+                              Mercado
+                            </Badge>
+                          )}
                           <Badge
                             variant="secondary"
                             className="bg-muted/30 text-muted-foreground border border-border/30 text-[9px] py-0 px-1.5 hover:bg-muted/30"
@@ -341,7 +349,9 @@ export default function OverviewPage() {
                             ? ' Al ser una brecha en tu perfil, adquirir esta habilidad fortalecería tu posición para roles que demandan este stack.'
                             : selectedNode.status === 'acquired'
                               ? ' Ya posees esta habilidad, lo que te posiciona favorablemente en su respectivo dominio.'
-                              : ' Es una tecnología relacionada frecuentemente con tu stack actual.'}
+                              : selectedNode.status === 'neutral'
+                                ? ' Es una tecnología relacionada frecuentemente con tu stack actual.'
+                                : ' Es una habilidad general del mercado tecnológico no requerida por el cluster actual.'}
                         </p>
                       </div>
                     </CardContent>

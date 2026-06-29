@@ -50,6 +50,12 @@ export interface SkillItem {
   skill_type: string;
   market_importance?: string | null;
   market_demand_percentage?: number | null;
+  self_taught?: boolean;
+  personal_projects?: boolean;
+  years_of_experience?: number;
+  has_certification?: boolean;
+  ict_score?: number;
+  trend?: 'growing' | 'stable' | 'shrinking' | null;
 }
 
 export interface CompatibleRoleItem {

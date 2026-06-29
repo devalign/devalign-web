@@ -104,4 +104,12 @@ export async function resetAccount(): Promise<void> {
   });
 }
 
+/**
+ * Permanently deletes the user's account and all associated data.
+ */
+export async function deleteAccount(): Promise<void> {
+  return apiClient<void>('/users/me', {
+    method: 'DELETE',
+  });
+}
 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Loader2, CheckCircle2, TrendingUp, TrendingDown } from 'lucide-react';
 
 export interface StrengthItem {
   name: string;
@@ -10,6 +10,8 @@ export interface StrengthItem {
   score: number;
   demandPercentage: number;
   category?: string;
+  ict_score?: number;
+  trend?: 'growing' | 'stable' | 'shrinking' | null;
 }
 
 interface StrengthsCardProps {
@@ -64,12 +66,29 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
               <div className="flex items-center gap-2 min-w-0">
                 <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
                 <span className="text-xs font-semibold text-foreground truncate">{s.name}</span>
+                {s.trend === 'growing' && (
+                  <span title="Demanda en crecimiento" className="shrink-0 flex items-center">
+                    <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                  </span>
+                )}
+                {s.trend === 'shrinking' && (
+                  <span title="Demanda decreciente" className="shrink-0 flex items-center">
+                    <TrendingDown className="h-3.5 w-3.5 text-rose-500" />
+                  </span>
+                )}
               </div>
-              <span
-                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ml-2 ${levelBadge(s.level)}`}
-              >
-                {s.level}
-              </span>
+              <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                {s.ict_score !== undefined && (
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    ICT {s.ict_score.toFixed(1)}
+                  </span>
+                )}
+                <span
+                  className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${levelBadge(s.level)}`}
+                >
+                  {s.level}
+                </span>
+              </div>
             </div>
           ))
         )}
