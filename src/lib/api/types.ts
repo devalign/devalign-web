@@ -15,6 +15,7 @@ export interface CVUploadResult {
   download_url: string | null;
   message: string;
   uploaded_at?: string;
+  status?: 'processing' | 'completed' | 'failed';
 }
 
 export interface CVList {

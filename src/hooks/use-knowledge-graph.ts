@@ -12,7 +12,7 @@ export function useKnowledgeGraph(clusterName?: string | null) {
       const endpoint = clusterName 
         ? `/profile/skills-graph?cluster=${encodeURIComponent(clusterName)}`
         : `/profile/skills-graph`;
-      return apiClient<GraphData>(endpoint);
+      return apiClient<GraphData>(endpoint, { timeout: 30000 }); // 30s timeout para operaciones pesadas
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,

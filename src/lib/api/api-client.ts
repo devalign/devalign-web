@@ -2,30 +2,36 @@ import { createClient } from '@/lib/supabase/client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
 
-export async function apiClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export interface ApiClientOptions extends RequestInit {
+  timeout?: number;
+}
+
+export async function apiClient<T>(endpoint: string, options: ApiClientOptions = {}): Promise<T> {
   const supabase = createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
   const token = session?.access_token;
 
-  const headers = new Headers(options.headers);
+  const { timeout = 8000, ...fetchOptions } = options;
+
+  const headers = new Headers(fetchOptions.headers);
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
   // Do not set Content-Type if we are uploading a file (FormData)
   // because the browser needs to set the boundary parameter automatically
-  if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
+  if (!(fetchOptions.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
   let response: Response;
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
+      ...fetchOptions,
       headers,
       signal: controller.signal,
       cache: 'no-store',
@@ -34,7 +40,7 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
   } catch (netError) {
     if (netError instanceof DOMException && netError.name === 'AbortError') {
       throw new Error(
-        'El servidor de análisis no responde (timeout). Verifica que el backend esté ejecutándose.',
+        `El servidor no responde a tiempo (timeout de ${timeout / 1000}s). Verifica que el backend esté ejecutándose.`,
       );
     }
     const message =
