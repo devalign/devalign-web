@@ -14,8 +14,9 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-import { useResetAccount } from '@/hooks/use-user-profile';
+import { useResetAccount, useDeleteAccount } from '@/hooks/use-user-profile';
 import { ResetAccountDialog } from './reset-account-dialog';
+import { DeleteAccountDialog } from './delete-account-dialog';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -26,8 +27,10 @@ interface SettingsDialogProps {
 export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDialogProps) {
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
   const [isResetConfirmOpen, setIsResetConfirmOpen] = React.useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
 
   const { mutate: reset, isPending: isResetting } = useResetAccount();
+  const { mutate: deleteAcc, isPending: isDeleting } = useDeleteAccount();
 
   const handleResetConfirm = () => {
     reset(undefined, {
@@ -38,6 +41,22 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
       },
       onError: (error) => {
         console.error('Error resetting account:', error);
+        const message = error instanceof Error ? error.message : 'Ocurrió un error desconocido';
+        toast.error(`Error: ${message}`);
+      },
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    deleteAcc(undefined, {
+      onSuccess: () => {
+        toast.success('Cuenta eliminada permanentemente.');
+        setIsDeleteConfirmOpen(false);
+        onOpenChange(false);
+        onLogoutClick();
+      },
+      onError: (error) => {
+        console.error('Error deleting account:', error);
         const message = error instanceof Error ? error.message : 'Ocurrió un error desconocido';
         toast.error(`Error: ${message}`);
       },
@@ -116,20 +135,37 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
             <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               Datos de la Cuenta
             </h4>
-            <div className="rounded-lg border border-destructive/20 p-3.5 bg-destructive/5 flex items-center justify-between gap-4">
+            <div className="rounded-lg border border-border p-3.5 bg-secondary/10 flex items-center justify-between gap-4">
               <div className="space-y-0.5">
-                <span className="text-xs font-semibold text-destructive">Restablecer Cuenta</span>
+                <span className="text-xs font-semibold text-foreground">Restablecer Cuenta</span>
                 <p className="text-[10px] text-muted-foreground leading-normal">
-                  Elimina de forma permanente tu currículum, historial y diagnósticos guardados.
+                  Elimina tu currículum y diagnósticos, pero mantén tu cuenta activa.
                 </p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsResetConfirmOpen(true)}
-                className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive text-[10px] h-7 shrink-0 cursor-pointer"
+                className="text-[10px] h-7 shrink-0 cursor-pointer"
               >
                 Restablecer
+              </Button>
+            </div>
+            
+            <div className="rounded-lg border border-destructive/20 p-3.5 bg-destructive/5 flex items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                <span className="text-xs font-semibold text-destructive">Eliminar Cuenta</span>
+                <p className="text-[10px] text-muted-foreground leading-normal">
+                  Elimina de forma permanente e irreversible tu cuenta y todos tus datos.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsDeleteConfirmOpen(true)}
+                className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive text-[10px] h-7 shrink-0 cursor-pointer"
+              >
+                Eliminar
               </Button>
             </div>
           </div>
@@ -188,6 +224,13 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
         onOpenChange={setIsResetConfirmOpen}
         onConfirm={handleResetConfirm}
         isLoading={isResetting}
+      />
+
+      <DeleteAccountDialog
+        open={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
       />
     </Dialog>
   );

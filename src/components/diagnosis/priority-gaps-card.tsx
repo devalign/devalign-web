@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Loader2, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { SkillItem } from '@/lib/api/types';
 
 interface PriorityGapsCardProps {
@@ -75,6 +75,16 @@ export function PriorityGapsCard({
                     }`}
                   />
                   <span className="text-xs font-semibold text-foreground truncate">{bg.name}</span>
+                  {bg.trend === 'growing' && (
+                    <span title="Demanda en crecimiento" className="shrink-0 flex items-center">
+                      <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                    </span>
+                  )}
+                  {bg.trend === 'shrinking' && (
+                    <span title="Demanda decreciente" className="shrink-0 flex items-center">
+                      <TrendingDown className="h-3.5 w-3.5 text-rose-500" />
+                    </span>
+                  )}
                 </div>
                 <span
                   className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ml-2 ${severityBadge(crit)}`}

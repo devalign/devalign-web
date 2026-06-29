@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
 import CVHistoryModal from '@/components/profile/cv-history-modal';
 import CVUploader from '@/components/profile/cv-uploader';
+import SkillEvidenceModal from '@/components/profile/skill-evidence-modal';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { Badge } from '@/components/ui/badge';
@@ -91,6 +92,11 @@ function buildSkillItems(skills?: SkillItem[]) {
     skill_type: skill.skill_type || 'tech',
     market_importance: skill.market_importance ?? 'consolidated',
     market_demand_percentage: skill.market_demand_percentage ?? null,
+    self_taught: skill.self_taught ?? false,
+    personal_projects: skill.personal_projects ?? false,
+    years_of_experience: skill.years_of_experience ?? 0,
+    has_certification: skill.has_certification ?? false,
+    ict_score: skill.ict_score ?? 0.0,
   }));
 }
 
@@ -117,7 +123,7 @@ function buildProfessionalSummary(profile?: UserProfileData, roleTitle?: string)
   return `${role} ${experienceText}, orientado a ${specialty}.${skillsText}`;
 }
 
-function EmptyProfileState({ onUpload }: { onUpload: () => void }) {
+function EmptyProfileState({ onUploadSuccess }: { onUploadSuccess: (newCvId: string) => void }) {
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
       <div className="mb-6">
@@ -129,8 +135,8 @@ function EmptyProfileState({ onUpload }: { onUpload: () => void }) {
 
       <Card className="card-standard overflow-hidden">
         <CardContent className="p-6 md:p-10">
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div className="space-y-4">
+          <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-center">
+            <div className="space-y-5">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
                 <FileText className="h-6 w-6" />
               </div>
@@ -138,27 +144,29 @@ function EmptyProfileState({ onUpload }: { onUpload: () => void }) {
                 <h2 className="text-xl font-black text-foreground">Aún no hay CV activo</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Tu perfil se construye desde el CV. Al subirlo, Devalign detectará tus
-                  competencias, especialidades y afinidades principales.
+                  competencias, especialidades y afinidades principales de forma automática.
                 </p>
               </div>
-              <Button onClick={onUpload} className="h-10 gap-2 text-xs font-bold">
-                <Upload className="h-4 w-4" />
-                Subir primer CV
-              </Button>
-            </div>
-            <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/[0.04] p-6">
-              <div className="space-y-4 text-xs text-muted-foreground">
+              <div className="space-y-3.5 pt-2">
                 {[
-                  'Análisis técnico automático',
-                  'Resumen profesional generado',
-                  'Afinidades por especialidad',
+                  'Análisis técnico automático de competencias',
+                  'Resumen profesional autogenerado',
+                  'Afinidades y alineación con especialidades del mercado',
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-3">
                     <BadgeCheck className="h-4 w-4 text-success shrink-0" />
-                    <span className="font-semibold text-foreground">{item}</span>
+                    <span className="text-xs font-semibold text-foreground/80">{item}</span>
                   </div>
                 ))}
               </div>
+            </div>
+            
+            <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-6 md:p-8">
+              <div className="mb-4">
+                <h3 className="text-sm font-bold text-foreground">Subir tu CV</h3>
+                <p className="text-xs text-muted-foreground">Formatos PDF o Word, máx 5MB.</p>
+              </div>
+              <CVUploader onUploadSuccess={onUploadSuccess} />
             </div>
           </div>
         </CardContent>
@@ -180,6 +188,8 @@ export default function ProfileDashboardView() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [skills, setSkills] = useState<SkillItem[]>([]);
   const [newSkillText, setNewSkillText] = useState('');
+  const [selectedSkillForEvidence, setSelectedSkillForEvidence] = useState<SkillItem | null>(null);
+  const [isEvidenceModalOpen, setIsEvidenceModalOpen] = useState(false);
 
   const action = searchParams.get('action');
   const isAtsOpen = action === 'preview-ats';
@@ -339,27 +349,11 @@ export default function ProfileDashboardView() {
 
   if (cvs.length === 0) {
     return (
-      <>
-        <EmptyProfileState onUpload={() => setIsUploadOpen(true)} />
-        <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-          <DialogContent className="sm:max-w-[500px] border-border bg-card">
-            <DialogHeader>
-              <DialogTitle className="text-sm font-bold text-foreground">
-                Subir nuevo CV
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Carga un PDF o Word para iniciar tu diagnóstico profesional.
-              </DialogDescription>
-            </DialogHeader>
-            <CVUploader
-              onUploadSuccess={(newCvId) => {
-                setIsUploadOpen(false);
-                startAnalysis(newCvId);
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      </>
+      <EmptyProfileState
+        onUploadSuccess={(newCvId) => {
+          startAnalysis(newCvId);
+        }}
+      />
     );
   }
 
@@ -479,14 +473,27 @@ export default function ProfileDashboardView() {
                     skills.map((skill) => (
                       <span
                         key={`${skill.name}-${skill.skill_type}`}
-                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-bold text-foreground"
+                        onClick={() => {
+                          setSelectedSkillForEvidence(skill);
+                          setIsEvidenceModalOpen(true);
+                        }}
+                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-bold text-foreground hover:border-primary/50 cursor-pointer transition-all select-none group"
+                        title="Haga clic para editar evidencias e ICT score"
                       >
                         <span className="h-2 w-2 rounded-full bg-success" />
-                        <span className="max-w-[180px] truncate">{skill.name}</span>
+                        <span className="max-w-[180px] truncate group-hover:text-primary transition-colors">{skill.name}</span>
+                        {skill.ict_score !== undefined && (
+                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">
+                            ICT {skill.ict_score.toFixed(1)}
+                          </span>
+                        )}
                         <button
                           type="button"
-                          onClick={() => handleRemoveSkill(skill.name)}
-                          className="text-muted-foreground hover:text-destructive transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveSkill(skill.name);
+                          }}
+                          className="text-muted-foreground hover:text-destructive transition-colors ml-1"
                           aria-label={`Eliminar ${skill.name}`}
                         >
                           <X className="h-3.5 w-3.5" />
@@ -674,6 +681,19 @@ export default function ProfileDashboardView() {
         onOpenChange={setIsHistoryOpen}
         activeCvId={profile?.cv_id}
         onReanalyzeTriggered={(cvId) => startAnalysis(cvId)}
+      />
+
+      <SkillEvidenceModal
+        skill={selectedSkillForEvidence}
+        isOpen={isEvidenceModalOpen}
+        onOpenChange={setIsEvidenceModalOpen}
+        onSave={(updatedSkill) => {
+          setSkills((current) =>
+            current.map((skill) =>
+              skill.name.toLowerCase() === updatedSkill.name.toLowerCase() ? updatedSkill : skill
+            )
+          );
+        }}
       />
 
       {isAtsOpen && (

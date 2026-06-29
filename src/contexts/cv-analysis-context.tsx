@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getUserProfile } from '@/lib/api';
+import { getUserProfile, listUserCVs } from '@/lib/api';
 import { toast } from 'sonner';
+import { createClient } from '@/lib/supabase/client';
 
 interface CVAnalysisContextType {
   isAnalyzing: boolean;
@@ -9,11 +10,13 @@ interface CVAnalysisContextType {
   analyzedCvId: string | null;
   startAnalysis: (cvId: string) => void;
   commitUpdate: () => Promise<void>;
+  cancelAnalysis: () => void;
 }
 
 const CVAnalysisContext = createContext<CVAnalysisContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'devalign_cv_analysis_state';
+const MAX_POLLING_DURATION = 90000; // 90 seconds total timeout
 
 export function CVAnalysisProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
@@ -21,79 +24,112 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
   const [isAnalysisReady, setIsAnalysisReady] = useState(false);
   const [analyzedCvId, setAnalyzedCvId] = useState<string | null>(null);
 
-  const pollingRef = useRef<boolean>(false);
-  const targetCvIdRef = useRef<string | null>(null);
+  const channelRef = useRef<any>(null);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   // Persistence to LocalStorage
-  const saveState = (analyzing: boolean, ready: boolean, cvId: string | null) => {
+  const saveState = (analyzing: boolean, ready: boolean, cvId: string | null, startTime?: number) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(
         LOCAL_STORAGE_KEY,
-        JSON.stringify({ isAnalyzing: analyzing, isAnalysisReady: ready, analyzedCvId: cvId }),
+        JSON.stringify({
+          isAnalyzing: analyzing,
+          isAnalysisReady: ready,
+          analyzedCvId: cvId,
+          startTime: startTime || Date.now(),
+        }),
       );
     }
   };
 
-  const runPolling = useCallback(async (cvId: string) => {
-    if (pollingRef.current && targetCvIdRef.current === cvId) return;
+  const unsubscribeFromCvChanges = useCallback(() => {
+    if (channelRef.current) {
+      channelRef.current.unsubscribe();
+      channelRef.current = null;
+    }
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+  }, []);
 
-    pollingRef.current = true;
-    targetCvIdRef.current = cvId;
+  const pollCvStatus = useCallback((cvId: string, initialStartTime?: number) => {
+    unsubscribeFromCvChanges();
 
-    let attempts = 0;
-    const maxAttempts = 30;
-    const pollInterval = 3000; // 3 seconds
+    const startTime = initialStartTime || Date.now();
+    let pollInterval: NodeJS.Timeout | null = null;
 
-    const poll = async () => {
-      if (!pollingRef.current || targetCvIdRef.current !== cvId) return;
-
-      try {
-        const profile = await getUserProfile();
-        if (profile && profile.cv_id === cvId) {
-          setIsAnalyzing(false);
-          setIsAnalysisReady(true);
-          pollingRef.current = false;
-          saveState(false, true, cvId);
-          toast.success(
-            '¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.',
-          );
-          return;
-        }
-      } catch (error) {
-        console.error('Error polling profile analysis:', error);
-      }
-
-      attempts++;
-      if (attempts >= maxAttempts) {
+    const checkStatus = async () => {
+      const elapsed = Date.now() - startTime;
+      if (elapsed >= MAX_POLLING_DURATION) {
         setIsAnalyzing(false);
         setIsAnalysisReady(false);
         setAnalyzedCvId(null);
-        pollingRef.current = false;
-        targetCvIdRef.current = null;
         saveState(false, false, null);
         toast.warning(
           'El análisis está tomando más de lo esperado. Puedes intentar actualizar tus datos en unos instantes.',
         );
+        unsubscribeFromCvChanges();
         return;
       }
 
-      setTimeout(poll, pollInterval);
+      try {
+        const data = await listUserCVs();
+        const currentCv = data.cvs.find((c) => c.cv_id === cvId);
+        if (currentCv) {
+          if (currentCv.status === 'completed') {
+            setIsAnalyzing(false);
+            setIsAnalysisReady(true);
+            saveState(false, true, cvId);
+            toast.success(
+              '¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.',
+            );
+            unsubscribeFromCvChanges();
+          } else if (currentCv.status === 'failed') {
+            setIsAnalyzing(false);
+            setIsAnalysisReady(false);
+            setAnalyzedCvId(null);
+            saveState(false, false, null);
+            toast.error(
+              'Hubo un problema al procesar tu CV. Por favor, intenta de nuevo.',
+            );
+            unsubscribeFromCvChanges();
+          }
+        }
+      } catch (err) {
+        console.error('Error polling CV status:', err);
+      }
     };
 
-    poll();
-  }, []);
+    // First check immediately
+    checkStatus();
+
+    // Then poll every 3 seconds
+    pollInterval = setInterval(checkStatus, 3000);
+    timeoutIdRef.current = pollInterval; // Store in ref for cleanup
+  }, [unsubscribeFromCvChanges]);
 
   const startAnalysis = useCallback(
     (cvId: string) => {
       setIsAnalyzing(true);
       setIsAnalysisReady(false);
       setAnalyzedCvId(cvId);
-      saveState(true, false, cvId);
+      const startTime = Date.now();
+      saveState(true, false, cvId, startTime);
 
-      runPolling(cvId);
+      pollCvStatus(cvId, startTime);
     },
-    [runPolling],
+    [pollCvStatus],
   );
+
+  const cancelAnalysis = useCallback(() => {
+    setIsAnalyzing(false);
+    setIsAnalysisReady(false);
+    setAnalyzedCvId(null);
+    unsubscribeFromCvChanges();
+    saveState(false, false, null);
+    toast.info('Análisis cancelado.');
+  }, [unsubscribeFromCvChanges]);
 
   const commitUpdate = useCallback(async () => {
     const toastId = toast.loading('Aplicando nuevos datos de análisis a tu perfil...');
@@ -107,8 +143,7 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
       setIsAnalyzing(false);
       setIsAnalysisReady(false);
       setAnalyzedCvId(null);
-      pollingRef.current = false;
-      targetCvIdRef.current = null;
+      unsubscribeFromCvChanges();
       saveState(false, false, null);
 
       toast.dismiss(toastId);
@@ -118,41 +153,88 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
       toast.dismiss(toastId);
       toast.error('Error al aplicar la actualización.');
     }
-  }, [queryClient]);
+  }, [queryClient, unsubscribeFromCvChanges]);
 
-  // Restore state on mount
+  // Restore state on mount and check status
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    let active = true;
+
+    async function restoreAndCheck() {
+      if (typeof window === 'undefined') return;
+
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed.isAnalyzing && parsed.analyzedCvId) {
-            setTimeout(() => {
-              setIsAnalyzing(true);
-              setIsAnalysisReady(false);
-              setAnalyzedCvId(parsed.analyzedCvId);
-              runPolling(parsed.analyzedCvId);
-            }, 0);
-          } else if (parsed.isAnalysisReady) {
-            setTimeout(() => {
-              setIsAnalysisReady(true);
-              setAnalyzedCvId(parsed.analyzedCvId);
-            }, 0);
+      if (!stored) return;
+
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.isAnalyzing && parsed.analyzedCvId) {
+          const startTime = parsed.startTime || Date.now();
+          const elapsed = Date.now() - startTime;
+
+          if (elapsed >= MAX_POLLING_DURATION) {
+            setIsAnalyzing(false);
+            setIsAnalysisReady(false);
+            setAnalyzedCvId(null);
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            console.warn('Analysis timed out while away.');
+            return;
           }
-        } catch (e) {
-          console.error('Error parsing stored CV analysis state:', e);
+
+          // Fetch latest CVs to check if status was updated while user was offline/away
+          setIsAnalyzing(true);
+          setAnalyzedCvId(parsed.analyzedCvId);
+
+          try {
+            const data = await listUserCVs();
+            const currentCv = data.cvs.find((c) => c.cv_id === parsed.analyzedCvId);
+            
+            if (!active) return;
+
+            if (currentCv) {
+              if (currentCv.status === 'completed') {
+                setIsAnalyzing(false);
+                setIsAnalysisReady(true);
+                saveState(false, true, parsed.analyzedCvId);
+                toast.success('¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.');
+                return;
+              } else if (currentCv.status === 'failed') {
+                setIsAnalyzing(false);
+                setIsAnalysisReady(false);
+                setAnalyzedCvId(null);
+                saveState(false, false, null);
+                return;
+              }
+            }
+          } catch (apiError) {
+            console.error('Error checking current CV status on mount:', apiError);
+          }
+
+          // If still processing, resume polling
+          if (active) {
+            pollCvStatus(parsed.analyzedCvId, startTime);
+          }
+        } else if (parsed.isAnalysisReady) {
+          setIsAnalysisReady(true);
+          setAnalyzedCvId(parsed.analyzedCvId);
         }
+      } catch (e) {
+        console.error('Error parsing stored CV analysis state:', e);
       }
     }
-  }, [runPolling]);
+
+    restoreAndCheck();
+
+    return () => {
+      active = false;
+    };
+  }, [pollCvStatus]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      pollingRef.current = false;
+      unsubscribeFromCvChanges();
     };
-  }, []);
+  }, [unsubscribeFromCvChanges]);
 
   return (
     <CVAnalysisContext.Provider
@@ -162,6 +244,7 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
         analyzedCvId,
         startAnalysis,
         commitUpdate,
+        cancelAnalysis,
       }}
     >
       {children}

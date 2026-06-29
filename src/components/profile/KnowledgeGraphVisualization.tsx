@@ -15,7 +15,7 @@ export interface GraphNode {
   label: string;
   group: string;
   domains: string[];
-  status: 'acquired' | 'gap' | 'neutral';
+  status: 'acquired' | 'gap' | 'neutral' | 'market';
   val?: number; // Internal size
 }
 
@@ -72,6 +72,7 @@ export function KnowledgeGraphVisualization({
 
   // Determine if a node matches the active filter
   const isNodeHighlighted = (node: GraphNode) => {
+    if (node.status === 'market') return false; // General market background is always faded
     if (highlightMode === 'all') return true;
     if (highlightMode === 'strengths') return node.status === 'acquired';
     if (highlightMode === 'gaps') return node.status === 'gap';

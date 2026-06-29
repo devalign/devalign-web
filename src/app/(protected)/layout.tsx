@@ -8,38 +8,21 @@ import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav';
 import { SidebarProvider } from '@/components/layout/sidebar-context';
 import { GlobalHeader } from '@/components/layout/global-header';
 import { CVAnalysisProvider } from '@/contexts/cv-analysis-context';
-import { useUserCVs } from '@/hooks/use-user-cvs';
 import { ErrorBoundary } from '@/components/shared/error-boundary';
-import { ErrorFallback } from '@/components/shared/error-fallback';
-import { cn } from '@/lib/utils';
+import { useUserCVs } from '@/hooks/use-user-cvs';
 
-function OnboardingGate({ children }: { children: React.ReactNode }) {
+function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: cvData, isLoading, isError, refetch } = useUserCVs();
-  const isOnboarding = pathname === '/onboarding';
+  const { data: cvData, isLoading } = useUserCVs();
   const hasCV = !!(cvData?.cvs && cvData.cvs.length > 0);
+  const showGlobalHeader = pathname === '/overview';
 
   React.useEffect(() => {
-    if (!isOnboarding && !isLoading && !isError && !hasCV) {
-      router.replace('/onboarding');
+    if (!isLoading && !hasCV && pathname !== '/profile') {
+      router.replace('/profile');
     }
-  }, [isOnboarding, isLoading, isError, hasCV, router]);
-
-  if (isOnboarding) {
-    return <>{children}</>;
-  }
-
-  if (isError) {
-    return (
-      <ErrorFallback
-        error="No se puede verificar tu perfil. El servidor de análisis no está disponible."
-        onRetry={() => refetch()}
-        onHome={() => router.push('/')}
-        fullPage
-      />
-    );
-  }
+  }, [isLoading, hasCV, pathname, router]);
 
   if (isLoading) {
     return (
@@ -49,29 +32,14 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!hasCV) {
-    return null;
-  }
-
-  return <>{children}</>;
-}
-
-function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const showGlobalHeader = pathname === '/overview';
-  const isOnboarding = pathname === '/onboarding';
-
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background font-sans antialiased">
       <div suppressHydrationWarning className="flex h-full w-full gap-0 lg:gap-3">
-        {!isOnboarding && <AppSidebar />}
+        <AppSidebar />
 
         <main
           suppressHydrationWarning
-          className={cn(
-            'flex-1 overflow-y-auto overflow-x-hidden bg-background flex flex-col relative',
-            isOnboarding ? 'pb-0' : 'pb-16 lg:pb-6',
-          )}
+          className="flex-1 overflow-y-auto overflow-x-hidden bg-background flex flex-col relative pb-16 lg:pb-6"
         >
           {showGlobalHeader && (
             <div className="z-30 w-full pointer-events-none pt-3 px-3 lg:pt-6 lg:px-6 absolute top-0 left-0 right-0">
@@ -83,7 +51,7 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex-1 min-h-0 w-full relative">{children}</div>
         </main>
 
-        {!isOnboarding && <MobileBottomNav />}
+        <MobileBottomNav />
       </div>
     </div>
   );
@@ -95,9 +63,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       <SidebarProvider>
         <Suspense fallback={null}>
           <ErrorBoundary>
-            <OnboardingGate>
-              <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
-            </OnboardingGate>
+            <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
           </ErrorBoundary>
         </Suspense>
       </SidebarProvider>
