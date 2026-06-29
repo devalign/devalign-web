@@ -23,6 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { LoadingScreen } from '@/components/shared/loading-screen';
 
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
 import CVHistoryModal from '@/components/profile/cv-history-modal';
@@ -337,14 +338,7 @@ export default function ProfileDashboardView() {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-xs text-muted-foreground font-semibold">Cargando perfil...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Cargando perfil..." minHeight="min-h-[70vh]" />;
   }
 
   if (cvs.length === 0) {

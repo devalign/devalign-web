@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { LoadingScreen } from '@/components/shared/loading-screen';
 
 interface RoadmapStep {
   skill: string;
@@ -350,16 +351,7 @@ function RoadmapContent() {
   };
 
   if (isUserLoading || isProfileLoading || isCVLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-xs text-muted-foreground font-semibold">
-            Cargando tu Plan de Acción...
-          </p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Cargando tu Plan de Acción..." />;
   }
 
   const primarySpecialty = activeCluster?.cluster_name || 'Data Engineering';
@@ -707,18 +699,7 @@ function RoadmapContent() {
 
 export default function RoadmapPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-xs text-muted-foreground font-semibold">
-              Cargando tu Plan de Acción...
-            </p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingScreen message="Cargando tu Plan de Acción..." />}>
       <RoadmapContent />
     </Suspense>
   );

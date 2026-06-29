@@ -4,6 +4,7 @@ import React, { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { LoadingScreen } from '@/components/shared/loading-screen';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -162,16 +163,7 @@ function TopologyContent() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-[400px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Cpu className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-xs text-muted-foreground font-semibold">
-            Cargando la Topología del Mercado...
-          </p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Cargando la Topología del Mercado..." minHeight="min-h-[400px]" />;
   }
 
   if (error) {
@@ -580,28 +572,7 @@ function TopologyContent() {
 
 export default function MarketTopologyPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-3">
-            <style jsx global>{`
-              @keyframes spin {
-                to {
-                  transform: rotate(360deg);
-                }
-              }
-              .animate-spin-custom {
-                animation: spin 1s linear infinite;
-              }
-            `}</style>
-            <Cpu className="h-8 w-8 animate-spin-custom text-primary" />
-            <p className="text-xs text-muted-foreground font-semibold">
-              Cargando la Topología del Mercado...
-            </p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingScreen message="Cargando la Topología del Mercado..." />}>
       <TopologyContent />
     </Suspense>
   );

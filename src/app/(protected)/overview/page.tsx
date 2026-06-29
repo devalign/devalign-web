@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Network, Cpu, Layers, Info, X, Sparkles, Loader2 } from 'lucide-react';
+import { Network, Cpu, Layers, Info, X, Sparkles } from 'lucide-react';
+import { LoadingScreen } from '@/components/shared/loading-screen';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useUserProfile } from '@/hooks/use-user-profile';
@@ -204,14 +205,7 @@ export default function OverviewPage() {
 
   // Loading Session
   if (isUserLoading || isCVLoading) {
-    return (
-      <div className="min-h-[calc(100vh-1rem)] flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-xs text-muted-foreground font-semibold">Cargando Overview...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Cargando Overview..." minHeight="min-h-[calc(100vh-1rem)]" />;
   }
 
   // Get formatted date

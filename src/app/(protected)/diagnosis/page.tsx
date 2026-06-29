@@ -7,6 +7,7 @@ import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { toast } from 'sonner';
 import { ErrorFallback } from '@/components/shared/error-fallback';
+import { LoadingScreen } from '@/components/shared/loading-screen';
 import CVUploader from '@/components/profile/cv-uploader';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
@@ -361,16 +362,7 @@ function DiagnosisContent() {
   }
 
   if (isUserLoading || isCVLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-xs text-muted-foreground font-semibold">
-            Cargando sesión de Devalign...
-          </p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Cargando sesión de Devalign..." />;
   }
 
   // Get formatted date for header
@@ -775,16 +767,7 @@ function DiagnosisContent() {
 
 export default function DiagnosisPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            <p className="text-xs text-muted-foreground font-semibold">Cargando diagnóstico...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingScreen message="Cargando diagnóstico..." />}>
       <DiagnosisContent />
     </Suspense>
   );
