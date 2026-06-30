@@ -69,13 +69,15 @@ export function UserHeroCard({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Perfil analizado */}
         <div className="flex items-start gap-2.5 p-3 card-standard!">
-          <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
-            <User className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
+              <User className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest block">
+              Perfil Analizado
+            </span>
           </div>
           <div className="min-w-0">
-            <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block">
-              Perfil analizado
-            </span>
             <span className="text-sm font-black text-foreground block truncate">{fullName}</span>
             <span className="text-[10px] text-muted-foreground block truncate">
               {roleTitle || 'Sin rol'} ·{' '}

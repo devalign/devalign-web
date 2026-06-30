@@ -42,13 +42,14 @@ export function AiInsightCard({ marketGaps, isLoading = false }: AiInsightCardPr
       ) : (
         <>
           <div className="flex flex-col sm:flex-row items-start justify-start gap-3.5 flex-1">
-            <div className="p-2 bg-primary/10 text-primary rounded-lg shrink-0">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-[11px] font-bold font-mono text-primary uppercase tracking-wider block">
-                Recomendación
-              </span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Sparkles className="w-3.5 h-3.5 text-warning" />
+                <span className="text-[10px] font-bold font-mono uppercase tracking-wider">
+                  Recomendación
+                </span>
+              </div>
+
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Fortalecer habilidades clave como{' '}
                 <strong className="text-foreground">{topGaps[0]?.name || 'AWS'}</strong>

@@ -59,30 +59,7 @@ export function ClusterDemandCard({
               {marketInsights?.market_share_percentage ?? 'N/A'}%).
             </p>
 
-            {/* Sparkline chart (SVG) */}
-            <div className="w-full h-10 mt-2 relative overflow-hidden">
-              <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="sparkline-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                {/* Area under the line */}
-                <path
-                  d="M 0 35 Q 20 32, 40 38 T 80 20 T 100 15 L 100 40 L 0 40 Z"
-                  fill="url(#sparkline-grad)"
-                />
-                {/* Stroke Line */}
-                <path
-                  d="M 0 35 Q 20 32, 40 38 T 80 20 T 100 15"
-                  fill="none"
-                  stroke="hsl(var(--success))"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
+
           </>
         )}
       </CardContent>

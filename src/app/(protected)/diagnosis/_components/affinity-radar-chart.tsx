@@ -120,7 +120,7 @@ export function AffinityRadarChart({
   }).sort((a, b) => a.gap - b.gap);
 
   const renderRadarSVG = () => (
-    <div className="relative w-full max-w-[290px] sm:max-w-[380px] md:max-w-[420px] aspect-square my-4 mx-auto">
+    <div className="relative w-full max-w-[290px] sm:max-w-[380px] md:max-w-[420px] aspect-square my-1 mx-auto">
       <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
         {[20, 40, 60, 80, 100].map((r) => {
           const rad = (r / 100) * 80;
@@ -367,16 +367,13 @@ export function AffinityRadarChart({
           </div>
         </CardHeader>
       ) : (
-        <div className="pb-0 pt-4 px-6 shrink-0">
+        <div className="pb-0 pt-1 px-6 shrink-0">
           <div className="flex items-center gap-2">
             <Target className="w-4 h-4 text-primary" />
-            <div className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+            <div className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-widest block">
               Afinidad Técnica por Dominio
             </div>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Comparación de tu perfil con la demanda del mercado por dominio técnico.
-          </p>
         </div>
       )}
 
@@ -406,16 +403,15 @@ export function AffinityRadarChart({
           </div>
         </CardContent>
       ) : (
-        <div className="flex justify-center py-4 flex-1 items-center px-6 min-h-0">
+        <div className="flex justify-center py-1 flex-1 items-center px-6 min-h-0">
           {renderRadarSVG()}
         </div>
       )}
 
       {/* Shared legend */}
-      <div className="px-6 pb-4">
+      <div className="px-6 pb-2">
         <p className="text-[9px] text-muted-foreground">
-          El porcentaje de GAP representa la diferencia entre tu nivel de dominio y la demanda
-          promedio del mercado. Cuanto más cercano a 0%, mayor es tu alineación.
+          Comparación de tu perfil con la demanda del mercado por dominio técnico.
         </p>
       </div>
     </>

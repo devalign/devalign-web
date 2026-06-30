@@ -23,56 +23,12 @@ import {
   Loader2,
   Activity,
 } from 'lucide-react';
+import { InsightCard } from '@/components/shared';
 import { useMarketClusters } from '@/hooks/use-market-clusters';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { evaluateClusterDiagnostic } from '@/lib/api/user-service';
 
-function getClusterMetadata(name: string) {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes('data')) {
-    return {
-      icon: Database,
-      colorClass: 'text-warning bg-warning/10 border-warning/20',
-    };
-  }
-  if (
-    lowerName.includes('backend') ||
-    lowerName.includes('back-end') ||
-    lowerName.includes('java')
-  ) {
-    return {
-      icon: Server,
-      colorClass: 'text-info bg-info/10 border-info/20',
-    };
-  }
-  if (lowerName.includes('devops') || lowerName.includes('cloud') || lowerName.includes('sre')) {
-    return {
-      icon: CloudLightning,
-      colorClass: 'text-success bg-success/10 border-success/20',
-    };
-  }
-  if (lowerName.includes('frontend') || lowerName.includes('front-end')) {
-    return {
-      icon: Monitor,
-      colorClass: 'text-sky-500 bg-sky-500/10 border-sky-500/20',
-    };
-  }
-  if (lowerName.includes('qa') || lowerName.includes('test') || lowerName.includes('automation')) {
-    return {
-      icon: CheckSquare,
-      colorClass: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
-    };
-  }
-  if (
-    lowerName.includes('full stack') ||
-    lowerName.includes('fullstack') ||
-    lowerName.includes('developer')
-  ) {
-    return {
-      icon: Cpu,
-      colorClass: 'text-sky-500 bg-sky-500/10 border-sky-500/20',
-    };
-  }
+function getClusterMetadata(_name?: string) {
   return {
     icon: Cpu,
     colorClass: 'text-muted-foreground bg-muted/10 border-muted/20',
@@ -254,154 +210,128 @@ function TopologyContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Technical details & metadata */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="card-standard overflow-hidden gap-0 py-0">
-            <CardHeader className="border-b border-border/40 py-3.5 bg-muted/20 px-4 sm:px-6">
-              <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-primary" />
-                <CardTitle className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
-                  Ficha Técnica del Modelo
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4 pb-5 space-y-4 px-4 sm:px-6">
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Este análisis agrupa ofertas laborales de TI en base a la co-ocurrencia de
-                habilidades técnicas utilizando técnicas avanzadas de minería de datos.
-              </p>
+          {/* Ficha Técnica Section Divider */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
+                Ficha Técnica del Modelo
+              </span>
+              <div className="h-px flex-1 bg-border/40" />
+            </div>
+            
+            <Card className="card-standard overflow-hidden">
+              <CardContent className="pt-4 pb-5 space-y-4 px-4 sm:px-6">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Este análisis agrupa ofertas laborales de TI en base a la co-ocurrencia de
+                  habilidades técnicas utilizando técnicas avanzadas de minería de datos.
+                </p>
 
-              <div className="space-y-3.5 pt-2">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/5 text-primary border border-primary/10 shrink-0">
-                    <Database className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-muted-foreground">
-                      Volumen Analizado
-                    </h4>
-                    <p className="text-xs font-bold text-foreground mt-0.5">
-                      {totalOffers} ofertas reales activas
-                    </p>
-                    <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
-                      Extraídas directamente de portales y canales de empleo de tecnología.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/5 text-primary border border-primary/10 shrink-0">
-                    <Binary className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-muted-foreground">
-                      Habilidades Únicas
-                    </h4>
-                    <p className="text-xs font-bold text-foreground mt-0.5">
-                      73 tecnologías distintas
-                    </p>
-                    <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
-                      Mapeadas y limpiadas a partir de los requisitos listados en las ofertas.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/5 text-primary border border-primary/10 shrink-0">
-                    <Cpu className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-muted-foreground">
-                      Algoritmo Utilizado
-                    </h4>
-                    <p className="text-xs font-bold text-foreground mt-0.5">
-                      Clustering HDBSCAN sobre UMAP
-                    </p>
-                    <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
-                      Clustering jerárquico basado en densidad optimizado con reducción dimensional
-                      para capturar afinidades complejas de habilidades.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-blue-500/5 text-blue-500 border border-blue-500/10 shrink-0">
-                    <Info className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-muted-foreground">
-                      Frecuencia de Actualización
-                    </h4>
-                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5">
-                      Semanal (Automatizada)
-                    </p>
-                    <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
-                      El sistema sincroniza nuevos datos los domingos para mantener el pulso del
-                      mercado.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Active context panel */}
-          {selectedCluster &&
-            (() => {
-              const isEval = hasDiagnostic(selectedCluster);
-              return (
-                <Card className="card-tinted">
-                  <CardContent className="py-4 space-y-2">
-                    <div className="flex items-center gap-1.5 text-primary">
-                      <Sparkles className="h-4 w-4" />
-                      <span className="text-xs font-bold font-mono uppercase tracking-wider">
-                        Especialidad Seleccionada
-                      </span>
+                <div className="space-y-3.5 pt-2">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-primary/5 text-primary border border-primary/10 shrink-0">
+                      <Database className="h-4 w-4" />
                     </div>
-                    <p className="text-xs text-foreground/80 leading-normal">
-                      Has seleccionado la especialidad de:{' '}
-                      <strong className="text-primary font-semibold">{selectedCluster}</strong>.
-                    </p>
-                    <p className="text-[10px] text-muted-foreground leading-normal">
-                      {isEval
-                        ? 'Haz clic en "Ver Diagnóstico" para analizar tu perfil con esta especialidad.'
-                        : 'Esta especialidad aún no está evaluada en tu perfil. Evalúa tus habilidades y brechas en este clúster.'}
-                    </p>
-
-                    <div className="pt-2">
-                      {isEval ? (
-                        <Button
-                          size="sm"
-                          onClick={() =>
-                            router.push(`/diagnosis?cluster=${encodeURIComponent(selectedCluster)}`)
-                          }
-                          className="w-full text-[10px] font-bold h-8 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-                        >
-                          Ver Diagnóstico
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          disabled={isGenerating !== null}
-                          onClick={() => handleGenerateDiagnostic(selectedCluster)}
-                          className="w-full text-[10px] font-bold h-8 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-                        >
-                          {isGenerating === selectedCluster ? (
-                            <>
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                              Generando...
-                            </>
-                          ) : (
-                            <>
-                              <Activity className="w-3 h-3" />
-                              Generar Diagnóstico
-                            </>
-                          )}
-                        </Button>
-                      )}
+                    <div>
+                      <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-muted-foreground">
+                        Volumen Analizado
+                      </h4>
+                      <p className="text-xs font-bold text-foreground mt-0.5">
+                        {totalOffers} ofertas reales activas
+                      </p>
+                      <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                        Extraídas directamente de portales y canales de empleo de tecnología.
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })()}
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-primary/5 text-primary border border-primary/10 shrink-0">
+                      <Binary className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-muted-foreground">
+                        Habilidades Únicas
+                      </h4>
+                      <p className="text-xs font-bold text-foreground mt-0.5">
+                        73 tecnologías distintas
+                      </p>
+                      <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                        Mapeadas y limpiadas a partir de los requisitos listados en las ofertas.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-primary/5 text-primary border border-primary/10 shrink-0">
+                      <Cpu className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-muted-foreground">
+                        Algoritmo Utilizado
+                      </h4>
+                      <p className="text-xs font-bold text-foreground mt-0.5">
+                        Clustering HDBSCAN sobre UMAP
+                      </p>
+                      <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                        Clustering jerárquico basado en densidad optimizado con reducción dimensional
+                        para capturar afinidades complejas de habilidades.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-blue-500/5 text-blue-500 border border-blue-500/10 shrink-0">
+                      <Info className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-muted-foreground">
+                        Frecuencia de Actualización
+                      </h4>
+                      <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+                        Semanal (Automatizada)
+                      </p>
+                      <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                        El sistema sincroniza nuevos datos los domingos para mantener el pulso del
+                        mercado.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Market Insights Context Panel */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
+                Insights de Mercado
+              </span>
+              <div className="h-px flex-1 bg-border/40" />
+            </div>
+            
+            <InsightCard
+              title="Brecha del Perfil Predominante"
+              description={
+                <>
+                  El <strong className="text-foreground">45%</strong> del mercado demanda <strong>Desarrolladores Web Full Stack</strong>. Su mayor deficiencia generalizada es el <strong className="text-rose-500">Testing Automatizado</strong>.
+                </>
+              }
+              type="trend"
+              value="Tendencia"
+            />
+            
+            <InsightCard
+              title="Brechas Más Frecuentes"
+              description={
+                <>
+                  De las últimas evaluaciones, el <strong className="text-foreground">62%</strong> de los desarrolladores presentan debilidades críticas en <strong>DevOps (Docker/CI/CD)</strong> independientemente de su rol.
+                </>
+              }
+              type="gap"
+              value="Top Brecha"
+            />
+          </div>
         </div>
 
         {/* Right Columns: The spacious layout of clusters */}

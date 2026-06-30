@@ -162,7 +162,7 @@ function EmptyProfileState({ onUploadSuccess }: { onUploadSuccess: (newCvId: str
                 ))}
               </div>
             </div>
-            
+
             <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-6 md:p-8">
               <div className="mb-4">
                 <h3 className="text-sm font-bold text-foreground">Subir tu CV</h3>
@@ -181,7 +181,12 @@ export default function ProfileDashboardView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: user, isLoading: isUserLoading, error: userError } = useCurrentUser();
-  const { data: profile, isLoading: isProfileLoading, error: profileError, refetch: refetchProfile } = useUserProfile();
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    error: profileError,
+    refetch: refetchProfile,
+  } = useUserProfile();
   const { data: cvData, isLoading: isCvLoading } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
   const { startAnalysis } = useCVAnalysis();
@@ -332,7 +337,7 @@ export default function ProfileDashboardView() {
       <ErrorFallback
         error={queryError}
         onRetry={() => refetchProfile()}
-        onHome={() => window.location.href = '/'}
+        onHome={() => (window.location.href = '/')}
         fullPage
       />
     );
@@ -475,8 +480,9 @@ export default function ProfileDashboardView() {
                         className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-bold text-foreground hover:border-primary/50 cursor-pointer transition-all select-none group"
                         title="Haga clic para editar evidencias e ICT score"
                       >
-                        <span className="h-2 w-2 rounded-full bg-success" />
-                        <span className="max-w-[180px] truncate group-hover:text-primary transition-colors">{skill.name}</span>
+                        <span className="max-w-[180px] truncate group-hover:text-primary transition-colors">
+                          {skill.name}
+                        </span>
                         {skill.ict_score !== undefined && (
                           <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">
                             ICT {skill.ict_score.toFixed(1)}
@@ -685,8 +691,8 @@ export default function ProfileDashboardView() {
         onSave={(updatedSkill) => {
           setSkills((current) =>
             current.map((skill) =>
-              skill.name.toLowerCase() === updatedSkill.name.toLowerCase() ? updatedSkill : skill
-            )
+              skill.name.toLowerCase() === updatedSkill.name.toLowerCase() ? updatedSkill : skill,
+            ),
           );
         }}
       />

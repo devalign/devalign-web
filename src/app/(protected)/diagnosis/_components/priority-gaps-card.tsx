@@ -31,7 +31,7 @@ export function PriorityGapsCard({
   isLoading = false,
 }: PriorityGapsCardProps) {
   return (
-    <Card className="flex flex-col h-full relative overflow-hidden min-h-[200px]">
+    <Card className="flex flex-col h-full relative overflow-hidden min-h-[180px]">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -60,7 +60,7 @@ export function PriorityGapsCard({
             Has cubierto todas las brechas detectadas.
           </div>
         ) : (
-          marketGaps.slice(0, 4).map((bg) => {
+          marketGaps.slice(0, 5).map((bg) => {
             const crit = bg.market_importance || 'medium';
 
             return (

@@ -29,7 +29,7 @@ const levelBadge = (level: string) => {
 
 export function StrengthsCard({ strengths, onViewAll, isLoading = false }: StrengthsCardProps) {
   return (
-    <Card className="flex flex-col h-full relative overflow-hidden min-h-[200px]">
+    <Card className="flex flex-col h-full relative overflow-hidden min-h-[180px]">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -58,7 +58,7 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
             No se identificaron fortalezas clave específicas para este cluster.
           </div>
         ) : (
-          strengths.slice(0, 4).map((s) => (
+          strengths.slice(0, 5).map((s) => (
             <div
               key={s.name}
               className="flex items-center justify-between py-1.5 px-1 border-b border-border/20 last:border-b-0"

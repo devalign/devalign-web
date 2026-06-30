@@ -7,11 +7,18 @@ import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { toast } from 'sonner';
 
 // UI Layout Components
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Sparkles, Loader2, ChevronLeft, ChevronDown, RefreshCw } from 'lucide-react';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { InsightCard } from '@/components/shared/insight-card';
 
 // Local _components (Diagnosis)
 import { UserHeroCard } from './_components/user-hero-card';
@@ -23,6 +30,9 @@ import { MarketImpactCard } from './_components/market-impact-card';
 import { AiInsightCard } from './_components/ai-insight-card';
 import { StrengthsDrawer } from './_components/strengths-drawer';
 import { GapsDrawer } from './_components/gaps-drawer';
+import { ProfileRadarCard } from './_components/profile-radar-card';
+import { ClusterHeaderCard } from './_components/cluster-header-card';
+import { useMarketClusters } from '@/hooks/use-market-clusters';
 
 // Reallocated Profile Components (CV & Graph)
 import CVUploader from '../profile/_components/cv/cv-uploader';
@@ -30,6 +40,7 @@ import CVAtsPreviewModal from '../profile/_components/cv/cv-ats-preview-modal';
 
 function DiagnosisContent() {
   const { data: profile, isLoading, error } = useUserProfileSelector();
+  const { data: clusters = [] } = useMarketClusters();
   const { startAnalysis, isAnalyzing } = useCVAnalysis();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -97,34 +108,52 @@ function DiagnosisContent() {
 
   // Active cluster calculations
   const allAffinities = profile.all_affinities || [];
-  const activeCluster = allAffinities.find(
-    (a) => clusterParam ? a.cluster_name.toLowerCase() === clusterParam.toLowerCase() : a.is_primary
-  ) || allAffinities[0] || null;
+  const activeCluster =
+    allAffinities.find((a) =>
+      clusterParam ? a.cluster_name.toLowerCase() === clusterParam.toLowerCase() : a.is_primary,
+    ) ||
+    allAffinities[0] ||
+    null;
 
-  const activeScore = activeCluster ? Math.round(activeCluster.affinity_score * 100) : profile.alignment_score;
+  const activeScore = activeCluster
+    ? Math.round(activeCluster.affinity_score * 100)
+    : profile.alignment_score;
 
   // Process strengths and gaps for listing
-  const strengths = (activeCluster?.detected_skills || []).map((s) => ({
-    name: s.name,
-    level: s.market_importance === 'critical' ? 'Avanzado' : 'Intermedio',
-    score: s.market_importance === 'critical' ? 3 : 2,
-    demandPercentage: s.market_demand_percentage ?? 100,
-    category: s.skill_type,
-    ict_score: s.ict_score,
-    trend: s.trend,
-  })).sort((a, b) => b.demandPercentage - a.demandPercentage);
+  const strengths = (activeCluster?.detected_skills || [])
+    .map((s) => ({
+      name: s.name,
+      level: s.market_importance === 'critical' ? 'Avanzado' : 'Intermedio',
+      score: s.market_importance === 'critical' ? 3 : 2,
+      demandPercentage: s.market_demand_percentage ?? 100,
+      category: s.skill_type,
+      ict_score: s.ict_score,
+      trend: s.trend,
+    }))
+    .sort((a, b) => b.demandPercentage - a.demandPercentage);
 
-  const gaps = (activeCluster?.skill_gaps || []).map((g) => ({
-    name: g.name,
-    skill_type: g.skill_type,
-    market_importance: g.market_importance ?? 'medium',
-    market_demand_percentage: g.market_demand_percentage ?? 50,
-    trend: g.trend,
-  })).sort((a, b) => b.market_demand_percentage - a.market_demand_percentage);
+  const gaps = (activeCluster?.skill_gaps || [])
+    .map((g) => ({
+      name: g.name,
+      skill_type: g.skill_type,
+      market_importance: g.market_importance ?? 'medium',
+      market_demand_percentage: g.market_demand_percentage ?? 50,
+      trend: g.trend,
+    }))
+    .sort((a, b) => b.market_demand_percentage - a.market_demand_percentage);
 
   // Header date formatting
   const formattedDate = activeCluster ? 'Recientemente' : 'Recientemente';
 
+  // Matching cluster for market stats
+  const totalOffers = clusters.reduce((sum, c) => sum + c.job_offer_count, 0);
+  const matchingMarketCluster = clusters.find(
+    (c) => c.name.toLowerCase() === (activeCluster?.cluster_name || '').toLowerCase(),
+  );
+  const jobOfferCount = matchingMarketCluster?.job_offer_count || 0;
+  const marketPercent =
+    totalOffers > 0 ? parseFloat(((jobOfferCount / totalOffers) * 100).toFixed(1)) : 0;
+  const topSkills = matchingMarketCluster?.top_skills || [];
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
@@ -150,7 +179,9 @@ function DiagnosisContent() {
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Cambiar especialidad
-                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isSpecialtyOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-3 h-3 transition-transform duration-200 ${isSpecialtyOpen ? 'rotate-180' : ''}`}
+                />
               </button>
 
               {isSpecialtyOpen && (
@@ -167,7 +198,9 @@ function DiagnosisContent() {
                             setIsSpecialtyOpen(false);
                           }}
                           className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold text-left transition-colors cursor-pointer ${
-                            isActive ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-secondary/50'
+                            isActive
+                              ? 'bg-primary/10 text-primary'
+                              : 'text-foreground hover:bg-secondary/50'
                           }`}
                         >
                           {cluster.cluster_name}
@@ -183,7 +216,7 @@ function DiagnosisContent() {
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-primary hover:bg-primary/10 transition-colors font-semibold text-xs cursor-pointer"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 animate-pulse" />
-                      <span>Explorar más especialidades...</span>
+                      <span>Agregar especialidad</span>
                     </button>
                   </div>
                 </>
@@ -195,65 +228,106 @@ function DiagnosisContent() {
           </p>
         </div>
 
-        {/* Hero Card */}
-        <UserHeroCard
-          fullName={profile.full_name || 'Desarrollador'}
-          roleTitle={profile.current_job_role || ''}
-          seniority={profile.seniority}
-          currentScore={activeScore}
-          primarySpecialty={activeCluster?.cluster_name || profile.primary_specialty}
-          totalSkills={profile.detected_skills.length}
-          totalStrengths={strengths.length}
-          totalGaps={gaps.length}
-          isLoading={isAnalyzing}
-          lastAnalysisDate={formattedDate}
-        />
-
-        {/* Two-Column Detail Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            <StrengthsCard
-              strengths={strengths}
-              onViewAll={() => setIsStrengthsDrawerOpen(true)}
+        {/* Main Grid: Left (Profile & Radar) / Right (Details & Insights) */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-6">
+          {/* Left Column (col-span-4): Perfil y Radar */}
+          <div className="xl:col-span-4 flex flex-col">
+            <ProfileRadarCard
+              fullName={profile.full_name || 'Desarrollador'}
+              roleTitle={profile.current_job_role || ''}
+              seniority={profile.seniority}
+              totalSkills={profile.detected_skills.length}
+              domainAffinities={profile.domain_affinities || []}
               isLoading={isAnalyzing}
-            />
-            <PriorityGapsCard
-              marketGaps={gaps}
-              onViewAll={() => setIsGapsDrawerOpen(true)}
-              isLoading={isAnalyzing}
+              className="h-full"
             />
           </div>
 
-          <div className="lg:col-span-3">
-            <AffinityRadarChart
-              domainAffinities={profile.domain_affinities || []}
-              techSkills={profile.detected_skills.filter(s => s.skill_type === 'tech').map(s => s.name)}
+          {/* Right Column (col-span-8): Header + Strengths/Gaps + Vertical Insights */}
+          <div className="xl:col-span-8 flex flex-col gap-6">
+            {/* Header: Especialidad analizada y estadísticas de mercado */}
+            <ClusterHeaderCard
+              primarySpecialty={activeCluster?.cluster_name || profile.primary_specialty}
+              currentScore={activeScore}
+              lastAnalysisDate={formattedDate}
+              jobOfferCount={jobOfferCount}
+              marketPercent={marketPercent}
+              topSkills={topSkills}
               isLoading={isAnalyzing}
-              className="w-full"
             />
+
+            {/* Split bottom of right column: Left (Strengths & Gaps) / Right (Insights) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Sub-column: Strengths & Gaps */}
+              <div className="flex flex-col gap-6">
+                <StrengthsCard
+                  strengths={strengths}
+                  onViewAll={() => setIsStrengthsDrawerOpen(true)}
+                  isLoading={isAnalyzing}
+                />
+                <PriorityGapsCard
+                  marketGaps={gaps}
+                  onViewAll={() => setIsGapsDrawerOpen(true)}
+                  isLoading={isAnalyzing}
+                />
+              </div>
+
+              {/* Right Sub-column: Vertical Market Insights (Blue Rectangle 1) */}
+              <div className="flex flex-col gap-6">
+                <ClusterDemandCard
+                  clusterName={activeCluster?.cluster_name || profile.primary_specialty}
+                  marketInsights={activeCluster?.market_insights}
+                  isLoading={isAnalyzing}
+                />
+                <MarketImpactCard
+                  marketGaps={gaps}
+                  marketInsights={activeCluster?.market_insights}
+                  isLoading={isAnalyzing}
+                />
+                <AiInsightCard marketGaps={gaps} isLoading={isAnalyzing} />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Market Context Section */}
+        {/* Bottom Section (Blue Rectangle 2: full width horizontal insights) */}
         <div className="mt-8 space-y-4">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
-              Contexto de mercado
+              Contexto de mercado adicional
             </span>
             <div className="h-px flex-1 bg-border/40" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ClusterDemandCard
-              clusterName={activeCluster?.cluster_name || profile.primary_specialty}
-              marketInsights={activeCluster?.market_insights}
-              isLoading={isAnalyzing}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <InsightCard
+              title="Cumplimiento de Perfiles"
+              description={
+                <>
+                  En promedio, los postulantes a{' '}
+                  <strong className="text-foreground">
+                    {activeCluster?.cluster_name || profile.primary_specialty}
+                  </strong>{' '}
+                  solo cumplen con el <strong className="text-emerald-500">58%</strong> del perfil
+                  técnico ideal. ¡Destacar aquí te da una gran ventaja!
+                </>
+              }
+              type="compliance"
+              value="Benchmarking"
             />
-            <MarketImpactCard
-              marketGaps={gaps}
-              marketInsights={activeCluster?.market_insights}
-              isLoading={isAnalyzing}
+
+            <InsightCard
+              title="Competencias Críticas"
+              description={
+                <>
+                  El mercado requiere alto nivel en <strong>Arquitectura en la Nube y CI/CD</strong>{' '}
+                  para tu perfil, pero el nivel promedio de los candidatos es muy bajo. Enfócate en
+                  esto.
+                </>
+              }
+              type="critical"
+              value="Oportunidad"
             />
-            <AiInsightCard marketGaps={gaps} isLoading={isAnalyzing} />
           </div>
         </div>
       </div>
@@ -286,11 +360,7 @@ function DiagnosisContent() {
 
       {/* ATS CV Preview Modal */}
       {isAtsOpen && (
-        <CVAtsPreviewModal
-          isOpen={isAtsOpen}
-          onOpenChange={handleCloseAts}
-          profile={profile}
-        />
+        <CVAtsPreviewModal isOpen={isAtsOpen} onOpenChange={handleCloseAts} profile={profile} />
       )}
 
       {/* Drawers */}
@@ -300,11 +370,7 @@ function DiagnosisContent() {
         strengths={strengths}
       />
 
-      <GapsDrawer
-        isOpen={isGapsDrawerOpen}
-        onOpenChange={setIsGapsDrawerOpen}
-        gaps={gaps}
-      />
+      <GapsDrawer isOpen={isGapsDrawerOpen} onOpenChange={setIsGapsDrawerOpen} gaps={gaps} />
     </>
   );
 }
