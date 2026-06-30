@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
-import AuthShell from '@/components/auth/auth-shell';
+import AuthShell from '@/app/(auth)/login/_components/auth-shell';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 

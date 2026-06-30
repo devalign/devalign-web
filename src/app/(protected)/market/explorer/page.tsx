@@ -7,7 +7,7 @@ import { useKnowledgeGraph } from '@/hooks/use-knowledge-graph';
 import {
   KnowledgeGraphVisualization,
   GraphNode,
-} from '@/components/profile/KnowledgeGraphVisualization';
+} from '@/app/(protected)/profile/_components/graph/knowledge-graph-visualization';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

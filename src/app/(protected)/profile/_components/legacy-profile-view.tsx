@@ -43,11 +43,11 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
-import CVUploader from '@/components/profile/cv-uploader';
-import CVHistoryModal from '@/components/profile/cv-history-modal';
+import CVAtsPreviewModal from './cv/cv-ats-preview-modal';
+import CVUploader from './cv/cv-uploader';
+import CVHistoryModal from './cv/cv-history-modal';
 import { useUserCVs, useReanalyzeCV } from '@/hooks/use-user-cvs';
-import { UserProfileData } from '@/lib/api/types';
+import { UserProfileData } from '@/types';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 

@@ -1,7 +1,7 @@
 'use client';
 
-import AuthShell from '@/components/auth/auth-shell';
-import LandingContent from '@/components/landing/landing-content';
+import AuthShell from '@/app/(auth)/login/_components/auth-shell';
+import LandingContent from './landing-content';
 
 export default function HomeClient() {
   return (

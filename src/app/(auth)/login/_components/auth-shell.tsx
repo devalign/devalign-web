@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Hexagon, Moon, Sun, Sparkles, Rocket } from 'lucide-react';
-import GlobeBackground from '@/components/auth/globe-background';
+import GlobeBackground from './globe-background';
 
 type AuthShellProps = {
   children: ReactNode;

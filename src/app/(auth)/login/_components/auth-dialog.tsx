@@ -1,7 +1,7 @@
 'use client';
 
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import AuthCard from '@/app/(auth)/login/auth-card';
+import AuthCard from './auth-card';
 
 interface AuthDialogProps {
   open: boolean;

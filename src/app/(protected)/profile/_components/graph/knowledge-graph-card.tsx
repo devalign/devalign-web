@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Network, Maximize } from 'lucide-react';
 import { useKnowledgeGraph } from '@/hooks/use-knowledge-graph';
-import { KnowledgeGraphVisualization } from '@/components/profile/KnowledgeGraphVisualization';
+import { KnowledgeGraphVisualization } from './knowledge-graph-visualization';
 import { Button } from '@/components/ui/button';
 
 export function KnowledgeGraphCard() {

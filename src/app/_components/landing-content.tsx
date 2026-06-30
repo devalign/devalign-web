@@ -1,6 +1,6 @@
 'use client';
 
-import AuthCard from '@/app/(auth)/login/auth-card';
+import AuthCard from '@/app/(auth)/login/_components/auth-card';
 
 export default function LandingContent() {
   return (

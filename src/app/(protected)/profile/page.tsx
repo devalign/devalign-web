@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import ProfileDashboardView from '@/components/profile/profile-dashboard-view';
+import ProfileDashboardView from './_components/profile-dashboard-view';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 
 export default function ProfilePage() {

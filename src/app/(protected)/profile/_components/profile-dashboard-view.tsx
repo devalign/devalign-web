@@ -24,11 +24,12 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { LoadingScreen } from '@/components/shared/loading-screen';
+import { ProfileSkeleton } from './profile-skeleton';
 
-import CVAtsPreviewModal from '@/components/profile/cv-ats-preview-modal';
-import CVHistoryModal from '@/components/profile/cv-history-modal';
-import CVUploader from '@/components/profile/cv-uploader';
-import SkillEvidenceModal from '@/components/profile/skill-evidence-modal';
+import CVAtsPreviewModal from './cv/cv-ats-preview-modal';
+import CVHistoryModal from './cv/cv-history-modal';
+import CVUploader from './cv/cv-uploader';
+import SkillEvidenceModal from './skills/skill-evidence-modal';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { Badge } from '@/components/ui/badge';
@@ -47,7 +48,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useUpdateUserSkills, useUserProfile } from '@/hooks/use-user-profile';
 import { cn } from '@/lib/utils';
-import type { ClusterAffinityItem, SkillItem, UserProfileData } from '@/lib/api/types';
+import type { ClusterAffinityItem, SkillItem, UserProfileData } from '@/types';
 
 function formatDate(value?: string | null, includeTime = false) {
   if (!value) return 'Sin fecha';
@@ -338,7 +339,7 @@ export default function ProfileDashboardView() {
   }
 
   if (isLoading) {
-    return <LoadingScreen message="Cargando perfil..." minHeight="min-h-[70vh]" />;
+    return <ProfileSkeleton />;
   }
 
   if (cvs.length === 0) {

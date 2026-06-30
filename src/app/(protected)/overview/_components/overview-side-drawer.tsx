@@ -16,7 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
-import { SimpleAffinityRadar } from '@/components/diagnosis/simple-affinity-radar';
+import { SimpleAffinityRadar } from '@/app/(protected)/diagnosis/_components/simple-affinity-radar';
 import { cn } from '@/lib/utils';
 
 export type FilterMode = 'all' | 'strengths' | 'gaps';

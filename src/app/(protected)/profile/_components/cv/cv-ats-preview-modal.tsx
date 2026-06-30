@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { UserProfileData } from '@/lib/api/types';
+import { UserProfileData } from '@/types';
 import { FileText, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
