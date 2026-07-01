@@ -32,7 +32,7 @@ import { StrengthsDrawer } from './_components/strengths-drawer';
 import { GapsDrawer } from './_components/gaps-drawer';
 import { ProfileRadarCard } from './_components/profile-radar-card';
 import { ClusterHeaderCard } from './_components/cluster-header-card';
-import { useClusterDiagnostic } from '@/hooks/use-cluster-diagnostic';
+import { useClusterDiagnostic, DiagnosticDetail } from '@/hooks/use-cluster-diagnostic';
 
 // Reallocated Profile Components (CV & Graph)
 import CVUploader from '../profile/_components/cv/cv-uploader';
@@ -112,7 +112,16 @@ function DiagnosisContent() {
 
   const hasProfileData = !!(profile?.cv_id || (profile?.detected_skills && profile.detected_skills.length > 0));
 
-  const fallbackDiagnostic = {
+  const fallbackDiagnostic: DiagnosticDetail = {
+    user_id: '',
+    full_name: null,
+    current_job_role: null,
+    seniority: 'mid',
+    total_profile_skills: 0,
+    domain_affinities: [],
+    market_insights: null,
+    compatible_roles: null,
+    ai_insight: null,
     cluster_name: 'Pendiente de CV',
     affinity_score: 0,
     detected_skills: [],

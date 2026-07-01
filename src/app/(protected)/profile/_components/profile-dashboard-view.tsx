@@ -187,7 +187,7 @@ export default function ProfileDashboardView() {
   const { data: profile, isLoading, error } = useUserProfileSelector();
   const { data: cvData } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
-  const { startAnalysis } = useCVAnalysis();
+  const { startAnalysis, isAnalyzing } = useCVAnalysis();
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
