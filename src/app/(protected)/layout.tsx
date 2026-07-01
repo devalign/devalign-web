@@ -18,11 +18,7 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
   const hasCV = !!(cvData?.cvs && cvData.cvs.length > 0);
   const showGlobalHeader = pathname === '/overview';
 
-  React.useEffect(() => {
-    if (!isLoading && !hasCV && pathname !== '/profile') {
-      router.replace('/profile');
-    }
-  }, [isLoading, hasCV, pathname, router]);
+
 
   if (isLoading) {
     return <LoadingScreen message="Cargando sesión..." />;

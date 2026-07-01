@@ -39,7 +39,7 @@ export interface UserProfileData {
   user_id: string;
   cv_id: string | null;
   seniority: string;
-  primary_specialty: string;
+  primary_specialty: string | null;
   alignment_score: number;
   secondary_affinities: ClusterAffinityItem[];
   all_affinities?: ClusterAffinityItem[];

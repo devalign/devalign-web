@@ -18,6 +18,7 @@ import { Sparkles, Loader2, ChevronLeft, ChevronDown, RefreshCw } from 'lucide-r
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 import { InsightCard } from '@/components/shared/insight-card';
 
 // Local _components (Diagnosis)
@@ -31,7 +32,7 @@ import { StrengthsDrawer } from './_components/strengths-drawer';
 import { GapsDrawer } from './_components/gaps-drawer';
 import { ProfileRadarCard } from './_components/profile-radar-card';
 import { ClusterHeaderCard } from './_components/cluster-header-card';
-import { useClusterDiagnostic } from '@/hooks/use-cluster-diagnostic';
+import { useClusterDiagnostic, DiagnosticDetail } from '@/hooks/use-cluster-diagnostic';
 
 // Reallocated Profile Components (CV & Graph)
 import CVUploader from '../profile/_components/cv/cv-uploader';
@@ -101,13 +102,36 @@ function DiagnosisContent() {
 
   // Load diagnostic details
   const {
-    data: diagnostic,
+    data: apiDiagnostic,
     isLoading: isDiagLoading,
     error: diagError,
   } = useClusterDiagnostic(activeClusterName);
 
   const isLoading = isProfileLoading || isDiagLoading;
   const error = profileError || diagError;
+
+  const hasProfileData = !!(profile?.cv_id || (profile?.detected_skills && profile.detected_skills.length > 0));
+
+  const fallbackDiagnostic: DiagnosticDetail = {
+    user_id: '',
+    full_name: null,
+    current_job_role: null,
+    seniority: 'mid',
+    total_profile_skills: 0,
+    domain_affinities: [],
+    market_insights: null,
+    compatible_roles: null,
+    ai_insight: null,
+    cluster_name: 'Pendiente de CV',
+    affinity_score: 0,
+    detected_skills: [],
+    skill_gaps: [],
+    last_analysis_date: null,
+    job_offer_count: 0,
+    top_skills: []
+  };
+
+  const diagnostic = apiDiagnostic || (!hasProfileData ? fallbackDiagnostic : null);
 
   if (isLoading) {
     return <LoadingScreen message="Cargando tu diagnóstico..." />;
@@ -275,6 +299,8 @@ function DiagnosisContent() {
             Análisis de tu perfil frente a las competencias más demandadas en esta especialidad.
           </p>
         </div>
+
+        <EmptyProfileBanner show={!hasProfileData} />
 
         {/* Main Grid: Left (Profile & Radar) / Right (Details & Insights) */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-6">

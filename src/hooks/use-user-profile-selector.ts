@@ -64,7 +64,7 @@ export function useUserProfileSelector() {
       preferred_modality: profile?.preferred_modality || 'Híbrido / Presencial',
       availability: profile?.availability || 'Inmediata',
       alignment_score: activeScore,
-      primary_specialty: activeCluster?.cluster_name || 'Software Engineering',
+      primary_specialty: activeCluster?.cluster_name || null,
       secondary_affinities: allAffinities.filter((a) => !a.is_primary),
       all_affinities: allAffinities,
       domain_affinities: profile?.domain_affinities || [],

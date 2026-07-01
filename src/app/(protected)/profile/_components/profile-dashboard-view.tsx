@@ -32,6 +32,7 @@ import CVUploader from './cv/cv-uploader';
 import SkillEvidenceModal from './skills/skill-evidence-modal';
 import { DomainAffinityCard } from './domain-affinity-card';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -186,7 +187,7 @@ export default function ProfileDashboardView() {
   const { data: profile, isLoading, error } = useUserProfileSelector();
   const { data: cvData } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
-  const { startAnalysis } = useCVAnalysis();
+  const { startAnalysis, isAnalyzing } = useCVAnalysis();
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -338,6 +339,7 @@ export default function ProfileDashboardView() {
     <>
       <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
         <CVUpdateBanner />
+        <EmptyProfileBanner show={!profile?.cv_id && !isAnalyzing} />
 
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:mt-10">
           <div className="space-y-1">
@@ -390,16 +392,7 @@ export default function ProfileDashboardView() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push('/profile?action=preview-ats')}
-                      className="h-9 gap-2 text-xs font-bold bg-card"
-                    >
-                      <FileText className="h-4 w-4" />
-                      Exportar CV ATS
-                    </Button>
-                  </div>
+                  <div className="flex flex-col sm:flex-row lg:flex-col gap-3"></div>
                 </div>
 
                 <div className="rounded-xl border border-primary/10 bg-primary/[0.04] p-4 md:p-5">

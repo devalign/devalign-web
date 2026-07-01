@@ -24,6 +24,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { InsightCard } from '@/components/shared';
+import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 import { useMarketClusters } from '@/hooks/use-market-clusters';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { evaluateClusterDiagnostic } from '@/lib/api/user-service';
@@ -43,6 +44,8 @@ function TopologyContent() {
 
   const { data: clusters = [], isLoading, error } = useMarketClusters();
   const { data: profile } = useUserProfile();
+
+  const hasProfileData = !!(profile?.cv_id || (profile?.detected_skills && profile.detected_skills.length > 0));
 
   const [filterMode, setFilterMode] = React.useState<'all' | 'evaluated' | 'unevaluated'>('all');
   const [isGenerating, setIsGenerating] = React.useState<string | null>(null);
@@ -99,6 +102,14 @@ function TopologyContent() {
   };
 
   const handleGenerateDiagnostic = async (clusterName: string) => {
+    if (!hasProfileData) {
+      toast.info('Primero debes subir tu CV para poder generar un diagnóstico.', {
+        description: 'Te estamos redirigiendo a tu perfil para cargar tu CV.',
+      });
+      router.push('/profile');
+      return;
+    }
+
     setIsGenerating(clusterName);
     const toastId = toast.loading(`Generando diagnóstico para ${clusterName}...`);
     try {
@@ -207,6 +218,8 @@ function TopologyContent() {
           </button>
         </div>
       </div>
+
+      <EmptyProfileBanner show={!hasProfileData} />
 
       {/* Grid: 2 Columns on desktop. Left column: Technical specs. Right/bottom: Grid of clusters */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

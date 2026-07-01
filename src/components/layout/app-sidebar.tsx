@@ -41,10 +41,10 @@ export default function AppSidebar() {
   const cluster = searchParams.get('cluster') || profile?.primary_specialty || '';
 
   const navItems: NavItem[] = React.useMemo(() => [
-    { name: 'Overview', href: '/overview', icon: Network, disabled: !hasCV },
-    { name: 'Mercado', href: '/market', icon: TrendingUp, disabled: true },
-    { name: 'Diagnóstico', href: '/diagnosis', icon: Activity, disabled: !hasCV },
-  ], [hasCV]);
+    { name: 'Overview', href: '/overview', icon: Network },
+    { name: 'Mercado', href: '/market', icon: TrendingUp },
+    { name: 'Diagnóstico', href: '/diagnosis', icon: Activity },
+  ], []);
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);

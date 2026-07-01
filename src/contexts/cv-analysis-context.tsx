@@ -25,10 +25,16 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
   const [analyzedCvId, setAnalyzedCvId] = useState<string | null>(null);
 
   const channelRef = useRef<any>(null);
-  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  // Separate refs for the poll interval and any one-shot timeout
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Persistence to LocalStorage
-  const saveState = (analyzing: boolean, ready: boolean, cvId: string | null, startTime?: number) => {
+  const saveState = (
+    analyzing: boolean,
+    ready: boolean,
+    cvId: string | null,
+    startTime?: number,
+  ) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(
         LOCAL_STORAGE_KEY,
@@ -47,67 +53,80 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
       channelRef.current.unsubscribe();
       channelRef.current = null;
     }
-    if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current);
-      timeoutIdRef.current = null;
+    // Use clearInterval — the poll is a setInterval, not a setTimeout
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
     }
   }, []);
 
-  const pollCvStatus = useCallback((cvId: string, initialStartTime?: number) => {
-    unsubscribeFromCvChanges();
+  const pollCvStatus = useCallback(
+    (cvId: string, initialStartTime?: number) => {
+      // Cancel any existing poll before starting a new one
+      unsubscribeFromCvChanges();
 
-    const startTime = initialStartTime || Date.now();
-    let pollInterval: NodeJS.Timeout | null = null;
+      const startTime = initialStartTime || Date.now();
 
-    const checkStatus = async () => {
-      const elapsed = Date.now() - startTime;
-      if (elapsed >= MAX_POLLING_DURATION) {
-        setIsAnalyzing(false);
-        setIsAnalysisReady(false);
-        setAnalyzedCvId(null);
-        saveState(false, false, null);
-        toast.warning(
-          'El análisis está tomando más de lo esperado. Puedes intentar actualizar tus datos en unos instantes.',
-        );
-        unsubscribeFromCvChanges();
-        return;
-      }
-
-      try {
-        const data = await listUserCVs();
-        const currentCv = data.cvs.find((c) => c.cv_id === cvId);
-        if (currentCv) {
-          if (currentCv.status === 'completed') {
-            setIsAnalyzing(false);
-            setIsAnalysisReady(true);
-            saveState(false, true, cvId);
-            toast.success(
-              '¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.',
-            );
-            unsubscribeFromCvChanges();
-          } else if (currentCv.status === 'failed') {
-            setIsAnalyzing(false);
-            setIsAnalysisReady(false);
-            setAnalyzedCvId(null);
-            saveState(false, false, null);
-            toast.error(
-              'Hubo un problema al procesar tu CV. Por favor, intenta de nuevo.',
-            );
-            unsubscribeFromCvChanges();
+      const checkStatus = async () => {
+        const elapsed = Date.now() - startTime;
+        if (elapsed >= MAX_POLLING_DURATION) {
+          // Stop polling first, then update state
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
           }
+          setIsAnalyzing(false);
+          setIsAnalysisReady(false);
+          setAnalyzedCvId(null);
+          saveState(false, false, null);
+          toast.warning(
+            'El análisis está tomando más de lo esperado. Puedes intentar actualizar tus datos en unos instantes.',
+          );
+          return;
         }
-      } catch (err) {
-        console.error('Error polling CV status:', err);
-      }
-    };
 
-    // First check immediately
-    checkStatus();
+        try {
+          const data = await listUserCVs();
+          const currentCv = data.cvs.find((c) => c.cv_id === cvId);
+          if (currentCv) {
+            if (currentCv.status === 'completed') {
+              // Stop polling BEFORE setting state to avoid race conditions
+              if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+              }
+              setIsAnalyzing(false);
+              setIsAnalysisReady(true);
+              saveState(false, true, cvId);
+              toast.success(
+                '¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.',
+              );
+            } else if (currentCv.status === 'failed') {
+              // Stop polling BEFORE setting state
+              if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+              }
+              setIsAnalyzing(false);
+              setIsAnalysisReady(false);
+              setAnalyzedCvId(null);
+              saveState(false, false, null);
+              toast.error('Hubo un problema al procesar tu CV. Por favor, intenta de nuevo.');
+            }
+          }
+        } catch (err) {
+          console.error('Error polling CV status:', err);
+        }
+      };
 
-    // Then poll every 3 seconds
-    pollInterval = setInterval(checkStatus, 3000);
-    timeoutIdRef.current = pollInterval; // Store in ref for cleanup
-  }, [unsubscribeFromCvChanges]);
+      // First check immediately
+      checkStatus();
+
+      // Then poll every 3 seconds; store in ref so clearInterval can cancel it
+      pollIntervalRef.current = setInterval(checkStatus, 3000);
+    },
+    [unsubscribeFromCvChanges],
+  );
 
   const startAnalysis = useCallback(
     (cvId: string) => {
@@ -187,7 +206,7 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
           try {
             const data = await listUserCVs();
             const currentCv = data.cvs.find((c) => c.cv_id === parsed.analyzedCvId);
-            
+
             if (!active) return;
 
             if (currentCv) {
@@ -195,7 +214,9 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
                 setIsAnalyzing(false);
                 setIsAnalysisReady(true);
                 saveState(false, true, parsed.analyzedCvId);
-                toast.success('¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.');
+                toast.success(
+                  '¡Análisis finalizado! Los datos de tu nuevo CV están listos para ser aplicados.',
+                );
                 return;
               } else if (currentCv.status === 'failed') {
                 setIsAnalyzing(false);
