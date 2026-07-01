@@ -59,6 +59,10 @@ export function GlobalHeader() {
       })
     : 'Recientemente';
 
+  const alignmentScore = activeCluster
+    ? Math.round(activeCluster.affinity_score * 100)
+    : (profile?.alignment_score ?? undefined);
+
   return (
     <HeaderBar
       clusters={allAffinities}
@@ -66,6 +70,7 @@ export function GlobalHeader() {
       onSelectCluster={handleSelectCluster}
       isAnalyzing={isAnalyzing}
       lastAnalysisDate={formattedDate}
+      alignmentScore={alignmentScore}
     />
   );
 }

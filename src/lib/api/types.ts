@@ -82,6 +82,8 @@ export interface ClusterAffinityItem {
   compatible_roles?: CompatibleRoleItem[];
   detected_skills?: SkillItem[];
   skill_gaps?: SkillItem[];
+  job_offer_count?: number;
+  top_skills?: string[];
 }
 
 export interface DomainAffinityItem {
@@ -110,6 +112,7 @@ export interface UserProfileData {
   work_experience: WorkExperienceItem[];
   education: EducationItem[];
   certifications: CertificationItem[];
+  last_analysis_date?: string | null;
 }
 
 export interface Cluster {

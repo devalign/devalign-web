@@ -13,7 +13,7 @@ export async function apiClient<T>(endpoint: string, options: ApiClientOptions =
   } = await supabase.auth.getSession();
   const token = session?.access_token;
 
-  const { timeout = 8000, ...fetchOptions } = options;
+  const { timeout = 30000, ...fetchOptions } = options;
 
   const headers = new Headers(fetchOptions.headers);
   if (token) {

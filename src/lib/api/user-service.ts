@@ -1,11 +1,11 @@
 import { apiClient } from './api-client';
-import { UserProfile, CVUploadResult, CVList, UserProfileData, SkillItem, Cluster } from './types';
+import { UserProfile, CVUploadResult, CVList, UserProfileData, SkillItem, Cluster } from '@/types';
 
 /**
  * Gets the currently logged-in user profile, provisioning JIT if needed.
  */
 export async function getCurrentUser(): Promise<UserProfile> {
-  return apiClient<UserProfile>('/users/me');
+  return apiClient<UserProfile>('/me');
 }
 
 /**
@@ -15,7 +15,7 @@ export async function uploadCV(file: File): Promise<CVUploadResult> {
   const formData = new FormData();
   formData.append('file', file);
 
-  return apiClient<CVUploadResult>('/users/me/cv', {
+  return apiClient<CVUploadResult>('/me/cv', {
     method: 'POST',
     body: formData,
   });
@@ -25,14 +25,14 @@ export async function uploadCV(file: File): Promise<CVUploadResult> {
  * Lists all CVs uploaded by the user.
  */
 export async function listUserCVs(): Promise<CVList> {
-  return apiClient<CVList>('/users/me/cvs');
+  return apiClient<CVList>('/me/cvs');
 }
 
 /**
  * Triggers re-analysis of a CV that was previously uploaded.
  */
 export async function reanalyzeCV(cvId: string): Promise<CVUploadResult> {
-  return apiClient<CVUploadResult>(`/users/me/cvs/${cvId}/reanalyze`, {
+  return apiClient<CVUploadResult>(`/me/cvs/${cvId}/reanalyze`, {
     method: 'POST',
   });
 }
@@ -41,7 +41,7 @@ export async function reanalyzeCV(cvId: string): Promise<CVUploadResult> {
  * Deletes a CV document from history.
  */
 export async function deleteCV(cvId: string): Promise<void> {
-  return apiClient<void>(`/users/me/cvs/${cvId}`, {
+  return apiClient<void>(`/me/cvs/${cvId}`, {
     method: 'DELETE',
   });
 }
@@ -50,14 +50,14 @@ export async function deleteCV(cvId: string): Promise<void> {
  * Gets the detailed computed user profile and analysis.
  */
 export async function getUserProfile(): Promise<UserProfileData> {
-  return apiClient<UserProfileData>('/profile/me');
+  return apiClient<UserProfileData>('/me');
 }
 
 /**
  * Manually updates personal and experience details on the profile.
  */
 export async function updateUserProfile(data: Partial<UserProfileData>): Promise<UserProfileData> {
-  return apiClient<UserProfileData>('/profile/me', {
+  return apiClient<UserProfileData>('/me', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export async function updateUserProfile(data: Partial<UserProfileData>): Promise
  * Updates skills manually for the developer profile.
  */
 export async function updateUserProfileSkills(skills: SkillItem[]): Promise<UserProfileData> {
-  return apiClient<UserProfileData>('/profile/skills', {
+  return apiClient<UserProfileData>('/me/skills', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -83,14 +83,14 @@ export async function updateUserProfileSkills(skills: SkillItem[]): Promise<User
  * Gets all market clusters from the API.
  */
 export async function getMarketClusters(): Promise<Cluster[]> {
-  return apiClient<Cluster[]>('/profile/clusters');
+  return apiClient<Cluster[]>('/market/clusters');
 }
 
 /**
  * Evaluates the user's profile against a specific tech cluster to generate a diagnostic.
  */
 export async function evaluateClusterDiagnostic(clusterName: string): Promise<UserProfileData> {
-  return apiClient<UserProfileData>(`/profile/evaluate-cluster/${encodeURIComponent(clusterName)}`, {
+  return apiClient<UserProfileData>(`/me/affinities/${encodeURIComponent(clusterName)}`, {
     method: 'POST',
   });
 }
@@ -99,7 +99,7 @@ export async function evaluateClusterDiagnostic(clusterName: string): Promise<Us
  * Resets the user's account (deletes profile, CVs, diagnostics).
  */
 export async function resetAccount(): Promise<void> {
-  return apiClient<void>('/users/me/reset', {
+  return apiClient<void>('/me/reset', {
     method: 'POST',
   });
 }
@@ -108,7 +108,7 @@ export async function resetAccount(): Promise<void> {
  * Permanently deletes the user's account and all associated data.
  */
 export async function deleteAccount(): Promise<void> {
-  return apiClient<void>('/users/me', {
+  return apiClient<void>('/me', {
     method: 'DELETE',
   });
 }

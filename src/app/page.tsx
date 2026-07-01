@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import HomeClient from './home-client';
+import HomeClient from './_components/home-client';
 
 export const metadata: Metadata = {
   title: 'Devalign | Diagnóstico técnico con IA',

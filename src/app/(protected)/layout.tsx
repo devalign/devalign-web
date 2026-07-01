@@ -2,7 +2,6 @@
 
 import React, { Suspense } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 import AppSidebar from '@/components/layout/app-sidebar';
 import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav';
 import { SidebarProvider } from '@/components/layout/sidebar-context';
@@ -10,6 +9,7 @@ import { GlobalHeader } from '@/components/layout/global-header';
 import { CVAnalysisProvider } from '@/contexts/cv-analysis-context';
 import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { useUserCVs } from '@/hooks/use-user-cvs';
+import { LoadingScreen } from '@/components/shared/loading-screen';
 
 function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -25,11 +25,7 @@ function ProtectedLayoutContent({ children }: { children: React.ReactNode }) {
   }, [isLoading, hasCV, pathname, router]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <LoadingScreen message="Cargando sesión..." />;
   }
 
   return (

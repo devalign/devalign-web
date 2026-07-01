@@ -296,3 +296,7 @@ button:hover {
 @utility card-ai {
   @apply border border-primary/15 bg-primary/[0.03] dark:bg-primary/[0.05] rounded-xl;
 }
+
+@utility card-insight {
+  @apply bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-xl;
+}

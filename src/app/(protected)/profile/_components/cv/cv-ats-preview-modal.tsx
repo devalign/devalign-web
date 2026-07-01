@@ -1,0 +1,713 @@
+'use client';
+
+import React, { useRef, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { UserProfileData } from '@/types';
+import { FileText, Download } from 'lucide-react';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
+interface CVAtsPreviewModalProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  profile: UserProfileData;
+  userEmail?: string;
+}
+
+export default function CVAtsPreviewModal({
+  isOpen,
+  onOpenChange,
+  profile,
+  userEmail,
+}: CVAtsPreviewModalProps) {
+  const cvPrintRef = useRef<HTMLDivElement>(null);
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'docx'>('pdf');
+
+  // Group skills by category for ATS text presentation
+  const getSkillsByType = (type: string) => {
+    return profile.detected_skills
+      .filter((s) => {
+        const nameLower = s.name.toLowerCase();
+        const sType = s.skill_type ? s.skill_type.toLowerCase() : '';
+        if (type === 'soft') {
+          return (
+            sType === 'soft_skill' ||
+            sType === 'soft' ||
+            nameLower === 'soft_skill' ||
+            [
+              'liderazgo',
+              'comunicación',
+              'trabajo en equipo',
+              'mentoría',
+              'adaptabilidad',
+              'empatía',
+              'resolución de problemas',
+              'negociación',
+              'agile',
+              'scrum',
+            ].some((x) => nameLower.includes(x))
+          );
+        }
+        if (type === 'tool') {
+          return (
+            sType === 'tool' ||
+            nameLower === 'tool' ||
+            ((sType === 'tech' || sType === 'hard_skill') &&
+              [
+                'aws',
+                'azure',
+                'gcp',
+                'docker',
+                'kubernetes',
+                'terraform',
+                'git',
+                'github',
+                'linux',
+                'ci/cd',
+              ].some((x) => nameLower.includes(x)))
+          );
+        }
+        // default to technical/hard skills
+        if (type === 'hard_skill') {
+          return (
+            sType !== 'soft_skill' &&
+            sType !== 'soft' &&
+            sType !== 'tool' &&
+            sType !== 'methodology' &&
+            sType !== 'concept' &&
+            !['aws', 'docker', 'kubernetes', 'git', 'github'].some((x) => nameLower.includes(x))
+          );
+        }
+        if (type === 'methodology') {
+          return sType === 'methodology' || sType === 'concept' || nameLower === 'methodology';
+        }
+        return false;
+      })
+      .map((s) => s.name);
+  };
+
+  const technicalSkills = getSkillsByType('hard_skill');
+  const toolSkills = getSkillsByType('tool');
+  const softSkills = getSkillsByType('soft');
+  const methodologySkills = getSkillsByType('methodology');
+
+  const defaultDescription = `Desarrollador técnico con experiencia en el diseño e implementación de soluciones de software. Especializado en optimización de flujos de trabajo y alineación de tecnologías a los estándares del mercado de desarrollo.`;
+
+  const generatePrintHtml = () => {
+    const expHtml =
+      profile.work_experience && profile.work_experience.length > 0
+        ? `
+        <div class="section-title">Experiencia Laboral</div>
+        ${profile.work_experience
+          .map(
+            (exp) => `
+          <div class="item">
+            <div class="item-header">
+              <span>${exp.role}</span>
+              <span style="font-weight: normal; color: var(--print-muted);">${exp.start_date} &ndash; ${exp.current ? 'Presente' : exp.end_date || ''}</span>
+            </div>
+            <div class="item-subheader">
+              <span>${exp.company}</span>
+              ${profile.location ? `<span>${profile.location}</span>` : ''}
+            </div>
+            ${
+              exp.description
+                ? `
+              <ul class="item-description">
+                ${exp.description
+                  .split('\n')
+                  .map((bullet) => {
+                    const trimmed = bullet.replace(/^[-\s*•]+/, '').trim();
+                    if (!trimmed) return '';
+                    return `<li>${trimmed}</li>`;
+                  })
+                  .join('')}
+              </ul>
+            `
+                : ''
+            }
+          </div>
+        `,
+          )
+          .join('')}`
+        : '';
+
+    const eduHtml =
+      profile.education && profile.education.length > 0
+        ? `
+        <div class="section-title">Educación</div>
+        ${profile.education
+          .map(
+            (edu) => `
+          <div class="item">
+            <div class="item-header">
+              <span>${edu.degree}</span>
+              <span style="font-weight: normal; color: var(--print-muted);">${edu.start_date} &ndash; ${edu.end_date || 'Presente'}</span>
+            </div>
+            <div class="item-subheader">
+              <span>${edu.institution}</span>
+            </div>
+          </div>
+        `,
+          )
+          .join('')}`
+        : '';
+
+    const skillsHtml = `
+      <div class="section-title">Habilidades</div>
+      ${
+        technicalSkills.length > 0
+          ? `
+        <div class="skills-block">
+          <span class="skills-label">Habilidades Técnicas:</span> ${technicalSkills.join(', ')}
+        </div>
+      `
+          : ''
+      }
+      ${
+        toolSkills.length > 0
+          ? `
+        <div class="skills-block">
+          <span class="skills-label">Herramientas y Tecnologías:</span> ${toolSkills.join(', ')}
+        </div>
+      `
+          : ''
+      }
+      ${
+        methodologySkills.length > 0
+          ? `
+        <div class="skills-block">
+          <span class="skills-label">Metodologías:</span> ${methodologySkills.join(', ')}
+        </div>
+      `
+          : ''
+      }
+      ${
+        softSkills.length > 0
+          ? `
+        <div class="skills-block">
+          <span class="skills-label">Habilidades Blandas:</span> ${softSkills.join(', ')}
+        </div>
+      `
+          : ''
+      }
+    `;
+
+    const certHtml =
+      profile.certifications && profile.certifications.length > 0
+        ? `
+        <div class="section-title">Certificaciones</div>
+        ${profile.certifications
+          .map(
+            (cert) => `
+          <div class="item" style="margin-bottom: 8px;">
+            <div class="item-header" style="font-size: 9.5pt;">
+              <span>${cert.name} ${cert.issuer ? `<span style="font-weight: normal; color: var(--print-muted);"> &mdash; ${cert.issuer}</span>` : ''}</span>
+              ${cert.date ? `<span style="font-weight: normal; color: var(--print-muted);">${cert.date}</span>` : ''}
+            </div>
+          </div>
+        `,
+          )
+          .join('')}`
+        : '';
+
+    const contactParts = [];
+    if (userEmail)
+      contactParts.push(
+        `<span style="color: var(--print-primary); text-decoration: underline;">${userEmail}</span>`,
+      );
+    if (profile.location) contactParts.push(`<span>${profile.location}</span>`);
+    if (profile.preferred_modality) contactParts.push(`<span>${profile.preferred_modality}</span>`);
+    if (profile.availability)
+      contactParts.push(`<span>Disponibilidad: ${profile.availability}</span>`);
+
+    return `
+      <div class="text-center">
+        <h1>${profile.full_name?.toUpperCase() || 'DESARROLLADOR'}</h1>
+        <div class="title-role">
+          ${profile.current_job_role || 'Software Engineer'}
+          ${profile.primary_specialty ? ` | ${profile.primary_specialty.toUpperCase()}` : ''}
+          ${profile.seniority ? ` | ${profile.seniority.toUpperCase()}` : ''}
+        </div>
+        <div class="contact-info">
+          ${contactParts.join(' &bull; ')}
+        </div>
+      </div>
+
+      <div class="section-title">Perfil Profesional</div>
+      <div class="summary">${defaultDescription}</div>
+
+      ${expHtml}
+      ${eduHtml}
+      ${skillsHtml}
+      ${certHtml}
+    `;
+  };
+
+  const getPrintColor = (varName: string, fallback: string): string => {
+    if (typeof window === 'undefined') return fallback;
+    return (
+      window.getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || fallback
+    );
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error(
+        'No se pudo abrir la ventana de impresión. Comprueba los bloqueadores de popups.',
+      );
+      return;
+    }
+
+    const printContent = generatePrintHtml();
+
+    const printForeground = getPrintColor('--print-foreground', '#111827');
+    const printMuted = getPrintColor('--print-muted', '#4b5563');
+    const printPrimary = getPrintColor('--print-primary', '#2563eb');
+    const printBorder = getPrintColor('--print-border', '#d1d5db');
+    const printDark = getPrintColor('--print-dark', '#374151');
+
+    // Generate plain, clean HTML document for absolute ATS text fidelity on print/PDF save
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>CV_${profile.full_name?.replace(/\s+/g, '_') || 'Devalign'}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+            :root {
+              --print-foreground: ${printForeground};
+              --print-muted: ${printMuted};
+              --print-primary: ${printPrimary};
+              --print-border: ${printBorder};
+              --print-dark: ${printDark};
+            }
+            body {
+              font-family: 'Inter', Arial, sans-serif;
+              color: var(--print-foreground);
+              line-height: 1.5;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+              font-size: 9.5pt;
+            }
+            .text-center {
+              text-align: center;
+            }
+            h1 {
+              font-size: 18pt;
+              font-weight: 700;
+              margin: 0 0 4px 0;
+              color: var(--print-foreground);
+              letter-spacing: -0.02em;
+            }
+            .title-role {
+              font-size: 10pt;
+              font-weight: 600;
+              color: var(--print-primary);
+              margin: 0 0 10px 0;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            .contact-info {
+              font-size: 8pt;
+              color: var(--print-muted);
+              margin-bottom: 20px;
+              border-bottom: 1px solid var(--print-border);
+              padding-bottom: 12px;
+            }
+            .section-title {
+              font-size: 9.5pt;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+              border-bottom: 2px solid var(--print-foreground);
+              padding-bottom: 2px;
+              margin: 24px 0 12px 0;
+              color: var(--print-foreground);
+            }
+            .summary {
+              font-size: 8.5pt;
+              margin-bottom: 16px;
+              text-align: justify;
+              color: var(--print-dark);
+            }
+            .item {
+              margin-bottom: 16px;
+            }
+            .item-header {
+              display: flex;
+              justify-content: space-between;
+              font-weight: 600;
+              font-size: 9.2pt;
+              color: var(--print-foreground);
+              margin-bottom: 2px;
+            }
+            .item-subheader {
+              display: flex;
+              justify-content: space-between;
+              font-size: 8.2pt;
+              color: var(--print-muted);
+              font-style: italic;
+              margin-bottom: 6px;
+            }
+            .item-description {
+              font-size: 8.5pt;
+              color: var(--print-dark);
+              margin: 0;
+              padding-left: 18px;
+              text-align: justify;
+            }
+            .item-description li {
+              margin-bottom: 4px;
+            }
+            .skills-block {
+              font-size: 8.5pt;
+              margin-bottom: 8px;
+              color: var(--print-dark);
+            }
+            .skills-label {
+              font-weight: 600;
+              color: var(--print-foreground);
+            }
+            @media print {
+              body {
+                padding: 0;
+                margin: 0;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+  };
+
+  const handleDownloadDocx = () => {
+    toast.info(
+      'Descarga en formato Word (.docx): Esta función exportará tu plantilla ATS directamente en formato Word editable en la versión de producción.',
+      {
+        duration: 5000,
+      },
+    );
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-6xl h-[90vh] md:h-[85vh] max-h-[900px] flex flex-col border-border bg-card p-0 overflow-hidden gap-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Gestión de Currículum</DialogTitle>
+          <DialogDescription>
+            Sube, previsualiza y descarga tu CV en formato original o formato optimizado para ATS.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Header Bar */}
+        <div className="border-b border-border bg-card px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0 pr-12">
+          <div className="space-y-0.5">
+            <h3 className="text-base font-bold text-foreground">Exportar CV ATS</h3>
+            <p className="text-xs text-muted-foreground">
+              Previsualiza y descarga tu currículum optimizado para sistemas ATS.
+            </p>
+          </div>
+        </div>
+
+        {/* Contenido Principal */}
+        <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
+          {/* Left Side: Paper CV Preview Sheet */}
+          <div className="flex-1 bg-zinc-100 dark:bg-zinc-950/70 p-6 overflow-y-auto flex justify-center items-start scrollbar-thin">
+            <div
+              ref={cvPrintRef}
+              className="bg-card text-foreground p-8 shadow-lg border border-border rounded-xs w-full max-w-[680px] min-h-[900px] font-sans leading-relaxed my-2"
+            >
+              {/* Header / Contact Details */}
+              <div className="text-center">
+                <h1 className="text-lg font-bold text-foreground tracking-tight">
+                  {profile.full_name?.toUpperCase() || 'DESARROLLADOR'}
+                </h1>
+                <div className="text-[10px] font-semibold text-primary uppercase tracking-wider mt-1">
+                  {profile.current_job_role || 'Software Engineer'}
+                  {profile.primary_specialty && ` | ${profile.primary_specialty.toUpperCase()}`}
+                  {profile.seniority && ` | ${profile.seniority.toUpperCase()}`}
+                </div>
+                <div className="text-[9px] text-muted-foreground mt-2 pb-3 border-b border-border flex justify-center gap-4 flex-wrap">
+                  {userEmail && (
+                    <span className="text-primary underline font-medium">{userEmail}</span>
+                  )}
+                  {profile.location && (
+                    <>
+                      <span className="text-muted-foreground/60 font-normal">&bull;</span>
+                      <span>{profile.location}</span>
+                    </>
+                  )}
+                  {profile.preferred_modality && (
+                    <>
+                      <span className="text-muted-foreground/60 font-normal">&bull;</span>
+                      <span>{profile.preferred_modality}</span>
+                    </>
+                  )}
+                  {profile.availability && (
+                    <>
+                      <span className="text-muted-foreground/60 font-normal">&bull;</span>
+                      <span>Disponibilidad: {profile.availability}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Profile Summary */}
+              <div className="mt-5">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-2">
+                  Perfil Profesional
+                </div>
+                <p className="text-[9.5px] text-foreground/90 text-justify leading-relaxed">
+                  {defaultDescription}
+                </p>
+              </div>
+
+              {/* Professional Experience */}
+              {profile.work_experience && profile.work_experience.length > 0 && (
+                <div className="mt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-3">
+                    Experiencia Laboral
+                  </div>
+                  <div className="space-y-4">
+                    {profile.work_experience.map((exp, idx) => (
+                      <div key={idx} className="text-[9.5px]">
+                        <div className="flex justify-between items-baseline font-semibold text-foreground">
+                          <span className="text-[10.5px]">{exp.role}</span>
+                          <span className="text-muted-foreground font-normal text-[9.5px]">
+                            {exp.start_date} &ndash; {exp.current ? 'Presente' : exp.end_date || ''}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-baseline text-muted-foreground/80 italic mt-0.5 text-[9.5px]">
+                          <span>{exp.company}</span>
+                          {profile.location && (
+                            <span className="font-normal not-italic">{profile.location}</span>
+                          )}
+                        </div>
+                        {exp.description && (
+                          <ul className="list-disc pl-4 mt-2 text-foreground/90 space-y-1 text-justify">
+                            {exp.description.split('\n').map((bullet, bIdx) => {
+                              const trimmed = bullet.replace(/^[-\s*•]+/, '').trim();
+                              if (!trimmed) return null;
+                              return (
+                                <li key={bIdx} className="leading-relaxed">
+                                  {trimmed}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Education */}
+              {profile.education && profile.education.length > 0 && (
+                <div className="mt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-3">
+                    Educación
+                  </div>
+                  <div className="space-y-3">
+                    {profile.education.map((edu, idx) => (
+                      <div key={idx} className="text-[9.5px]">
+                        <div className="flex justify-between items-baseline font-semibold text-foreground">
+                          <span className="text-[10.5px]">{edu.degree}</span>
+                          <span className="text-muted-foreground font-normal text-[9.5px]">
+                            {edu.start_date} &ndash; {edu.end_date || 'Presente'}
+                          </span>
+                        </div>
+                        <div className="text-muted-foreground/80 mt-0.5 text-[9.5px]">
+                          {edu.institution}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Technical, Tools, Methodologies and Soft Skills */}
+              {(technicalSkills.length > 0 ||
+                toolSkills.length > 0 ||
+                softSkills.length > 0 ||
+                methodologySkills.length > 0) && (
+                <div className="mt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-2">
+                    Habilidades
+                  </div>
+                  <div className="space-y-1.5 text-[9.5px] text-foreground/90">
+                    {technicalSkills.length > 0 && (
+                      <div className="leading-relaxed">
+                        <span className="font-semibold text-foreground">
+                          Habilidades Técnicas:{' '}
+                        </span>
+                        {technicalSkills.join(', ')}
+                      </div>
+                    )}
+                    {toolSkills.length > 0 && (
+                      <div className="leading-relaxed">
+                        <span className="font-semibold text-foreground">
+                          Herramientas y Tecnologías:{' '}
+                        </span>
+                        {toolSkills.join(', ')}
+                      </div>
+                    )}
+                    {softSkills.length > 0 && (
+                      <div className="leading-relaxed">
+                        <span className="font-semibold text-foreground">Habilidades Blandas: </span>
+                        {softSkills.join(', ')}
+                      </div>
+                    )}
+                    {methodologySkills.length > 0 && (
+                      <div className="leading-relaxed">
+                        <span className="font-semibold text-foreground">Metodologías: </span>
+                        {methodologySkills.join(', ')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Certifications */}
+              {profile.certifications && profile.certifications.length > 0 && (
+                <div className="mt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-foreground border-b-2 border-foreground pb-0.5 mb-2">
+                    Certificaciones
+                  </div>
+                  <div className="space-y-1 text-[9.5px] text-foreground/90">
+                    {profile.certifications.map((cert, idx) => (
+                      <div key={idx} className="flex justify-between items-baseline">
+                        <div>
+                          <span className="font-semibold text-foreground">{cert.name}</span>
+                          {cert.issuer && (
+                            <span className="text-muted-foreground"> &mdash; {cert.issuer}</span>
+                          )}
+                        </div>
+                        {cert.date && (
+                          <span className="text-muted-foreground text-[9.5px]">{cert.date}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Side: Control Sidebar */}
+          <div className="w-full md:w-[350px] shrink-0 border-t md:border-t-0 md:border-l border-border bg-card p-6 flex flex-col justify-between overflow-y-auto scrollbar-thin">
+            <div className="space-y-6">
+              <div className="space-y-2 pr-4">
+                <div className="flex items-center gap-2 text-primary font-bold text-sm tracking-wider uppercase">
+                  <FileText className="h-4 w-4" />
+                  <span>CV ATS Generado</span>
+                </div>
+                <h2 className="text-xl font-extrabold text-foreground tracking-tight">
+                  Vista de Exportación
+                </h2>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Este formato de una sola columna está diseñado y optimizado para ser fácilmente
+                  escaneado por las plataformas automáticas de reclutamiento (ATS).
+                </p>
+              </div>
+
+              <div className="border-t border-border pt-6 space-y-4">
+                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                  Configuración del Documento
+                </h3>
+                <div className="space-y-3">
+                  {/* Format Selector: PDF vs DOCX */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Formato de Exportación
+                    </label>
+                    <div className="grid grid-cols-2 gap-1 bg-secondary/35 p-0.5 rounded-lg border border-border/50">
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat('pdf')}
+                        className={cn(
+                          'flex items-center justify-center gap-1.5 py-1.5 px-1.5 text-[10px] font-semibold rounded-md transition-all duration-150 cursor-pointer',
+                          exportFormat === 'pdf'
+                            ? 'bg-card text-foreground shadow-xs'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                      >
+                        <span>PDF (.pdf)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setExportFormat('docx')}
+                        className={cn(
+                          'flex items-center justify-center gap-1.5 py-1.5 px-1.5 text-[10px] font-semibold rounded-md transition-all duration-150 cursor-pointer',
+                          exportFormat === 'docx'
+                            ? 'bg-card text-foreground shadow-xs'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                      >
+                        <span>Word (.docx)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between border-b border-border/40 pb-2 text-xs text-muted-foreground">
+                    <span>Idioma:</span>
+                    <span className="font-semibold text-foreground">Español</span>
+                  </div>
+                  <div className="flex justify-between border-b border-border/40 pb-2 text-xs text-muted-foreground">
+                    <span>Fuente base:</span>
+                    <span className="font-semibold text-foreground">Inter (Sans-Serif)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-6 mt-6 space-y-2">
+              {exportFormat === 'pdf' ? (
+                <Button
+                  onClick={handlePrint}
+                  className="w-full text-xs font-semibold cursor-pointer gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 justify-center py-5"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar PDF
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleDownloadDocx}
+                  className="w-full text-xs font-semibold cursor-pointer gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 justify-center py-5"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar Word
+                </Button>
+              )}
+              <p className="text-[10px] text-center text-muted-foreground/60 leading-tight">
+                {exportFormat === 'pdf'
+                  ? 'Genera el archivo PDF con texto seleccionable compatible con ATS.'
+                  : 'Descarga una versión editable de tu currículum en formato de Word.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
