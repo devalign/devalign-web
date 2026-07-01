@@ -6,6 +6,7 @@ import { Network, Cpu, Layers, Info, X, Sparkles } from 'lucide-react';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 import { useUserProfileSelector } from '@/hooks/use-user-profile-selector';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { useKnowledgeGraph } from '@/hooks/use-knowledge-graph';
@@ -53,6 +54,8 @@ export default function OverviewPage() {
     );
   }
 
+  const hasProfileData = !!(profile.cv_id || (profile.detected_skills && profile.detected_skills.length > 0));
+
   const allAffinities = profile.all_affinities || [];
   const activeCluster = allAffinities.find(
     (a) => clusterParam ? a.cluster_name.toLowerCase() === clusterParam.toLowerCase() : a.is_primary
@@ -62,10 +65,11 @@ export default function OverviewPage() {
 
   return (
     <div className="relative w-full h-screen bg-background flex flex-col">
-      {/* CV Update Banner */}
-      <div className="absolute top-20 lg:top-24 left-3 lg:left-6 right-3 lg:right-6 z-10 max-w-2xl pointer-events-none">
+      {/* CV Update / Empty Profile Banner */}
+      <div className="absolute top-20 lg:top-24 left-3 lg:left-6 right-3 lg:right-6 z-10 max-w-2xl pointer-events-none flex flex-col gap-2">
         <div className="pointer-events-auto">
           <CVUpdateBanner />
+          <EmptyProfileBanner show={!hasProfileData} />
         </div>
       </div>
 

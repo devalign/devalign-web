@@ -56,31 +56,19 @@ export function MobileBottomNav() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 h-12 border-t border-border/80 bg-background/80 backdrop-blur-xl flex lg:hidden justify-around items-center px-2 pb-safe shadow-lg">
       {/* Overview */}
-      {hasCV ? (
-        <Link href={getLinkHref('/overview')} className={iconClass(false)}>
-          <Network className={iconStyle(pathname === '/overview')} strokeWidth={1.75} />
-        </Link>
-      ) : (
-        <div className={iconClass(false, true)} title="Sube tu CV primero">
-          <Network className={iconStyle(false, true)} strokeWidth={1.75} />
-        </div>
-      )}
+      <Link href={getLinkHref('/overview')} className={iconClass(false)}>
+        <Network className={iconStyle(pathname === '/overview')} strokeWidth={1.75} />
+      </Link>
 
       {/* Diagnóstico */}
-      {hasCV ? (
-        <Link href={getLinkHref('/diagnosis')} className={iconClass(false)}>
-          <Activity className={iconStyle(pathname === '/diagnosis')} strokeWidth={1.75} />
-        </Link>
-      ) : (
-        <div className={iconClass(false, true)} title="Sube tu CV primero">
-          <Activity className={iconStyle(false, true)} strokeWidth={1.75} />
-        </div>
-      )}
+      <Link href={getLinkHref('/diagnosis')} className={iconClass(false)}>
+        <Activity className={iconStyle(pathname === '/diagnosis')} strokeWidth={1.75} />
+      </Link>
 
       {/* Mercado */}
-      <div className={iconClass(false, true)} title="Próximamente">
-        <TrendingUp className={iconStyle(false, true)} strokeWidth={1.75} />
-      </div>
+      <Link href={getLinkHref('/market')} className={iconClass(false)}>
+        <TrendingUp className={iconStyle(pathname === '/market')} strokeWidth={1.75} />
+      </Link>
 
       {/* Ajustes */}
       <button
