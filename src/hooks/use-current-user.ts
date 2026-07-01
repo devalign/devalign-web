@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 
-interface UserData {
+export interface UserData {
   id: string;
   email?: string;
   full_name?: string;
@@ -11,65 +12,54 @@ interface UserData {
 }
 
 export function useCurrentUser() {
-  const [data, setData] = useState<UserData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+
+  const query = useQuery<UserData | null, Error>({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error) throw error;
+      if (!user) return null;
+
+      return {
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+        avatar_url: user.user_metadata?.avatar_url,
+      };
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    retry: 1,
+  });
 
   useEffect(() => {
-    const supabase = createClient();
-    let isMounted = true;
-
-    async function fetchUser() {
-      try {
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
-        if (authError) throw authError;
-
-        if (user && isMounted) {
-          setData({
-            id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-            avatar_url: user.user_metadata?.avatar_url,
-          });
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err instanceof Error ? err : new Error('Error fetching user'));
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchUser();
-
-    // Subscribe to auth state changes to update the user in real time
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        setData({
+        const newUser: UserData = {
           id: session.user.id,
           email: session.user.email,
           full_name:
             session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
           avatar_url: session.user.user_metadata?.avatar_url,
-        });
+        };
+        queryClient.setQueryData(['currentUser'], newUser);
+        queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       } else if (event === 'SIGNED_OUT') {
-        setData(null);
+        queryClient.setQueryData(['currentUser'], null);
+        queryClient.clear(); // Clear all cached queries on logout
       }
     });
 
     return () => {
-      isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase.auth, queryClient]);
 
-  return { data, isLoading, error };
+  return query;
 }

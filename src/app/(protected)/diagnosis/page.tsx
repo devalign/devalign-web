@@ -31,15 +31,14 @@ import { StrengthsDrawer } from './_components/strengths-drawer';
 import { GapsDrawer } from './_components/gaps-drawer';
 import { ProfileRadarCard } from './_components/profile-radar-card';
 import { ClusterHeaderCard } from './_components/cluster-header-card';
-import { useMarketClusters } from '@/hooks/use-market-clusters';
+import { useClusterDiagnostic } from '@/hooks/use-cluster-diagnostic';
 
 // Reallocated Profile Components (CV & Graph)
 import CVUploader from '../profile/_components/cv/cv-uploader';
 import CVAtsPreviewModal from '../profile/_components/cv/cv-ats-preview-modal';
 
 function DiagnosisContent() {
-  const { data: profile, isLoading, error } = useUserProfileSelector();
-  const { data: clusters = [] } = useMarketClusters();
+  const { data: profile, isLoading: isProfileLoading, error: profileError } = useUserProfileSelector();
   const { startAnalysis, isAnalyzing } = useCVAnalysis();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -90,14 +89,34 @@ function DiagnosisContent() {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
+  // Determine active cluster name
+  const allAffinities = profile?.all_affinities || [];
+  const activeCluster =
+    allAffinities.find((a) =>
+      clusterParam ? a.cluster_name.toLowerCase() === clusterParam.toLowerCase() : a.is_primary,
+    ) ||
+    allAffinities[0] ||
+    null;
+  const activeClusterName = activeCluster?.cluster_name || profile?.primary_specialty || null;
+
+  // Load diagnostic details
+  const {
+    data: diagnostic,
+    isLoading: isDiagLoading,
+    error: diagError,
+  } = useClusterDiagnostic(activeClusterName);
+
+  const isLoading = isProfileLoading || isDiagLoading;
+  const error = profileError || diagError;
+
   if (isLoading) {
     return <LoadingScreen message="Cargando tu diagnóstico..." />;
   }
 
-  if (error || !profile) {
+  if (error || !profile || !diagnostic) {
     return (
       <ErrorFallback
-        error={error || new Error('No se pudo cargar el perfil del usuario')}
+        error={error || new Error('No se pudo cargar el diagnóstico')}
         onRetry={() => window.location.reload()}
         onHome={() => router.push('/')}
         fullPage
@@ -105,21 +124,10 @@ function DiagnosisContent() {
     );
   }
 
-  // Active cluster calculations
-  const allAffinities = profile.all_affinities || [];
-  const activeCluster =
-    allAffinities.find((a) =>
-      clusterParam ? a.cluster_name.toLowerCase() === clusterParam.toLowerCase() : a.is_primary,
-    ) ||
-    allAffinities[0] ||
-    null;
-
-  const activeScore = activeCluster
-    ? Math.round(activeCluster.affinity_score * 100)
-    : profile.alignment_score;
+  const activeScore = Math.round(diagnostic.affinity_score * 100);
 
   // Process strengths and gaps for listing
-  const strengths = (activeCluster?.detected_skills || [])
+  const strengths = (diagnostic.detected_skills || [])
     .map((s) => {
       const ict = s.ict_score ?? 0;
       let level = 'Básico';
@@ -151,7 +159,7 @@ function DiagnosisContent() {
       return b.demandPercentage - a.demandPercentage;
     });
 
-  const gaps = (activeCluster?.skill_gaps || [])
+  const gaps = (diagnostic.skill_gaps || [])
     .map((g) => {
       const importanceMap: Record<string, number> = {
         critical: 3,
@@ -179,8 +187,8 @@ function DiagnosisContent() {
     });
 
   // Header date formatting
-  const formattedDate = profile.last_analysis_date
-    ? new Date(profile.last_analysis_date).toLocaleDateString('es-ES', {
+  const formattedDate = diagnostic.last_analysis_date
+    ? new Date(diagnostic.last_analysis_date).toLocaleDateString('es-ES', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
@@ -188,14 +196,12 @@ function DiagnosisContent() {
     : 'Recientemente';
 
   // Matching cluster for market stats
-  const totalOffers = clusters.reduce((sum, c) => sum + c.job_offer_count, 0);
-  const matchingMarketCluster = clusters.find(
-    (c) => c.name.toLowerCase() === (activeCluster?.cluster_name || '').toLowerCase(),
-  );
-  const jobOfferCount = matchingMarketCluster?.job_offer_count || 0;
+  const jobOfferCount = diagnostic.job_offer_count;
+  const totalOffers = profile.all_affinities?.reduce((sum, c) => sum + (c.job_offer_count ?? 0), 0) || 0;
   const marketPercent =
     totalOffers > 0 ? parseFloat(((jobOfferCount / totalOffers) * 100).toFixed(1)) : 0;
-  const topSkills = matchingMarketCluster?.top_skills || [];
+  const topSkills = diagnostic.top_skills || [];
+
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -211,7 +217,7 @@ function DiagnosisContent() {
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
-              Diagnóstico · {activeCluster?.cluster_name || profile.primary_specialty}
+              Diagnóstico · {diagnostic.cluster_name}
             </h1>
 
             <div className="relative shrink-0">
@@ -231,7 +237,7 @@ function DiagnosisContent() {
                   <div className="fixed inset-0 z-40" onClick={() => setIsSpecialtyOpen(false)} />
                   <div className="absolute right-0 top-full mt-1.5 w-56 bg-card border border-border rounded-lg shadow-lg z-50 p-1">
                     {allAffinities.map((cluster) => {
-                      const isActive = cluster.cluster_name === activeCluster?.cluster_name;
+                      const isActive = cluster.cluster_name === diagnostic.cluster_name;
                       return (
                         <button
                           key={cluster.cluster_name}
@@ -275,11 +281,11 @@ function DiagnosisContent() {
           {/* Left Column (col-span-4): Perfil y Radar */}
           <div className="xl:col-span-4 flex flex-col">
             <ProfileRadarCard
-              fullName={profile.full_name || 'Desarrollador'}
-              roleTitle={profile.current_job_role || ''}
-              seniority={profile.seniority}
-              totalSkills={profile.detected_skills.length}
-              domainAffinities={profile.domain_affinities || []}
+              fullName={diagnostic.full_name || 'Desarrollador'}
+              roleTitle={diagnostic.current_job_role || ''}
+              seniority={diagnostic.seniority}
+              totalSkills={diagnostic.total_profile_skills}
+              domainAffinities={diagnostic.domain_affinities || []}
               isLoading={isAnalyzing}
               className="h-full"
             />
@@ -289,7 +295,7 @@ function DiagnosisContent() {
           <div className="xl:col-span-8 flex flex-col gap-6">
             {/* Header: Especialidad analizada y estadísticas de mercado */}
             <ClusterHeaderCard
-              primarySpecialty={activeCluster?.cluster_name || profile.primary_specialty}
+              primarySpecialty={diagnostic.cluster_name}
               currentScore={activeScore}
               lastAnalysisDate={formattedDate}
               jobOfferCount={jobOfferCount}
@@ -317,13 +323,13 @@ function DiagnosisContent() {
               {/* Right Sub-column: Vertical Market Insights (Blue Rectangle 1) */}
               <div className="flex flex-col gap-6">
                 <ClusterDemandCard
-                  clusterName={activeCluster?.cluster_name || profile.primary_specialty}
-                  marketInsights={activeCluster?.market_insights}
+                  clusterName={diagnostic.cluster_name}
+                  marketInsights={diagnostic.market_insights || undefined}
                   isLoading={isAnalyzing}
                 />
                 <MarketImpactCard
                   marketGaps={gaps}
-                  marketInsights={activeCluster?.market_insights}
+                  marketInsights={diagnostic.market_insights || undefined}
                   isLoading={isAnalyzing}
                 />
                 <AiInsightCard marketGaps={gaps} isLoading={isAnalyzing} />
@@ -348,7 +354,7 @@ function DiagnosisContent() {
                 <>
                   En promedio, los postulantes a{' '}
                   <strong className="text-foreground">
-                    {activeCluster?.cluster_name || profile.primary_specialty}
+                    {diagnostic.cluster_name}
                   </strong>{' '}
                   solo cumplen con el <strong className="text-emerald-500">58%</strong> del perfil
                   técnico ideal. ¡Destacar aquí te da una gran ventaja!

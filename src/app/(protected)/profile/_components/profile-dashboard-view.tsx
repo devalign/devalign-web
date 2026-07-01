@@ -47,7 +47,8 @@ import { Input } from '@/components/ui/input';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserCVs } from '@/hooks/use-user-cvs';
-import { useUpdateUserSkills, useUserProfile } from '@/hooks/use-user-profile';
+import { useUpdateUserSkills } from '@/hooks/use-user-profile';
+import { useUserProfileSelector } from '@/hooks/use-user-profile-selector';
 import { cn } from '@/lib/utils';
 import type { ClusterAffinityItem, SkillItem, UserProfileData } from '@/types';
 
@@ -181,14 +182,9 @@ function EmptyProfileState({ onUploadSuccess }: { onUploadSuccess: (newCvId: str
 export default function ProfileDashboardView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: user, isLoading: isUserLoading, error: userError } = useCurrentUser();
-  const {
-    data: profile,
-    isLoading: isProfileLoading,
-    error: profileError,
-    refetch: refetchProfile,
-  } = useUserProfile();
-  const { data: cvData, isLoading: isCvLoading } = useUserCVs();
+  const { data: user } = useCurrentUser();
+  const { data: profile, isLoading, error } = useUserProfileSelector();
+  const { data: cvData } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
   const { startAnalysis } = useCVAnalysis();
 
@@ -224,31 +220,15 @@ export default function ProfileDashboardView() {
   const fullName = profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Usuario';
   const roleTitle = profile?.current_job_role || 'Rol pendiente de detectar';
   const primarySpecialty = profile?.primary_specialty || 'Especialidad pendiente';
-  const summary = buildProfessionalSummary(profile, roleTitle);
+  const summary = buildProfessionalSummary(profile || undefined, roleTitle);
   const initials = getInitials(fullName);
 
   const affinities = useMemo(() => {
-    const list: ClusterAffinityItem[] =
-      profile?.all_affinities && profile.all_affinities.length > 0
-        ? profile.all_affinities
-        : [
-            ...(profile?.primary_specialty
-              ? [
-                  {
-                    cluster_id: 'primary',
-                    cluster_name: profile.primary_specialty,
-                    affinity_score: (profile.alignment_score || 0) / 100,
-                    is_primary: true,
-                  } satisfies ClusterAffinityItem,
-                ]
-              : []),
-            ...(profile?.secondary_affinities || []),
-          ];
-
-    return [...list]
+    if (!profile?.all_affinities) return [];
+    return [...profile.all_affinities]
       .filter((item) => item.cluster_name)
       .sort((a, b) => normalizeScore(b.affinity_score) - normalizeScore(a.affinity_score));
-  }, [profile]);
+  }, [profile?.all_affinities]);
 
   const hasSkillChanges = useMemo(() => {
     const original = JSON.stringify(buildSkillItems(profile?.detected_skills));
@@ -316,7 +296,6 @@ export default function ProfileDashboardView() {
     const toastId = toast.loading('Guardando competencias...');
     try {
       await updateSkillsMutation.mutateAsync(skills);
-      await refetchProfile();
       toast.dismiss(toastId);
       toast.success('Competencias actualizadas.');
     } catch (error) {
@@ -330,21 +309,18 @@ export default function ProfileDashboardView() {
     router.push(`/diagnosis?cluster=${encodeURIComponent(clusterName)}`);
   };
 
-  const isLoading = isUserLoading || isProfileLoading || isCvLoading;
-
-  const queryError = userError || profileError;
-  if (queryError) {
+  if (error) {
     return (
       <ErrorFallback
-        error={queryError}
-        onRetry={() => refetchProfile()}
+        error={error}
+        onRetry={() => window.location.reload()}
         onHome={() => (window.location.href = '/')}
         fullPage
       />
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !profile) {
     return <ProfileSkeleton />;
   }
 

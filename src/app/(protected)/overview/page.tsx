@@ -29,7 +29,8 @@ export default function OverviewPage() {
   const clusterParam = searchParams.get('cluster');
 
   const { data: graphData, isLoading: isGraphLoading, error: graphError } = useKnowledgeGraph(
-    clusterParam || profile?.primary_specialty
+    clusterParam || profile?.primary_specialty,
+    !!(clusterParam || profile?.primary_specialty)
   );
 
   // Node selection & view states

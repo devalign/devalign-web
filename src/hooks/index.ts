@@ -11,3 +11,5 @@ export { useMarketClusters } from './use-market-clusters';
 export { useKnowledgeGraph } from './use-knowledge-graph';
 export { useGraphTheme } from './use-graph-theme';
 export { useCurrentUser } from './use-current-user';
+export { useClusterDiagnostic } from './use-cluster-diagnostic';
+

@@ -3,7 +3,7 @@ import { GraphData } from '@/app/(protected)/profile/_components/graph/knowledge
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { apiClient } from '@/lib/api/api-client';
 
-export function useKnowledgeGraph(clusterName?: string | null) {
+export function useKnowledgeGraph(clusterName?: string | null, enabled: boolean = true) {
   const { data: user } = useCurrentUser();
 
   return useQuery<GraphData, Error>({
@@ -14,6 +14,7 @@ export function useKnowledgeGraph(clusterName?: string | null) {
         : `/market/skills-graph`;
       return apiClient<GraphData>(endpoint, { timeout: 30000 }); // 30s timeout para operaciones pesadas
     },
+    enabled: enabled && !!user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,
   });

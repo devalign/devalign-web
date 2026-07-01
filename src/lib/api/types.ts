@@ -82,6 +82,8 @@ export interface ClusterAffinityItem {
   compatible_roles?: CompatibleRoleItem[];
   detected_skills?: SkillItem[];
   skill_gaps?: SkillItem[];
+  job_offer_count?: number;
+  top_skills?: string[];
 }
 
 export interface DomainAffinityItem {
