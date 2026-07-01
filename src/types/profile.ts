@@ -55,4 +55,5 @@ export interface UserProfileData {
   work_experience: WorkExperienceItem[];
   education: EducationItem[];
   certifications: CertificationItem[];
+  last_analysis_date?: string | null;
 }

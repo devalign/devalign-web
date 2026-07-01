@@ -30,6 +30,7 @@ import CVAtsPreviewModal from './cv/cv-ats-preview-modal';
 import CVHistoryModal from './cv/cv-history-modal';
 import CVUploader from './cv/cv-uploader';
 import SkillEvidenceModal from './skills/skill-evidence-modal';
+import { DomainAffinityCard } from './domain-affinity-card';
 import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { Badge } from '@/components/ui/badge';
@@ -359,7 +360,7 @@ export default function ProfileDashboardView() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
         <CVUpdateBanner />
 
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:mt-10">
@@ -608,6 +609,8 @@ export default function ProfileDashboardView() {
                 )}
               </CardContent>
             </Card>
+
+            <DomainAffinityCard domainAffinities={profile?.domain_affinities} />
 
             <Card className="card-standard overflow-hidden">
               <CardContent className="space-y-5">

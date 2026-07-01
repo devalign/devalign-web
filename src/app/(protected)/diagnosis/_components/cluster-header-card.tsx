@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Briefcase, Target, Clock3, Award, FileText, ChevronRight } from 'lucide-react';
+import { Briefcase, Clock3, Award, FileText, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -28,32 +28,13 @@ export function ClusterHeaderCard({
   isLoading = false,
   className,
 }: ClusterHeaderCardProps) {
-  const getScoreState = (score: number) => {
-    if (score >= 75)
-      return {
-        label: 'Alta afinidad',
-        color: 'text-success bg-success/10 border-success/30 dark:border-success/20',
-      };
-    if (score >= 50)
-      return {
-        label: 'Media afinidad',
-        color: 'text-warning bg-warning/10 border-warning/30 dark:border-warning/20',
-      };
-    return {
-      label: 'Baja afinidad',
-      color: 'text-destructive bg-destructive/10 border-destructive/30 dark:border-destructive/20',
-    };
-  };
-
-  const scoreState = getScoreState(currentScore);
-
   return (
     <Card
       className={cn('relative overflow-hidden p-5 card-standard flex flex-col gap-4', className)}
     >
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         {/* Left Side: Specialty Info & Stats */}
-        <div className="space-y-2.5 flex-1 min-w-0">
+        <div className="space-y-2 flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
               <Briefcase className="w-4 h-4" />
@@ -62,38 +43,34 @@ export function ClusterHeaderCard({
               Especialidad Analizada
             </span>
           </div>
-          <h2 className="text-sm font-semibold text-foreground tracking-tight truncate leading-none">
-            Clúster de {primarySpecialty}
-          </h2>
+          <div className="flex items-baseline gap-1.5 flex-wrap pt-0.5">
+            <span className="text-2xl font-black tracking-tight text-foreground leading-none">
+              {currentScore}%
+            </span>
+            <span
+              className={cn(
+                'text-[10px] font-bold uppercase tracking-wider',
+                currentScore >= 75
+                  ? 'text-success'
+                  : currentScore >= 50
+                    ? 'text-warning'
+                    : 'text-destructive',
+              )}
+            >
+              {currentScore >= 75
+                ? 'afinidad alta'
+                : currentScore >= 50
+                  ? 'afinidad media'
+                  : 'afinidad baja'}
+            </span>
+            <span className="text-xs text-muted-foreground ml-1">
+              con el Clúster de {primarySpecialty}
+            </span>
+          </div>
         </div>
 
         {/* Right Side: Score & Date Blocks */}
         <div className="flex flex-wrap gap-3 shrink-0">
-          {/* Affinity block */}
-          <div className="flex items-center gap-2.5 p-2 px-3.5 rounded-xl border border-border/40 bg-secondary/10 min-w-[140px]">
-            <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-              <Target className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-wider block">
-                Afinidad
-              </span>
-              <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-base font-black text-foreground tracking-tight tabular-nums">
-                  {currentScore}%
-                </span>
-                <span
-                  className={cn(
-                    'inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-extrabold border leading-none',
-                    scoreState.color,
-                  )}
-                >
-                  {scoreState.label.split(' ')[0]}
-                </span>
-              </div>
-            </div>
-          </div>
-
           {/* Market Share block */}
           {marketPercent > 0 && (
             <div className="flex items-center gap-2.5 p-2 px-3.5 rounded-xl border border-border/40 bg-secondary/10 min-w-[140px]">
@@ -102,7 +79,7 @@ export function ClusterHeaderCard({
               </div>
               <div className="min-w-0">
                 <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-wider block">
-                  Cuota de mercado
+                  Mercado
                 </span>
                 <span className="text-xs font-black text-foreground block truncate mt-0.5">
                   {marketPercent}%{' '}

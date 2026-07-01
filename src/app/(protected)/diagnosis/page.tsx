@@ -24,7 +24,6 @@ import { InsightCard } from '@/components/shared/insight-card';
 import { UserHeroCard } from './_components/user-hero-card';
 import { StrengthsCard } from './_components/strengths-card';
 import { PriorityGapsCard } from './_components/priority-gaps-card';
-import { AffinityRadarChart } from './_components/affinity-radar-chart';
 import { ClusterDemandCard } from './_components/cluster-demand-card';
 import { MarketImpactCard } from './_components/market-impact-card';
 import { AiInsightCard } from './_components/ai-insight-card';
@@ -121,29 +120,72 @@ function DiagnosisContent() {
 
   // Process strengths and gaps for listing
   const strengths = (activeCluster?.detected_skills || [])
-    .map((s) => ({
-      name: s.name,
-      level: s.market_importance === 'critical' ? 'Avanzado' : 'Intermedio',
-      score: s.market_importance === 'critical' ? 3 : 2,
-      demandPercentage: s.market_demand_percentage ?? 100,
-      category: s.skill_type,
-      ict_score: s.ict_score,
-      trend: s.trend,
-    }))
-    .sort((a, b) => b.demandPercentage - a.demandPercentage);
+    .map((s) => {
+      const ict = s.ict_score ?? 0;
+      let level = 'Básico';
+      let score = 1;
+      if (ict >= 7.0) {
+        level = 'Avanzado';
+        score = 3;
+      } else if (ict >= 4.0) {
+        level = 'Intermedio';
+        score = 2;
+      }
+
+      return {
+        name: s.name,
+        level,
+        score,
+        demandPercentage: s.market_demand_percentage ?? 100,
+        category: s.skill_type,
+        ict_score: s.ict_score,
+        trend: s.trend,
+      };
+    })
+    .sort((a, b) => {
+      // Sort by candidate proficiency score (Avanzado > Intermedio > Básico) first
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      // Tie breaker: market demand percentage descending
+      return b.demandPercentage - a.demandPercentage;
+    });
 
   const gaps = (activeCluster?.skill_gaps || [])
-    .map((g) => ({
-      name: g.name,
-      skill_type: g.skill_type,
-      market_importance: g.market_importance ?? 'medium',
-      market_demand_percentage: g.market_demand_percentage ?? 50,
-      trend: g.trend,
-    }))
-    .sort((a, b) => b.market_demand_percentage - a.market_demand_percentage);
+    .map((g) => {
+      const importanceMap: Record<string, number> = {
+        critical: 3,
+        high: 2,
+        medium: 1,
+      };
+      const importanceScore = importanceMap[g.market_importance ?? 'medium'] ?? 1;
+
+      return {
+        name: g.name,
+        skill_type: g.skill_type,
+        market_importance: g.market_importance ?? 'medium',
+        importanceScore,
+        market_demand_percentage: g.market_demand_percentage ?? 50,
+        trend: g.trend,
+      };
+    })
+    .sort((a, b) => {
+      // Sort by importance priority score (Alta > Media > Baja) first
+      if (b.importanceScore !== a.importanceScore) {
+        return b.importanceScore - a.importanceScore;
+      }
+      // Tie breaker: market demand percentage descending
+      return b.market_demand_percentage - a.market_demand_percentage;
+    });
 
   // Header date formatting
-  const formattedDate = activeCluster ? 'Recientemente' : 'Recientemente';
+  const formattedDate = profile.last_analysis_date
+    ? new Date(profile.last_analysis_date).toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : 'Recientemente';
 
   // Matching cluster for market stats
   const totalOffers = clusters.reduce((sum, c) => sum + c.job_offer_count, 0);
@@ -156,7 +198,7 @@ function DiagnosisContent() {
   const topSkills = matchingMarketCluster?.top_skills || [];
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         <CVUpdateBanner />
 
         {/* Page Header */}

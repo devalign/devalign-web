@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useGraphTheme } from '@/hooks/use-graph-theme';
 import { GraphLegend } from './graph-legend';
 import { GraphLoading } from './graph-loading';
@@ -48,6 +48,18 @@ export function KnowledgeGraphVisualization({
 }: KnowledgeGraphVisualizationProps) {
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const { isDark, colors } = useGraphTheme();
+
+  const nodeCounts = useMemo(() => {
+    let acquired = 0;
+    let gap = 0;
+    let neutral = 0;
+    (data?.nodes || []).forEach((n) => {
+      if (n.status === 'acquired') acquired++;
+      else if (n.status === 'gap') gap++;
+      else if (n.status === 'neutral') neutral++;
+    });
+    return { acquired, gap, neutral };
+  }, [data.nodes]);
 
   useEffect(() => {
     const container = document.getElementById('graph-container');
@@ -125,7 +137,7 @@ export function KnowledgeGraphVisualization({
   return (
     <div className="relative w-full h-full overflow-hidden bg-transparent touch-none">
       <div id="graph-container" className="relative w-full h-full overflow-hidden bg-transparent touch-none">
-        {!isLegendHidden && <GraphLegend />}
+        {!isLegendHidden && <GraphLegend counts={nodeCounts} />}
 
         <ForceGraph2D
           width={dimensions.width}

@@ -49,9 +49,13 @@ export function useUserProfileSelector() {
     const activeCluster = allAffinities.find((a) => a.is_primary) || allAffinities[0] || null;
     const activeScore = activeCluster ? Math.round(activeCluster.affinity_score * 100) : 50;
 
+    const activeCvId = profile?.cv_id || cvData?.cvs?.[0]?.cv_id || null;
+    const currentCv = cvData?.cvs?.find((cv) => cv.cv_id === activeCvId) || cvData?.cvs?.[0];
+    const lastAnalysisDate = currentCv?.uploaded_at || null;
+
     return {
       user_id: user?.id || profile?.user_id || '',
-      cv_id: profile?.cv_id || cvData?.cvs?.[0]?.cv_id || null,
+      cv_id: activeCvId,
       full_name: fullName,
       current_job_role: roleTitle,
       seniority: seniority,
@@ -69,6 +73,7 @@ export function useUserProfileSelector() {
       education,
       work_experience: experiences,
       certifications,
+      last_analysis_date: lastAnalysisDate,
     };
   }, [profile, user, cvData]);
 

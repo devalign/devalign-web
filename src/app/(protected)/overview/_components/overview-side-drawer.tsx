@@ -4,20 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   ChevronRight,
-  ChevronLeft,
-  Settings2,
-  Compass,
   ChevronDown,
   ChevronUp,
   Network,
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
-import { SimpleAffinityRadar } from '@/app/(protected)/diagnosis/_components/simple-affinity-radar';
+import { ProfileRadarCard } from '@/app/(protected)/diagnosis/_components/profile-radar-card';
+import { GraphNode } from '../../profile/_components/graph/knowledge-graph-visualization';
 import { cn } from '@/lib/utils';
+import { ClusterAffinityItem } from '@/lib/api/types';
 
 export type FilterMode = 'all' | 'strengths' | 'gaps';
 
@@ -26,6 +24,7 @@ interface OverviewSideDrawerProps {
   fullName: string;
   roleTitle: string;
   seniority: string;
+  totalSkills: number;
   alignmentScore?: number;
   primarySpecialty?: string;
   isLoading?: boolean;
@@ -33,6 +32,9 @@ interface OverviewSideDrawerProps {
   onOpenChange: (open: boolean) => void;
   activeFilter?: FilterMode;
   onFilterChange?: (filter: FilterMode) => void;
+  graphNodes?: GraphNode[];
+  onNodeClick?: (node: GraphNode) => void;
+  activeCluster?: ClusterAffinityItem | null;
 }
 
 export function OverviewSideDrawer({
@@ -40,82 +42,89 @@ export function OverviewSideDrawer({
   fullName,
   roleTitle,
   seniority,
-  alignmentScore,
-  primarySpecialty,
+  totalSkills,
   isLoading = false,
   isOpen,
   onOpenChange,
   activeFilter,
   onFilterChange,
+  graphNodes = [],
+  onNodeClick,
+  activeCluster,
 }: OverviewSideDrawerProps) {
-  const getScoreState = (score: number) => {
-    if (score >= 75)
-      return {
-        label: 'Alta afinidad',
-        color: 'text-success bg-success/10 border-success/35 hover:bg-success/10',
-      };
-    if (score >= 50)
-      return {
-        label: 'Media afinidad',
-        color: 'text-warning bg-warning/10 border-warning/35 hover:bg-warning/10',
-      };
-    return {
-      label: 'Baja afinidad',
-      color:
-        'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-500/10 dark:border-red-500/20 hover:bg-red-50 dark:hover:bg-red-500/10',
-    };
-  };
+  // Filter and sort nodes for Strengths (acquired) and Gaps (gap)
+  const filteredNodes = React.useMemo(() => {
+    if (!activeFilter || activeFilter === 'all') return [];
 
-  const scoreState = alignmentScore !== undefined ? getScoreState(alignmentScore) : null;
+    const statusToFilter = activeFilter === 'strengths' ? 'acquired' : 'gap';
+    const nodes = graphNodes.filter((node) => node.status === statusToFilter);
+
+    if (activeFilter === 'strengths') {
+      const skillsMap = new Map(
+        (activeCluster?.detected_skills || []).map((s) => {
+          const nameLower = s.name.toLowerCase();
+          const ict = s.ict_score ?? 0;
+          let score = 1;
+          if (ict >= 7.0) score = 3;
+          else if (ict >= 4.0) score = 2;
+
+          return [nameLower, { score, demand: s.market_demand_percentage ?? 0 }];
+        })
+      );
+
+      return [...nodes].sort((a, b) => {
+        const aDetail = skillsMap.get(a.label.toLowerCase()) || { score: 1, demand: 0 };
+        const bDetail = skillsMap.get(b.label.toLowerCase()) || { score: 1, demand: 0 };
+
+        if (bDetail.score !== aDetail.score) {
+          return bDetail.score - aDetail.score;
+        }
+        return bDetail.demand - aDetail.demand;
+      });
+    } else {
+      const gapsMap = new Map(
+        (activeCluster?.skill_gaps || []).map((g) => {
+          const nameLower = g.name.toLowerCase();
+          const importanceMap: Record<string, number> = {
+            critical: 3,
+            high: 2,
+            medium: 1,
+          };
+          const importanceScore = importanceMap[g.market_importance ?? 'medium'] ?? 1;
+
+          return [nameLower, { importanceScore, demand: g.market_demand_percentage ?? 0 }];
+        })
+      );
+
+      return [...nodes].sort((a, b) => {
+        const aDetail = gapsMap.get(a.label.toLowerCase()) || { importanceScore: 1, demand: 0 };
+        const bDetail = gapsMap.get(b.label.toLowerCase()) || { importanceScore: 1, demand: 0 };
+
+        if (bDetail.importanceScore !== aDetail.importanceScore) {
+          return bDetail.importanceScore - aDetail.importanceScore;
+        }
+        return bDetail.demand - aDetail.demand;
+      });
+    }
+  }, [graphNodes, activeFilter, activeCluster]);
 
   return (
     <>
-      {/* UNIFIED VERTICAL COLLAPSING CARD */}
       <div className="flex pointer-events-auto w-full">
-        <Card className="overflow-hidden py-0 flex flex-col w-full card-glass! rounded-t-3xl lg:rounded-2xl border border-x border-b-0 lg:border border-border/30 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.4)] transition-all duration-300 ease-in-out">
-          {/* Header (Mini Card) - Always visible, acts as toggle */}
-          <div
-            className="flex flex-col cursor-pointer p-4 pb-3 border-b border-border/10 hover:bg-muted/30 transition-colors rounded-t-3xl lg:rounded-t-2xl"
-            onClick={() => onOpenChange(!isOpen)}
-          >
-            {/* Handle */}
-            <div className="flex justify-center mb-3">
+        <Card className="overflow-visible py-0 flex flex-col w-full card-glass! rounded-t-3xl lg:rounded-2xl border border-x border-b-0 lg:border border-border/30 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.4)] transition-all duration-300 ease-in-out">
+          {/* Header area - acts as handle & contains filters */}
+          <div className="flex flex-col p-3 pb-0 border-b border-border/10">
+            {/* Handle for mobile drag */}
+            <div
+              className="flex justify-center lg:hidden cursor-pointer"
+              onClick={() => onOpenChange(!isOpen)}
+            >
               <div className="w-12 h-1.5 rounded-full bg-muted-foreground/30" />
-            </div>
-
-            {/* Summary Info */}
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider mb-1.5">
-                  <Compass className="w-3.5 h-3.5 text-info" />
-                  <span className="truncate">{primarySpecialty || 'Especialidad'}</span>
-                </div>
-                {scoreState && (
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      'text-[10px] font-bold px-2 py-0.5 w-fit border-border/30',
-                      scoreState.color,
-                    )}
-                  >
-                    {scoreState.label}
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="text-3xl font-black text-foreground tracking-tighter">
-                  {alignmentScore !== undefined ? `${alignmentScore}%` : '--'}
-                </span>
-              </div>
             </div>
 
             {/* Segmented Filter Control Row */}
             {activeFilter && onFilterChange && (
-              <div
-                className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-border/10"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <div className="flex items-center justify-between gap-2">
                 <div className="flex bg-muted/65 p-0.5 rounded-lg border border-border/20 flex-1">
                   {[
                     { id: 'all' as FilterMode, label: 'Todo', icon: Network },
@@ -166,50 +175,79 @@ export function OverviewSideDrawer({
               isOpen ? 'max-h-[60vh] lg:max-h-[70vh] opacity-100' : 'max-h-0 opacity-0',
             )}
           >
-            {/* User Info & Adjust */}
-            <div className="p-4 flex justify-between items-start gap-4 border-y border-border shrink-0 bg-muted/5">
-              <div className="space-y-1 flex-1 min-w-0">
-                <h2 className="text-sm font-black tracking-tight text-foreground truncate">
-                  {fullName}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <p className="text-[11px] text-muted-foreground font-bold">{roleTitle}</p>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold font-mono bg-primary/10 text-primary uppercase">
-                    {seniority}
-                  </span>
+            {/* Tab content */}
+            <div className="flex-1 overflow-y-auto scrollbar-none min-h-[60vh]">
+              {activeFilter === 'all' ? (
+                <div className="flex-1 overflow-visible">
+                  <ProfileRadarCard
+                    fullName={fullName}
+                    roleTitle={roleTitle}
+                    seniority={seniority}
+                    totalSkills={totalSkills}
+                    domainAffinities={domainAffinities}
+                    isLoading={isLoading}
+                    className="border-0 shadow-none bg-transparent p-0 card-glass-none!"
+                  />
                 </div>
-              </div>
-              <div className="shrink-0">
-                <Link href="/profile">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary hover:bg-primary/10 text-[10px] h-7 cursor-pointer gap-1 px-2"
-                  >
-                    <Settings2 className="w-3 h-3" />
-                    Ajustar
-                  </Button>
-                </Link>
-              </div>
-            </div>
+              ) : (
+                <div className="flex-1 flex flex-col p-4 space-y-2.5 h-full">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest">
+                      {activeFilter === 'strengths'
+                        ? 'Competencias Adquiridas'
+                        : 'Brechas por Desarrollar'}
+                    </span>
+                    <span className="text-[9px] font-extrabold text-muted-foreground/80 bg-secondary/80 border border-border/40 px-2 py-0.5 rounded-full">
+                      {filteredNodes.length}
+                    </span>
+                  </div>
 
-            {/* Simple Radar Chart */}
-            <div className="flex-1 overflow-y-auto scrollbar-none min-h-[200px] flex flex-col items-center justify-center py-4">
-              <SimpleAffinityRadar
-                domainAffinities={domainAffinities}
-                isLoading={isLoading}
-              />
+                  <div className="h-full space-y-2 overflow-y-auto pr-1 scrollbar-thin">
+                    {filteredNodes.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-10 font-medium">
+                        No se detectaron {activeFilter === 'strengths' ? 'fortalezas' : 'brechas'}{' '}
+                        en esta especialidad.
+                      </p>
+                    ) : (
+                      filteredNodes.map((node) => (
+                        <div
+                          key={node.id}
+                          onClick={() => onNodeClick && onNodeClick(node)}
+                          className="flex items-center justify-between p-2.5 rounded-xl border border-border/40 bg-secondary/15 hover:bg-secondary/30 hover:border-primary/30 transition-all cursor-pointer group"
+                        >
+                          <div className="flex flex-col min-w-0 pr-2">
+                            <span className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                              {node.label}
+                            </span>
+                            <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">
+                              {node.group}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {node.status === 'acquired' ? (
+                              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                            ) : (
+                              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-warning animate-pulse" />
+                            )}
+                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/45 group-hover:text-primary transition-all group-hover:translate-x-0.5" />
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-b border-border/10 bg-muted shrink-0">
+            <div className="p-3 border-t border-border/10 bg-muted shrink-0 rounded-b-2xl">
               <Link href="/diagnosis" className="block w-full">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="w-full text-[11px] font-bold h-9 text-muted-foreground hover:text-foreground flex items-center justify-center gap-1.5 transition-all rounded-lg cursor-pointer hover:bg-muted/50"
                 >
-                  Ver Diagnóstico Completo
+                  Ver diagnóstico completo
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>

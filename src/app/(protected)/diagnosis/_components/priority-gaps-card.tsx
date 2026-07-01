@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowRight, Loader2, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowRight, Loader2, AlertTriangle, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import { SkillItem } from '@/lib/api/types';
 
 interface PriorityGapsCardProps {
@@ -31,7 +31,7 @@ export function PriorityGapsCard({
   isLoading = false,
 }: PriorityGapsCardProps) {
   return (
-    <Card className="flex flex-col h-full relative overflow-hidden min-h-[180px]">
+    <Card className="flex flex-col h-full relative overflow-visible min-h-[180px]">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -41,10 +41,18 @@ export function PriorityGapsCard({
         </div>
       )}
 
-      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-        <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
-          Brechas prioritarias
-        </span>
+      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0 overflow-visible">
+        <div className="flex items-center gap-1.5 relative z-30">
+          <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+            Brechas prioritarias
+          </span>
+          <div className="group relative">
+            <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-xl transition-all group-hover:opacity-100 z-50 normal-case font-normal">
+              Indica las tecnologías críticas requeridas por el mercado para tu rol que aún no han sido detectadas en tu perfil. Su prioridad (Alta, Media, Baja) se determina por la relevancia del stack y su nivel de demanda.
+            </div>
+          </div>
+        </div>
         {marketGaps.length > 0 && (
           <button
             onClick={onViewAll}

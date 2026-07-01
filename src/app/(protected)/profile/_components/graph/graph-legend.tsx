@@ -3,7 +3,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Info, X } from 'lucide-react';
 
-export function GraphLegend() {
+interface GraphLegendProps {
+  counts?: {
+    acquired: number;
+    gap: number;
+    neutral: number;
+  };
+}
+
+export function GraphLegend({ counts }: GraphLegendProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -42,9 +50,18 @@ export function GraphLegend() {
   }, [isOpen]);
 
   const items = [
-    { label: 'Habilidad Adquirida', colorClass: 'bg-success shadow-[0_0_8px_rgba(22,163,74,0.5)]' },
-    { label: 'Brecha / Faltante', colorClass: 'bg-warning shadow-[0_0_8px_rgba(249,115,22,0.5)]' },
-    { label: 'Relacionada', colorClass: 'bg-info shadow-[0_0_8px_rgba(99,102,241,0.5)]' },
+    {
+      label: counts ? `Habilidad Adquirida (${counts.acquired})` : 'Habilidad Adquirida',
+      colorClass: 'bg-success shadow-[0_0_8px_rgba(22,163,74,0.5)]',
+    },
+    {
+      label: counts ? `Brecha / Faltante (${counts.gap})` : 'Brecha / Faltante',
+      colorClass: 'bg-warning shadow-[0_0_8px_rgba(249,115,22,0.5)]',
+    },
+    {
+      label: counts ? `Relacionada (${counts.neutral})` : 'Relacionada',
+      colorClass: 'bg-info shadow-[0_0_8px_rgba(99,102,241,0.5)]',
+    },
   ];
 
   if (isMobile) {

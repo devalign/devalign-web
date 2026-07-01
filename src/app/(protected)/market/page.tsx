@@ -119,7 +119,9 @@ function TopologyContent() {
   };
 
   if (isLoading) {
-    return <LoadingScreen message="Cargando la Topología del Mercado..." minHeight="min-h-[400px]" />;
+    return (
+      <LoadingScreen message="Cargando la Topología del Mercado..." minHeight="min-h-[400px]" />
+    );
   }
 
   if (error) {
@@ -212,15 +214,11 @@ function TopologyContent() {
         <div className="lg:col-span-1 space-y-6">
           {/* Ficha Técnica Section Divider */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
-                Ficha Técnica del Modelo
-              </span>
-              <div className="h-px flex-1 bg-border/40" />
-            </div>
-            
             <Card className="card-standard overflow-hidden">
-              <CardContent className="pt-4 pb-5 space-y-4 px-4 sm:px-6">
+              <CardContent className="space-y-4 px-4 sm:px-6">
+                <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
+                  Ficha Técnica del Modelo
+                </span>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Este análisis agrupa ofertas laborales de TI en base a la co-ocurrencia de
                   habilidades técnicas utilizando técnicas avanzadas de minería de datos.
@@ -273,8 +271,8 @@ function TopologyContent() {
                         Clustering HDBSCAN sobre UMAP
                       </p>
                       <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
-                        Clustering jerárquico basado en densidad optimizado con reducción dimensional
-                        para capturar afinidades complejas de habilidades.
+                        Clustering jerárquico basado en densidad optimizado con reducción
+                        dimensional para capturar afinidades complejas de habilidades.
                       </p>
                     </div>
                   </div>
@@ -309,23 +307,27 @@ function TopologyContent() {
               </span>
               <div className="h-px flex-1 bg-border/40" />
             </div>
-            
+
             <InsightCard
               title="Brecha del Perfil Predominante"
               description={
                 <>
-                  El <strong className="text-foreground">45%</strong> del mercado demanda <strong>Desarrolladores Web Full Stack</strong>. Su mayor deficiencia generalizada es el <strong className="text-rose-500">Testing Automatizado</strong>.
+                  El <strong className="text-foreground">45%</strong> del mercado demanda{' '}
+                  <strong>Desarrolladores Web Full Stack</strong>. Su mayor deficiencia generalizada
+                  es el <strong className="text-foreground">Testing Automatizado</strong>.
                 </>
               }
               type="trend"
               value="Tendencia"
             />
-            
+
             <InsightCard
               title="Brechas Más Frecuentes"
               description={
                 <>
-                  De las últimas evaluaciones, el <strong className="text-foreground">62%</strong> de los desarrolladores presentan debilidades críticas en <strong>DevOps (Docker/CI/CD)</strong> independientemente de su rol.
+                  De las últimas evaluaciones, el <strong className="text-foreground">62%</strong>{' '}
+                  de los desarrolladores presentan debilidades críticas en{' '}
+                  <strong>DevOps (Docker/CI/CD)</strong> independientemente de su rol.
                 </>
               }
               type="gap"

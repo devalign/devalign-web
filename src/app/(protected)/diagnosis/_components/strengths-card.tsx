@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowRight, Loader2, CheckCircle2, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowRight, Loader2, CheckCircle2, TrendingUp, TrendingDown, Info } from 'lucide-react';
 
 export interface StrengthItem {
   name: string;
@@ -29,7 +29,7 @@ const levelBadge = (level: string) => {
 
 export function StrengthsCard({ strengths, onViewAll, isLoading = false }: StrengthsCardProps) {
   return (
-    <Card className="flex flex-col h-full relative overflow-hidden min-h-[180px]">
+    <Card className="flex flex-col h-full relative overflow-visible min-h-[180px]">
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -39,10 +39,18 @@ export function StrengthsCard({ strengths, onViewAll, isLoading = false }: Stren
         </div>
       )}
 
-      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-        <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
-          Fortalezas principales
-        </span>
+      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0 overflow-visible">
+        <div className="flex items-center gap-1.5 relative z-30">
+          <span className="text-[10px] font-extrabold text-foreground uppercase tracking-wider">
+            Fortalezas principales
+          </span>
+          <div className="group relative">
+            <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-xl transition-all group-hover:opacity-100 z-50 normal-case font-normal">
+              Representa tus habilidades con mayor dominio técnico. El índice <strong>ICT (Índice de Credenciales Tecnológicas)</strong> va de 0 a 10 y se calcula combinando tus años de experiencia, certificaciones y proyectos personales.
+            </div>
+          </div>
+        </div>
         {strengths.length > 0 && (
           <button
             onClick={onViewAll}
