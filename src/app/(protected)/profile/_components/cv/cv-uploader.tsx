@@ -46,17 +46,18 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
   };
 
   const validateAndSetFile = (file: File) => {
+    if (file.size === 0) {
+      toast.error('El archivo está vacío. Sube un documento con contenido.');
+      return;
+    }
+
     const validTypes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword',
     ];
     const extension = file.name.split('.').pop()?.toLowerCase();
     const isValidType =
-      validTypes.includes(file.type) ||
-      extension === 'pdf' ||
-      extension === 'docx' ||
-      extension === 'doc';
+      validTypes.includes(file.type) || extension === 'pdf' || extension === 'docx';
 
     if (!isValidType) {
       toast.error('Tipo de archivo no soportado. Sube un PDF o DOCX.');
@@ -69,7 +70,6 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
     }
 
     setSelectedFile(file);
-    // Quitamos el toast redundante ya que ahora la interfaz mostrará la vista previa visualmente
   };
 
   const onButtonClick = () => {
@@ -122,7 +122,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".pdf,.docx,.doc"
+          accept=".pdf,.docx"
           onChange={handleChange}
           disabled={isUploading}
         />

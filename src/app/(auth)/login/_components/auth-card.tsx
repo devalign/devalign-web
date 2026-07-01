@@ -173,7 +173,7 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
           return;
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -184,6 +184,11 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
           },
         });
         if (error) throw error;
+        if (data.user && data.user.identities?.length === 0) {
+          toast.error('Este correo electrónico ya está registrado.');
+          setIsLoading(false);
+          return;
+        }
         toast.success('Revisa tu correo electrónico para confirmar tu cuenta.');
         handleModeChange('login');
       } else if (isForgotPassword) {

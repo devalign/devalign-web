@@ -392,16 +392,7 @@ export default function ProfileDashboardView() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push('/profile?action=preview-ats')}
-                      className="h-9 gap-2 text-xs font-bold bg-card"
-                    >
-                      <FileText className="h-4 w-4" />
-                      Exportar CV ATS
-                    </Button>
-                  </div>
+                  <div className="flex flex-col sm:flex-row lg:flex-col gap-3"></div>
                 </div>
 
                 <div className="rounded-xl border border-primary/10 bg-primary/[0.04] p-4 md:p-5">
