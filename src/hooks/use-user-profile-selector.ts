@@ -22,24 +22,11 @@ export function useUserProfileSelector() {
     const experiences = profile?.work_experience || [];
     const certifications = profile?.certifications || [];
 
-    const techSkills: string[] = [];
-    const conceptSkills: string[] = [];
-    const softSkills: string[] = [];
-
-    if (profile?.detected_skills) {
-      profile.detected_skills.forEach((s) => {
-        const t = s.skill_type ? s.skill_type.toLowerCase() : '';
-        if (t === 'soft' || t === 'soft_skill') softSkills.push(s.name);
-        else if (t === 'concept' || t === 'methodology') conceptSkills.push(s.name);
-        else techSkills.push(s.name);
-      });
-    }
-
-    const detected_skills = [
-      ...techSkills.map((name) => ({ name, skill_type: 'tech' })),
-      ...softSkills.map((name) => ({ name, skill_type: 'soft' })),
-      ...conceptSkills.map((name) => ({ name, skill_type: 'concept' })),
-    ];
+    // Preserve full skill objects including ict_score, market_importance, etc.
+    const detected_skills = (profile?.detected_skills || []).map((s) => ({
+      ...s,
+      skill_type: s.skill_type || 'tech',
+    }));
 
     // Gaps
     const skill_gaps = profile?.skill_gaps || [];
@@ -58,6 +45,7 @@ export function useUserProfileSelector() {
       cv_id: activeCvId,
       full_name: fullName,
       current_job_role: roleTitle,
+      professional_summary: profile?.professional_summary ?? null,
       seniority: seniority,
       years_experience: profile?.years_experience || 2,
       location: profile?.location || 'Lima, Peru',
@@ -74,6 +62,7 @@ export function useUserProfileSelector() {
       work_experience: experiences,
       certifications,
       last_analysis_date: lastAnalysisDate,
+      is_diagnosed: profile?.is_diagnosed ?? false,
     };
   }, [profile, user, cvData]);
 

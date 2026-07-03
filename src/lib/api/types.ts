@@ -105,6 +105,7 @@ export interface UserProfileData {
   skill_gaps: SkillItem[];
   full_name: string | null;
   current_job_role: string | null;
+  professional_summary?: string | null;
   years_experience: number | null;
   preferred_modality: string | null;
   location: string | null;
@@ -113,6 +114,7 @@ export interface UserProfileData {
   education: EducationItem[];
   certifications: CertificationItem[];
   last_analysis_date?: string | null;
+  is_diagnosed?: boolean;
 }
 
 export interface Cluster {

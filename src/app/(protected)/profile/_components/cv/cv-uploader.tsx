@@ -1,22 +1,55 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useUploadCV } from '@/hooks/use-upload-cv';
-import { UploadCloud, FileText, Loader2, Lock, Eye } from 'lucide-react';
+import { UploadCloud, FileText, Loader2, Lock, Eye, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+const PENDING_FILE_KEY = 'devalign_pending_cv_upload';
+
 interface CVUploaderProps {
   onUploadSuccess?: (cvId: string) => void;
+}
+
+const MAGIC_BYTES: Record<string, number[]> = {
+  pdf: [0x25, 0x50, 0x44, 0x46],
+  docx: [0x50, 0x4b, 0x03, 0x04],
+};
+
+async function validateMagicBytes(file: File): Promise<boolean> {
+  const slice = file.slice(0, 4);
+  const buffer = await slice.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+
+  const isPDF = MAGIC_BYTES.pdf.every((b, i) => bytes[i] === b);
+  const isZIP = MAGIC_BYTES.docx.every((b, i) => bytes[i] === b);
+
+  return isPDF || isZIP;
 }
 
 export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [pendingFile, setPendingFile] = useState<{ name: string; size: number } | null>(null);
 
   const uploadMutation = useUploadCV();
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(PENDING_FILE_KEY);
+    if (stored) {
+      try {
+        setPendingFile(JSON.parse(stored));
+      } catch { /* ignore */ }
+    }
+  }, []);
+
+  const clearPendingFile = () => {
+    setPendingFile(null);
+    sessionStorage.removeItem(PENDING_FILE_KEY);
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -45,7 +78,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
     }
   };
 
-  const validateAndSetFile = (file: File) => {
+  const validateAndSetFile = async (file: File) => {
     if (file.size === 0) {
       toast.error('El archivo está vacío. Sube un documento con contenido.');
       return;
@@ -69,7 +102,14 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
       return;
     }
 
+    const isValidMagic = await validateMagicBytes(file);
+    if (!isValidMagic) {
+      toast.error('El archivo no es un PDF o DOCX válido. Verifica que el archivo no esté corrupto.');
+      return;
+    }
+
     setSelectedFile(file);
+    clearPendingFile();
   };
 
   const onButtonClick = () => {
@@ -83,6 +123,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
       const result = await uploadMutation.mutateAsync(selectedFile);
       toast.success('¡Tu CV se ha subido y el diagnóstico inicial ha comenzado!');
       setSelectedFile(null);
+      clearPendingFile();
       if (onUploadSuccess) {
         onUploadSuccess(result.cv_id);
       }
@@ -103,17 +144,17 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         onDragOver={handleDrag}
         onDragLeave={handleDrag}
         onDrop={handleDrop}
-        onClick={onButtonClick}
+        onClick={!selectedFile && !isUploading ? onButtonClick : undefined}
         className={cn(
           'relative flex flex-col items-center justify-center rounded-2xl transition-all duration-300',
           !selectedFile
-            ? 'border-2 border-dashed p-8 md:p-12 text-center cursor-pointer bg-card'
-            : 'border-2 border-dashed border-border/50 bg-secondary/5 p-8 cursor-default',
+            ? 'border-2 border-dashed p-8 md:p-12 text-center bg-card'
+            : 'border-2 border-dashed border-border/50 bg-secondary/5 p-8',
           dragActive && !selectedFile
             ? 'border-primary bg-primary/5 scale-[1.01] shadow-lg shadow-primary/5'
             : '',
           !dragActive && !selectedFile
-            ? 'border-border hover:border-primary/50 hover:bg-secondary/20'
+            ? 'border-border hover:border-primary/50 hover:bg-secondary/20 cursor-pointer'
             : '',
           isUploading ? 'pointer-events-none opacity-60' : '',
         )}
@@ -128,7 +169,6 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         />
 
         <div className="space-y-4">
-          {/* Icono de estado (Solo se muestra si no hay archivo seleccionado o está cargando) */}
           {(!selectedFile || isUploading) && (
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
               {isUploading ? (
@@ -139,7 +179,6 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
             </div>
           )}
 
-          {/* Textos descriptivos */}
           <div className="space-y-1 w-full">
             {selectedFile ? (
               <div className="w-full flex flex-col items-center justify-center space-y-4">
@@ -181,7 +220,6 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
             )}
           </div>
 
-          {/* Restricciones */}
           {!selectedFile && (
             <div className="text-[10px] text-muted-foreground/80 font-medium">
               Máx. 5MB &bull; PDF, DOCX &bull; Español o Inglés
@@ -189,7 +227,6 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
           )}
         </div>
 
-        {/* Overlay de Carga */}
         {isUploading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/85 rounded-2xl backdrop-blur-[2px] transition-all">
             <Loader2 className="h-8 w-8 text-primary animate-spin mb-3" />
@@ -201,7 +238,42 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         )}
       </div>
 
-      {/* Boton de Accion / Envio */}
+      {/* Archivo pendiente de sesión anterior */}
+      {pendingFile && !selectedFile && !isUploading && (
+        <div className="flex items-center justify-between gap-3 p-3 rounded-xl border border-warning/20 bg-warning/5">
+          <div className="flex items-center gap-2 min-w-0">
+            <History className="h-4 w-4 text-warning shrink-0" />
+            <span className="text-xs text-muted-foreground truncate">
+              Tenías un archivo pendiente: <strong className="text-foreground">{pendingFile.name}</strong>
+            </span>
+          </div>
+          <div className="flex gap-1.5 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                clearPendingFile();
+                onButtonClick();
+              }}
+              className="h-7 text-[10px] font-bold px-2.5"
+            >
+              Seleccionar archivo
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={clearPendingFile}
+              className="h-7 text-[10px] text-muted-foreground px-2.5"
+            >
+              Descartar
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Botones de Accion */}
       {selectedFile && !isUploading && (
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <Button
@@ -221,7 +293,6 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         </div>
       )}
 
-      {/* Nota Legal */}
       <p className="text-[10px] text-center text-muted-foreground leading-relaxed max-w-md mx-auto">
         <Lock className="h-3 w-3 inline-block mr-1 align-text-bottom text-muted-foreground/80" />
         Al subir tu CV, aceptas nuestros{' '}

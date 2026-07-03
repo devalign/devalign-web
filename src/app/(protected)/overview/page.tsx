@@ -68,7 +68,7 @@ export default function OverviewPage() {
       {/* CV Update / Empty Profile Banner */}
       <div className="absolute top-20 lg:top-24 left-3 lg:left-6 right-3 lg:right-6 z-10 max-w-2xl pointer-events-none flex flex-col gap-2">
         <div className="pointer-events-auto">
-          <CVUpdateBanner />
+          <CVUpdateBanner mode="proactive" />
           <EmptyProfileBanner show={!hasProfileData} />
         </div>
       </div>

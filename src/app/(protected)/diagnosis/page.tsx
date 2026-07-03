@@ -229,7 +229,7 @@ function DiagnosisContent() {
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <CVUpdateBanner />
+        <CVUpdateBanner mode="proactive" />
 
         {/* Page Header */}
         <div className="flex flex-col gap-2 my-10">

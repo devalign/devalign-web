@@ -1,20 +1,24 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle, WifiOff, RefreshCw, Home, ServerCrash } from 'lucide-react';
+import { AlertTriangle, WifiOff, RefreshCw, Home, ServerCrash, FileWarning, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+type ErrorCategory = 'network' | 'server' | 'cv_invalid' | 'cv_processing' | 'unknown';
 
 interface ErrorFallbackProps {
   error?: Error | string | null;
   onRetry?: () => void;
   onHome?: () => void;
+  onUploadNew?: () => void;
+  onViewHistory?: () => void;
   fullPage?: boolean;
   title?: string;
   description?: string;
 }
 
-function getErrorType(error: Error | string | null | undefined): 'network' | 'server' | 'unknown' {
+function getErrorCategory(error: Error | string | null | undefined): ErrorCategory {
   const msg = typeof error === 'string' ? error : error?.message || '';
   const lower = msg.toLowerCase();
   if (lower.includes('fetch') || lower.includes('network') || lower.includes('conexión') || lower.includes('timeout') || lower.includes('failed to fetch')) {
@@ -23,39 +27,56 @@ function getErrorType(error: Error | string | null | undefined): 'network' | 'se
   if (lower.includes('500') || lower.includes('503') || lower.includes('502') || lower.includes('servidor') || lower.includes('server error')) {
     return 'server';
   }
+  if (lower.includes('no es un cv') || lower.includes('no es un currículum') || lower.includes('not a valid cv') || lower.includes('not a resume')) {
+    return 'cv_invalid';
+  }
+  if (lower.includes('cv') || lower.includes('currículum') || lower.includes('resume') || lower.includes('extraction') || lower.includes('procesar')) {
+    return 'cv_processing';
+  }
   return 'unknown';
 }
+
+const CATEGORY_CONFIG: Record<ErrorCategory, { icon: typeof WifiOff; title: string; description: string }> = {
+  network: {
+    icon: WifiOff,
+    title: 'Sin conexión al servidor',
+    description: 'No pudimos conectar con el servidor de análisis. Verifica tu conexión o inténtalo más tarde.',
+  },
+  server: {
+    icon: ServerCrash,
+    title: 'Error del servidor',
+    description: 'El servidor de análisis experimentó un problema. Nuestro equipo ha sido notificado.',
+  },
+  cv_invalid: {
+    icon: FileWarning,
+    title: 'El archivo no es un CV válido',
+    description: 'El documento que subiste no se reconoce como un currículum. Asegúrate de que contenga experiencia laboral, educación y habilidades.',
+  },
+  cv_processing: {
+    icon: AlertTriangle,
+    title: 'Error al procesar el CV',
+    description: 'Ocurrió un problema durante el análisis de tu currículum. Puedes intentarlo de nuevo o subir otro archivo.',
+  },
+  unknown: {
+    icon: AlertTriangle,
+    title: 'Algo salió mal',
+    description: 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.',
+  },
+};
 
 export function ErrorFallback({
   error,
   onRetry,
   onHome,
+  onUploadNew,
+  onViewHistory,
   fullPage,
   title,
   description,
 }: ErrorFallbackProps) {
-  const errorType = getErrorType(error);
+  const category = getErrorCategory(error);
   const errorMessage = typeof error === 'string' ? error : error?.message;
-
-  const config = {
-    network: {
-      icon: WifiOff,
-      title: 'Sin conexión al servidor',
-      description: 'No pudimos conectar con el servidor de análisis. Verifica tu conexión o inténtalo más tarde.',
-    },
-    server: {
-      icon: ServerCrash,
-      title: 'Error del servidor',
-      description: 'El servidor de análisis experimentó un problema. Nuestro equipo ha sido notificado.',
-    },
-    unknown: {
-      icon: AlertTriangle,
-      title: 'Algo salió mal',
-      description: 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.',
-    },
-  };
-
-  const { icon: Icon, title: defaultTitle, description: defaultDescription } = config[errorType];
+  const { icon: Icon, title: defaultTitle, description: defaultDescription } = CATEGORY_CONFIG[category];
 
   return (
     <div
@@ -88,11 +109,23 @@ export function ErrorFallback({
         </details>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap justify-center gap-2">
         {onRetry && (
           <Button onClick={onRetry} className="gap-2 h-10 text-xs font-bold">
             <RefreshCw className="h-4 w-4" />
             Reintentar
+          </Button>
+        )}
+        {onUploadNew && (category === 'cv_invalid' || category === 'cv_processing') && (
+          <Button variant="outline" onClick={onUploadNew} className="gap-2 h-10 text-xs font-bold">
+            <FileWarning className="h-4 w-4" />
+            Subir otro CV
+          </Button>
+        )}
+        {onViewHistory && (category === 'cv_processing' || category === 'unknown') && (
+          <Button variant="outline" onClick={onViewHistory} className="gap-2 h-10 text-xs font-bold">
+            <History className="h-4 w-4" />
+            Ver historial
           </Button>
         )}
         {onHome && (
