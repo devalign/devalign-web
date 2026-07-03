@@ -187,8 +187,9 @@ export default function ProfileDashboardView() {
   const { data: profile, isLoading, error } = useUserProfileSelector();
   const { data: cvData } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
-  const { startAnalysis, isAnalyzing } = useCVAnalysis();
+  const { startAnalysis, isAnalyzing, isAnalysisReady } = useCVAnalysis();
 
+  const [uploadStarted, setUploadStarted] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [skills, setSkills] = useState<SkillItem[]>([]);
@@ -221,15 +222,13 @@ export default function ProfileDashboardView() {
   const fullName = profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Usuario';
   const roleTitle = profile?.current_job_role || 'Rol pendiente de detectar';
   const primarySpecialty = profile?.primary_specialty || 'Especialidad pendiente';
-  const summary = buildProfessionalSummary(profile || undefined, roleTitle);
+  const summary = profile?.professional_summary || buildProfessionalSummary(profile || undefined, roleTitle);
+  const isDiagnosed = profile?.is_diagnosed ?? false;
   const initials = getInitials(fullName);
 
-  const affinities = useMemo(() => {
-    if (!profile?.all_affinities) return [];
-    return [...profile.all_affinities]
-      .filter((item) => item.cluster_name)
-      .sort((a, b) => normalizeScore(b.affinity_score) - normalizeScore(a.affinity_score));
-  }, [profile?.all_affinities]);
+  const affinities = [...(profile?.all_affinities || [])]
+    .filter((item) => item.cluster_name)
+    .sort((a, b) => normalizeScore(b.affinity_score) - normalizeScore(a.affinity_score));
 
   const hasSkillChanges = useMemo(() => {
     const original = JSON.stringify(buildSkillItems(profile?.detected_skills));
@@ -325,10 +324,14 @@ export default function ProfileDashboardView() {
     return <ProfileSkeleton />;
   }
 
-  if (cvs.length === 0) {
+  // Show empty state only when there are no CVs AND no analysis in progress
+  // AND no upload has been initiated. The uploadStarted flag prevents a flicker
+  // where isAnalyzing briefly reads as false on the first render after upload.
+  if (cvs.length === 0 && !isAnalyzing && !uploadStarted) {
     return (
       <EmptyProfileState
         onUploadSuccess={(newCvId) => {
+          setUploadStarted(true);
           startAnalysis(newCvId);
         }}
       />
@@ -338,8 +341,8 @@ export default function ProfileDashboardView() {
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
-        <CVUpdateBanner />
-        <EmptyProfileBanner show={!profile?.cv_id && !isAnalyzing} />
+        <CVUpdateBanner mode="proactive" />
+        <EmptyProfileBanner show={!profile?.cv_id && !isAnalyzing && !isAnalysisReady} />
 
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:mt-10">
           <div className="space-y-1">
@@ -453,11 +456,15 @@ export default function ProfileDashboardView() {
                         <span className="max-w-[180px] truncate group-hover:text-primary transition-colors">
                           {skill.name}
                         </span>
-                        {skill.ict_score !== undefined && (
+                        {skill.ict_score !== undefined && isDiagnosed ? (
                           <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">
                             ICT {skill.ict_score.toFixed(1)}
                           </span>
-                        )}
+                        ) : !isDiagnosed ? (
+                          <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium text-muted-foreground animate-pulse">
+                            ICT --
+                          </span>
+                        ) : null}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -516,8 +523,23 @@ export default function ProfileDashboardView() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  {affinities.length === 0 ? (
+                <div className={cn("space-y-4", !isDiagnosed && "animate-pulse")}>
+                  {!isDiagnosed ? (
+                    <>
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="h-4 w-32 bg-muted rounded" />
+                            <div className="h-4 w-8 bg-muted rounded" />
+                          </div>
+                          <div className="grid grid-cols-[1fr_auto] gap-3 items-center">
+                            <div className="h-2 w-full bg-muted rounded-full" />
+                            <div className="h-8 w-24 bg-muted rounded-lg" />
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : affinities.length === 0 ? (
                     <p className="text-xs text-muted-foreground text-center py-6">
                       Aún no hay afinidades detectadas.
                     </p>
@@ -597,6 +619,15 @@ export default function ProfileDashboardView() {
                   </div>
                 </div>
 
+                {!isDiagnosed && currentCV && (
+                  <div className="flex items-center gap-3 p-3 rounded-xl border border-info/20 bg-info/5 animate-pulse">
+                    <Loader2 className="h-4 w-4 animate-spin text-info shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                      Completando diagnóstico de habilidades...
+                    </p>
+                  </div>
+                )}
+
                 {currentCV && (
                   <div className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border">
                     <div className="h-9 w-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
@@ -642,6 +673,7 @@ export default function ProfileDashboardView() {
           </DialogHeader>
           <CVUploader
             onUploadSuccess={(newCvId) => {
+              setUploadStarted(true);
               setIsUploadOpen(false);
               startAnalysis(newCvId);
             }}

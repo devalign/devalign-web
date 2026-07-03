@@ -15,6 +15,7 @@ export function useReanalyzeCV() {
   return useMutation({
     mutationFn: (cvId: string) => reanalyzeCV(cvId),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userCVs'] });
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
     },
   });
