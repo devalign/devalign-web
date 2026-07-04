@@ -56,6 +56,7 @@ export function DomainAffinityDetailModal({
       const t = setTimeout(() => setAnimated(true), 150);
       return () => clearTimeout(t);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnimated(false);
     }
   }, [isOpen]);

@@ -4,15 +4,15 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  X, 
-  Layers, 
-  Info, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
+import {
+  X,
+  Layers,
+  Info,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
   CheckCircle2,
-  Activity
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GraphNode } from '../../profile/_components/graph/knowledge-graph-visualization';
@@ -28,13 +28,13 @@ interface NodeDetailCardProps {
 export function NodeDetailCard({ node, activeCluster, profile, onClose }: NodeDetailCardProps) {
   // Find skill in strengths/acquired or gaps
   const skillNameLower = node.label.toLowerCase();
-  
+
   const acquiredSkill = (activeCluster?.detected_skills || []).find(
-    (s) => s.name.toLowerCase() === skillNameLower
+    (s) => s.name.toLowerCase() === skillNameLower,
   );
-  
+
   const gapSkill = (activeCluster?.skill_gaps || []).find(
-    (g) => g.name.toLowerCase() === skillNameLower
+    (g) => g.name.toLowerCase() === skillNameLower,
   );
 
   // ICT calculations
@@ -57,14 +57,16 @@ export function NodeDetailCard({ node, activeCluster, profile, onClose }: NodeDe
   let priorityColor = 'text-muted-foreground bg-secondary border-border/40';
   if (rawImportance === 'critical') {
     priorityLabel = 'Alta prioridad';
-    priorityColor = 'text-destructive bg-destructive/10 border-destructive/20 dark:border-destructive/20';
+    priorityColor =
+      'text-destructive bg-destructive/10 border-destructive/20 dark:border-destructive/20';
   } else if (rawImportance === 'high') {
     priorityLabel = 'Media prioridad';
     priorityColor = 'text-warning bg-warning/10 border-warning/20 dark:border-warning/20';
   }
 
   // Demand
-  const demand = acquiredSkill?.market_demand_percentage ?? gapSkill?.market_demand_percentage ?? null;
+  const demand =
+    acquiredSkill?.market_demand_percentage ?? gapSkill?.market_demand_percentage ?? null;
 
   // Trend
   const trend = acquiredSkill?.trend ?? gapSkill?.trend ?? null;
@@ -131,6 +133,60 @@ export function NodeDetailCard({ node, activeCluster, profile, onClose }: NodeDe
       </CardHeader>
 
       <CardContent className="pt-5 space-y-6 flex-1 overflow-y-auto scrollbar-none overflow-visible">
+        {/* Application Domains Section */}
+        <div className="space-y-2">
+          <h4 className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Layers className="h-3.5 w-3.5" />
+            Dominios de Aplicación
+          </h4>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {node.domains.map((domain) => (
+              <span
+                key={domain}
+                className="px-2 py-0.5 text-[10px] font-medium rounded-lg bg-muted/30 text-foreground border border-border/30"
+              >
+                {domain}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Contextual Analysis Section */}
+        <div className="space-y-3 rounded-xl bg-info/5 border border-info/10 p-4 mt-6">
+          <div className="flex items-center gap-2 text-info dark:text-info">
+            <Info className="h-3.5 w-3.5" />
+            <h4 className="text-[10px] font-bold uppercase tracking-wider">Análisis Contextual</h4>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {node.status === 'gap' ? (
+              <>
+                Esta tecnología se conecta con otras herramientas en tu grafo basadas en la demanda
+                actual del mercado. Al ser una <strong>brecha en tu perfil</strong> para la
+                especialidad de{' '}
+                <strong>{activeCluster?.cluster_name || profile.primary_specialty}</strong>,
+                adquirir esta habilidad fortalecería significativamente tu posición para los roles
+                que la demandan.
+              </>
+            ) : node.status === 'acquired' ? (
+              <>
+                Ya posees esta competencia en tu perfil técnico. Con un nivel{' '}
+                <strong>{level.toLowerCase()}</strong> en esta habilidad, te posicionas
+                favorablemente dentro de este dominio.
+              </>
+            ) : node.status === 'neutral' ? (
+              <>
+                Es una tecnología conectada frecuentemente con tu ecosistema actual de herramientas
+                y metodologías.
+              </>
+            ) : (
+              <>
+                Representa una habilidad general del mercado tecnológico no requerida de forma
+                directa por tu especialidad actual.
+              </>
+            )}
+          </p>
+        </div>
+
         {/* Dynamic Metrics Section */}
         {(node.status === 'acquired' || node.status === 'gap') && (
           <div className="grid grid-cols-2 gap-3.5 overflow-visible">
@@ -238,58 +294,6 @@ export function NodeDetailCard({ node, activeCluster, profile, onClose }: NodeDe
             )}
           </div>
         )}
-
-        {/* Application Domains Section */}
-        <div className="space-y-2">
-          <h4 className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Layers className="h-3.5 w-3.5" />
-            Dominios de Aplicación
-          </h4>
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {node.domains.map((domain) => (
-              <span
-                key={domain}
-                className="px-2 py-0.5 text-[10px] font-medium rounded-lg bg-muted/30 text-foreground border border-border/30"
-              >
-                {domain}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Contextual Analysis Section */}
-        <div className="space-y-3 rounded-xl bg-info/5 border border-info/10 p-4 mt-6">
-          <div className="flex items-center gap-2 text-info dark:text-info">
-            <Info className="h-3.5 w-3.5" />
-            <h4 className="text-[10px] font-bold uppercase tracking-wider">
-              Análisis Contextual
-            </h4>
-          </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            {node.status === 'gap' ? (
-              <>
-                Esta tecnología se conecta con otras herramientas en tu grafo basadas en la demanda actual del mercado.
-                Al ser una <strong>brecha en tu perfil</strong> para la especialidad de{' '}
-                <strong>{activeCluster?.cluster_name || profile.primary_specialty}</strong>, adquirir esta habilidad
-                fortalecería significativamente tu posición para los roles que la demandan.
-              </>
-            ) : node.status === 'acquired' ? (
-              <>
-                Ya posees esta competencia en tu perfil técnico. Con un nivel{' '}
-                <strong>{level.toLowerCase()}</strong> en esta habilidad, te posicionas favorablemente
-                dentro de este dominio.
-              </>
-            ) : node.status === 'neutral' ? (
-              <>
-                Es una tecnología conectada frecuentemente con tu ecosistema actual de herramientas y metodologías.
-              </>
-            ) : (
-              <>
-                Representa una habilidad general del mercado tecnológico no requerida de forma directa por tu especialidad actual.
-              </>
-            )}
-          </p>
-        </div>
       </CardContent>
     </Card>
   );

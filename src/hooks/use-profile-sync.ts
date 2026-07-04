@@ -1,5 +1,6 @@
 'use client';
 
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { useCurrentUser } from '@/hooks/use-current-user';

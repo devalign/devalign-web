@@ -15,7 +15,7 @@ export interface CVUploadResult {
   download_url: string | null;
   message: string;
   uploaded_at?: string;
-  status?: 'processing' | 'completed' | 'failed';
+  status?: 'processing' | 'skills_detected' | 'completed' | 'failed';
 }
 
 export interface CVList {
@@ -115,6 +115,12 @@ export interface UserProfileData {
   certifications: CertificationItem[];
   last_analysis_date?: string | null;
   is_diagnosed?: boolean;
+}
+
+export interface FinalizeResponse {
+  cv_id: string;
+  status: string;
+  message: string;
 }
 
 export interface Cluster {

@@ -8,10 +8,6 @@ export function useUserProfile() {
     queryFn: getUserProfile,
     staleTime: 5 * 60 * 1000,
     retry: 1,
-    // Poll every 3s while profile exists but diagnosis hasn't completed yet.
-    // Stops polling once is_diagnosed becomes true.
-    refetchInterval: (query) =>
-      query.state.data?.is_diagnosed === false ? 3000 : false,
   });
 }
 

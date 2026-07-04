@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -49,7 +49,7 @@ import CVHistoryModal from './cv/cv-history-modal';
 import { useUserCVs, useReanalyzeCV } from '@/hooks/use-user-cvs';
 import { UserProfileData } from '@/types';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
-import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 
 interface Experience {
   role: string;
@@ -179,7 +179,7 @@ function ProfileContent() {
           ? profile.work_experience.map((exp) => ({
               role: exp.role,
               company: exp.company,
-              period: `${exp.start_date} — ${exp.current ? 'Presente' : exp.end_date || ''}`,
+              period: `${exp.start_date} â€” ${exp.current ? 'Presente' : exp.end_date || ''}`,
               description: exp.description || '',
             }))
           : [];
@@ -369,7 +369,7 @@ function ProfileContent() {
   // Construct payload formatted for backend/API
   const workExperiencePayload = experiences.map((exp) => {
     // Split by any common dash: em-dash, en-dash, or simple hyphen
-    const parts = exp.period.split(/[—–-]/).map((p) => p.trim());
+    const parts = exp.period.split(/[â€”â€“-]/).map((p) => p.trim());
     const isCurrent = parts[1]?.toLowerCase().includes('presente') || false;
     return {
       company: exp.company,
@@ -470,7 +470,7 @@ function ProfileContent() {
         softSkills,
       });
 
-      toast.success('¡Perfil guardado y diagnóstico recalculado con éxito!');
+      toast.success('Â¡Perfil guardado y diagnóstico recalculado con éxito!');
     } catch (error) {
       console.warn('API error updating profile:', error);
       toast.dismiss(toastId);
@@ -516,7 +516,7 @@ function ProfileContent() {
       });
 
       toast.dismiss(toastId);
-      toast.success('¡Perfil y diagnóstico actualizados con éxito!');
+      toast.success('Â¡Perfil y diagnóstico actualizados con éxito!');
       router.push('/overview');
     } catch (error) {
       console.error('Error syncing recalculation:', error);
@@ -541,13 +541,9 @@ function ProfileContent() {
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-6 py-6 relative">
         {/* Banner de Sincronización Diferida */}
-        <CVUpdateBanner />
+        <ProfileUploadBanner />
         {isRecalculationReady && (
-          <CVUpdateBanner
-            source="profile-recalculation"
-            show={true}
-            onSync={handleSyncRecalculation}
-          />
+          <ProfileUploadBanner show />
         )}
 
         {/* Back Button & CV Export Action */}
@@ -889,7 +885,7 @@ function ProfileContent() {
                               </p>
                               {(edu.start_date || edu.end_date) && (
                                 <p className="text-[10px] text-muted-foreground/85 font-medium">
-                                  {edu.start_date} — {edu.end_date || 'Presente'}
+                                  {edu.start_date} â€” {edu.end_date || 'Presente'}
                                 </p>
                               )}
                             </div>
@@ -1171,7 +1167,7 @@ function ProfileContent() {
                                     newExps[idx].period = e.target.value;
                                     setExperiences(newExps);
                                   }}
-                                  placeholder="Ej. Junio 2025 — Presente"
+                                  placeholder="Ej. Junio 2025 â€” Presente"
                                   className="h-8 text-xs bg-card"
                                 />
                               </div>
@@ -1411,7 +1407,7 @@ function ProfileContent() {
                     Descartar cambios
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground pt-1">
-                    ¿Estás seguro de descartar los cambios realizados? Los datos nuevos agregados se
+                    Â¿Estás seguro de descartar los cambios realizados? Los datos nuevos agregados se
                     perderán y no podrás recuperarlos.
                   </DialogDescription>
                 </DialogHeader>
@@ -1501,3 +1497,4 @@ export default function ProfilePage() {
     </Suspense>
   );
 }
+

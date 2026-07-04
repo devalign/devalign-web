@@ -20,6 +20,8 @@ import { DomainAffinityDetailModal } from './domain-affinity-detail-modal';
 
 interface DomainAffinityCardProps {
   domainAffinities?: DomainAffinityItem[];
+  isDiagnosed?: boolean;
+  isUpdating?: boolean;
 }
 
 const DOMAIN_ICONS: Record<string, React.ComponentType<any>> = {
@@ -42,7 +44,7 @@ const DOMAIN_LABELS: Record<string, string> = {
   QA: 'QA',
 };
 
-export function DomainAffinityCard({ domainAffinities }: DomainAffinityCardProps) {
+export function DomainAffinityCard({ domainAffinities, isDiagnosed, isUpdating }: DomainAffinityCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Process and sort domain affinities
@@ -87,10 +89,23 @@ export function DomainAffinityCard({ domainAffinities }: DomainAffinityCardProps
 
           {/* Dominios List */}
           <div className="space-y-3">
-            {processedAffinities.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-6">
-                Aún no hay afinidad con dominios detectada.
-              </p>
+            {isUpdating && !isDiagnosed ? (
+              <div className="space-y-3 animate-pulse">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-muted shrink-0" />
+                    <div className="h-4 w-28 bg-muted rounded shrink-0" />
+                    <div className="flex-1 h-1 rounded-full bg-muted" />
+                    <div className="h-4 w-8 bg-muted rounded shrink-0" />
+                  </div>
+                ))}
+              </div>
+            ) : processedAffinities.length === 0 ? (
+              <div className="w-full rounded-xl border border-dashed border-border p-6 text-center">
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Aún no hay dominios detectados.
+                </p>
+              </div>
             ) : (
               processedAffinities.map((item) => {
                 const Icon = item.icon;

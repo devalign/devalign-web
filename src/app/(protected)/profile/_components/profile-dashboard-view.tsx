@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   Activity,
   BadgeCheck,
@@ -14,13 +15,11 @@ import {
   Info,
   Loader2,
   MoreVertical,
-  Plus,
   RefreshCw,
   Sparkles,
   Target,
   TrendingUp,
   Upload,
-  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { LoadingScreen } from '@/components/shared/loading-screen';
@@ -28,29 +27,20 @@ import { ProfileSkeleton } from './profile-skeleton';
 
 import CVAtsPreviewModal from './cv/cv-ats-preview-modal';
 import CVHistoryModal from './cv/cv-history-modal';
-import CVUploader from './cv/cv-uploader';
 import SkillEvidenceModal from './skills/skill-evidence-modal';
 import { DomainAffinityCard } from './domain-affinity-card';
-import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
+import { DiagnosticLoadingBanner } from '@/components/shared/diagnostic-loading-banner';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserCVs } from '@/hooks/use-user-cvs';
-import { useUpdateUserSkills } from '@/hooks/use-user-profile';
+import { useUserProfile, useUpdateUserSkills } from '@/hooks/use-user-profile';
 import { useUserProfileSelector } from '@/hooks/use-user-profile-selector';
-import { cn } from '@/lib/utils';
 import type { ClusterAffinityItem, SkillItem, UserProfileData } from '@/types';
 
 function formatDate(value?: string | null, includeTime = false) {
@@ -105,100 +95,51 @@ function buildSkillItems(skills?: SkillItem[]) {
   }));
 }
 
-function buildProfessionalSummary(profile?: UserProfileData, roleTitle?: string) {
-  if (!profile) {
-    return '';
-  }
-
-  const role = roleTitle || profile.current_job_role || 'profesional tecnológico';
-  const specialty = profile.primary_specialty || 'desarrollo de software';
-  const years = profile.years_experience;
-  const skills = (profile.detected_skills || [])
-    .slice(0, 5)
-    .map((skill) => skill.name)
-    .filter(Boolean);
-
-  const experienceText =
-    years && years > 0 ? `con ${years} años de experiencia` : 'con experiencia comprobable';
-  const skillsText =
-    skills.length > 0
-      ? ` Especializado en ${skills.join(', ')}.`
-      : ' Perfil listo para enriquecer con competencias técnicas.';
-
-  return `${role} ${experienceText}, orientado a ${specialty}.${skillsText}`;
-}
-
-function EmptyProfileState({ onUploadSuccess }: { onUploadSuccess: (newCvId: string) => void }) {
-  return (
-    <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight text-foreground">Mi Perfil</h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Sube tu CV para generar tu perfil, afinidades y recomendaciones.
-        </p>
-      </div>
-
-      <Card className="card-standard overflow-hidden">
-        <CardContent className="p-6 md:p-10">
-          <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-center">
-            <div className="space-y-5">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                <FileText className="h-6 w-6" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-xl font-black text-foreground">Aún no hay CV activo</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Tu perfil se construye desde el CV. Al subirlo, Devalign detectará tus
-                  competencias, especialidades y afinidades principales de forma automática.
-                </p>
-              </div>
-              <div className="space-y-3.5 pt-2">
-                {[
-                  'Análisis técnico automático de competencias',
-                  'Resumen profesional autogenerado',
-                  'Afinidades y alineación con especialidades del mercado',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <BadgeCheck className="h-4 w-4 text-success shrink-0" />
-                    <span className="text-xs font-semibold text-foreground/80">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-6 md:p-8">
-              <div className="mb-4">
-                <h3 className="text-sm font-bold text-foreground">Subir tu CV</h3>
-                <p className="text-xs text-muted-foreground">Formatos PDF o Word, máx 5MB.</p>
-              </div>
-              <CVUploader onUploadSuccess={onUploadSuccess} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
 export default function ProfileDashboardView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: user } = useCurrentUser();
   const { data: profile, isLoading, error } = useUserProfileSelector();
+  const { refetch: refetchProfile } = useUserProfile();
   const { data: cvData } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
   const { startAnalysis, isAnalyzing, isAnalysisReady } = useCVAnalysis();
 
-  const [uploadStarted, setUploadStarted] = useState(false);
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [skills, setSkills] = useState<SkillItem[]>([]);
-  const [newSkillText, setNewSkillText] = useState('');
   const [selectedSkillForEvidence, setSelectedSkillForEvidence] = useState<SkillItem | null>(null);
   const [isEvidenceModalOpen, setIsEvidenceModalOpen] = useState(false);
+  const [isBannerDismissed, setIsBannerDismissed] = useState(false);
 
   const action = searchParams.get('action');
+  const statusParam = searchParams.get('status');
+  const expectedCvId = searchParams.get('expectedCvId');
+  const isUpdating = statusParam === 'updating';
+  const isDiagnosed = Boolean(
+    profile?.is_diagnosed && (!expectedCvId || profile?.cv_id === expectedCvId),
+  );
   const isAtsOpen = action === 'preview-ats';
+
+  // Poll profile when waiting for diagnosis completion
+  useEffect(() => {
+    if (!isUpdating || isDiagnosed || isBannerDismissed) return;
+
+    const interval = setInterval(async () => {
+      const result = await refetchProfile();
+      if (result.data?.is_diagnosed && (!expectedCvId || result.data?.cv_id === expectedCvId)) {
+        clearInterval(interval);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isUpdating, isDiagnosed, isBannerDismissed, expectedCvId, refetchProfile]);
+
+  // Clear the ?status=updating param when banner is dismissed
+  useEffect(() => {
+    if (isBannerDismissed) {
+      router.replace('/profile');
+    }
+  }, [isBannerDismissed, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -215,15 +156,12 @@ export default function ProfileDashboardView() {
     });
   }, [cvData?.cvs]);
 
-  const currentCV = profile?.cv_id
-    ? cvs.find((cv) => cv.cv_id === profile.cv_id) || cvs[0]
-    : cvs[0];
+  const currentCV = profile?.cv_id ? cvs.find((cv) => cv.cv_id === profile.cv_id) : undefined;
 
   const fullName = profile?.full_name || user?.full_name || user?.email?.split('@')[0] || 'Usuario';
   const roleTitle = profile?.current_job_role || 'Rol pendiente de detectar';
   const primarySpecialty = profile?.primary_specialty || 'Especialidad pendiente';
-  const summary = profile?.professional_summary || buildProfessionalSummary(profile || undefined, roleTitle);
-  const isDiagnosed = profile?.is_diagnosed ?? false;
+  const summary = profile?.professional_summary ?? null;
   const initials = getInitials(fullName);
 
   const affinities = [...(profile?.all_affinities || [])]
@@ -265,33 +203,6 @@ export default function ProfileDashboardView() {
     }
   };
 
-  const handleAddSkill = (event: React.FormEvent) => {
-    event.preventDefault();
-    const skillName = newSkillText.trim();
-    if (!skillName) return;
-
-    const exists = skills.some((skill) => skill.name.toLowerCase() === skillName.toLowerCase());
-    if (exists) {
-      toast.error('Esta competencia ya está registrada.');
-      return;
-    }
-
-    setSkills((current) => [
-      ...current,
-      {
-        name: skillName,
-        skill_type: 'tech',
-        market_importance: 'consolidated',
-        market_demand_percentage: null,
-      },
-    ]);
-    setNewSkillText('');
-  };
-
-  const handleRemoveSkill = (skillName: string) => {
-    setSkills((current) => current.filter((skill) => skill.name !== skillName));
-  };
-
   const handleSaveSkills = async () => {
     const toastId = toast.loading('Guardando competencias...');
     try {
@@ -320,31 +231,15 @@ export default function ProfileDashboardView() {
     );
   }
 
+  // Show skeleton only during actual loading
   if (isLoading || !profile) {
     return <ProfileSkeleton />;
   }
 
-  // Show empty state only when there are no CVs AND no analysis in progress
-  // AND no upload has been initiated. The uploadStarted flag prevents a flicker
-  // where isAnalyzing briefly reads as false on the first render after upload.
-  if (cvs.length === 0 && !isAnalyzing && !uploadStarted) {
-    return (
-      <EmptyProfileState
-        onUploadSuccess={(newCvId) => {
-          setUploadStarted(true);
-          startAnalysis(newCvId);
-        }}
-      />
-    );
-  }
-
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
-        <CVUpdateBanner mode="proactive" />
-        <EmptyProfileBanner show={!profile?.cv_id && !isAnalyzing && !isAnalysisReady} />
-
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:mt-10">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="space-y-1">
             <h1 className="text-2xl font-black tracking-tight text-foreground">Mi Perfil</h1>
             <p className="text-xs text-muted-foreground">
@@ -354,13 +249,11 @@ export default function ProfileDashboardView() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsUploadOpen(true)}
-              className="h-10 gap-2 text-xs font-bold bg-card"
-            >
-              <Upload className="h-4 w-4" />
-              Subir nuevo CV
+            <Button variant="outline" asChild className="h-10 gap-2 text-xs font-bold bg-card">
+              <Link href="/profile/upload">
+                <Upload className="h-4 w-4" />
+                Subir nuevo CV
+              </Link>
             </Button>
             <Button
               variant="outline"
@@ -372,16 +265,34 @@ export default function ProfileDashboardView() {
             </Button>
           </div>
         </div>
+        <ProfileUploadBanner />
+        <DiagnosticLoadingBanner
+          isUpdating={isUpdating}
+          isDiagnosed={isDiagnosed}
+          onDismiss={() => setIsBannerDismissed(true)}
+          onViewResults={() => router.push('/diagnosis')}
+        />
+        <EmptyProfileBanner show={!profile?.cv_id && !isUpdating} />
 
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-5">
           <div className="space-y-5">
-            <Card className="card-standard overflow-hidden">
+            <Card className="card-standard overflow-visible">
               <CardContent className="space-y-5">
                 <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="min-w-0 space-y-2">
                       <div className="space-y-1">
-                        <h2 className="text-lg font-black text-foreground truncate">{fullName}</h2>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-black text-foreground truncate">
+                            {fullName}
+                          </h2>
+                          <div className="group relative shrink-0">
+                            <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+                            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
+                              Datos principales de tu perfil profesional generados desde tu CV.
+                            </div>
+                          </div>
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           <p className="text-sm font-bold">{roleTitle}</p>
                           <Badge
@@ -398,62 +309,78 @@ export default function ProfileDashboardView() {
                   <div className="flex flex-col sm:flex-row lg:flex-col gap-3"></div>
                 </div>
 
-                <div className="rounded-xl border border-primary/10 bg-primary/[0.04] p-4 md:p-5">
-                  <p className="text-xs leading-7 text-foreground">
-                    {summary || 'Sube o actualiza tu CV para generar un resumen profesional.'}
-                  </p>
-                </div>
+                {isUpdating && !isDiagnosed ? (
+                  <div className="w-full rounded-xl border border-primary/5 bg-muted/10 p-4 md:p-5 space-y-2 animate-pulse">
+                    <div className="h-4 w-full bg-muted rounded" />
+                    <div className="h-4 w-[85%] bg-muted rounded" />
+                    <div className="h-4 w-[60%] bg-muted rounded" />
+                  </div>
+                ) : summary ? (
+                  <div className="rounded-xl border border-primary/10 bg-primary/[0.04] p-4 md:p-5">
+                    <p className="text-xs leading-7 text-foreground">{summary}</p>
+                  </div>
+                ) : (
+                  <div className="w-full rounded-xl border border-dashed border-border p-6 text-center">
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      Aún no hay resumen profesional disponible.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            <Card className="card-standard overflow-hidden">
+            <Card className="card-standard overflow-visible">
               <CardContent className="space-y-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex flex-col items-start gap-3">
-                    <div className="flex items-center justify-center gap-2 shrink-0">
-                      <div className="h-9 w-9 rounded-xl bg-info/10 text-info flex items-center justify-center shrink-0">
-                        <Code2 className="h-4 w-4" />
-                      </div>
-                      <h3 className="text-md font-black text-foreground">Competencias técnicas</h3>
+                <div className="flex flex-col items-start gap-2">
+                  <div className="flex items-center justify-center gap-2 shrink-0">
+                    <div className="h-9 w-9 rounded-xl bg-info/10 text-info flex items-center justify-center shrink-0">
+                      <Code2 className="h-4 w-4" />
                     </div>
-                    <p className="text-xs text-muted-foreground my-1">
-                      Estas competencias se utilizan para el análisis de afinidad y diagnóstico.
-                    </p>
+                    <h3 className="text-md font-black text-foreground">Competencias técnicas</h3>
+                    <div className="group relative">
+                      <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+                      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
+                        Competencias técnicas detectadas en tu CV. Haz clic para editar evidencias y
+                        puntuación ICT.
+                      </div>
+                    </div>
                   </div>
-
-                  <form onSubmit={handleAddSkill} className="flex gap-2 sm:min-w-[320px]">
-                    <Input
-                      value={newSkillText}
-                      onChange={(event) => setNewSkillText(event.target.value)}
-                      placeholder="Ej. React, Docker, AWS..."
-                      className="h-9 text-xs bg-card"
-                    />
-                    <Button type="submit" variant="outline" className="h-9 gap-2 text-xs bg-card">
-                      <Plus className="h-4 w-4" />
-                      Agregar
-                    </Button>
-                  </form>
+                  <p className="text-xs text-muted-foreground">
+                    Estas competencias se utilizan para el análisis de afinidad y diagnóstico. Haz
+                    clic en una competencia para editar su evidencia y puntuación ICT.
+                  </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {skills.length === 0 ? (
+                  {isUpdating && !isDiagnosed ? (
+                    <div className="flex flex-wrap gap-2 animate-pulse">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="h-9 bg-muted rounded-lg"
+                          // eslint-disable-next-line react-hooks/purity
+                          style={{ width: `${Math.floor(Math.random() * (110 - 70) + 70)}px` }}
+                        />
+                      ))}
+                    </div>
+                  ) : skills.length === 0 ? (
                     <div className="w-full rounded-xl border border-dashed border-border p-6 text-center">
                       <p className="text-xs font-semibold text-muted-foreground">
                         Aún no hay competencias detectadas.
                       </p>
                     </div>
                   ) : (
-                    skills.map((skill) => (
+                    skills.map((skill, index) => (
                       <span
-                        key={`${skill.name}-${skill.skill_type}`}
+                        key={`${skill.name}-${skill.skill_type}-${index}`}
                         onClick={() => {
                           setSelectedSkillForEvidence(skill);
                           setIsEvidenceModalOpen(true);
                         }}
-                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-bold text-foreground hover:border-primary/50 cursor-pointer transition-all select-none group"
+                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-bold text-foreground hover:border-primary/50 cursor-pointer transition-all select-none"
                         title="Haga clic para editar evidencias e ICT score"
                       >
-                        <span className="max-w-[180px] truncate group-hover:text-primary transition-colors">
+                        <span className="max-w-[180px] truncate hover:text-primary transition-colors">
                           {skill.name}
                         </span>
                         {skill.ict_score !== undefined && isDiagnosed ? (
@@ -465,17 +392,6 @@ export default function ProfileDashboardView() {
                             ICT --
                           </span>
                         ) : null}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveSkill(skill.name);
-                          }}
-                          className="text-muted-foreground hover:text-destructive transition-colors ml-1"
-                          aria-label={`Eliminar ${skill.name}`}
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
                       </span>
                     ))
                   )}
@@ -485,8 +401,7 @@ export default function ProfileDashboardView() {
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Info className="h-4 w-4 text-info shrink-0" />
                     <span>
-                      Puedes agregar, editar o eliminar competencias para mejorar la precisión de
-                      tus diagnósticos.
+                      Haz clic en cada competencia para ajustar su evidencia y puntuación ICT.
                     </span>
                   </div>
                   {hasSkillChanges && (
@@ -509,12 +424,19 @@ export default function ProfileDashboardView() {
           </div>
 
           <aside className="space-y-5">
-            <Card className="card-standard overflow-hidden">
+            <Card className="card-standard overflow-visible">
               <CardContent className="space-y-5">
                 <div className="flex flex-col items-start gap-2">
                   <div className="flex items-center gap-2">
                     <Target className="h-5 w-5 text-info" />
                     <h3 className="text-sm font-black text-foreground">Afinidades detectadas</h3>
+                    <div className="group relative">
+                      <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+                      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
+                        Especialidades del mercado con mayor coincidencia según tus competencias y
+                        experiencia.
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <p className="text-[11px] text-muted-foreground mt-1">
@@ -523,12 +445,12 @@ export default function ProfileDashboardView() {
                   </div>
                 </div>
 
-                <div className={cn("space-y-4", !isDiagnosed && "animate-pulse")}>
-                  {!isDiagnosed ? (
-                    <>
+                <div className="space-y-4">
+                  {isUpdating && !isDiagnosed ? (
+                    <div className="space-y-4 animate-pulse">
                       {Array.from({ length: 3 }).map((_, i) => (
                         <div key={i} className="space-y-2">
-                          <div className="flex items-center justify-between gap-2">
+                          <div className="flex justify-between items-center">
                             <div className="h-4 w-32 bg-muted rounded" />
                             <div className="h-4 w-8 bg-muted rounded" />
                           </div>
@@ -538,11 +460,13 @@ export default function ProfileDashboardView() {
                           </div>
                         </div>
                       ))}
-                    </>
+                    </div>
                   ) : affinities.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-6">
-                      Aún no hay afinidades detectadas.
-                    </p>
+                    <div className="w-full rounded-xl border border-dashed border-border p-6 text-center">
+                      <p className="text-xs font-semibold text-muted-foreground">
+                        Aún no hay afinidades detectadas.
+                      </p>
+                    </div>
                   ) : (
                     affinities.slice(0, 3).map((affinity) => {
                       const score = normalizeScore(affinity.affinity_score);
@@ -601,61 +525,80 @@ export default function ProfileDashboardView() {
               </CardContent>
             </Card>
 
-            <DomainAffinityCard domainAffinities={profile?.domain_affinities} />
+            <DomainAffinityCard
+              domainAffinities={profile?.domain_affinities}
+              isDiagnosed={isDiagnosed}
+              isUpdating={isUpdating}
+            />
 
-            <Card className="card-standard overflow-hidden">
+            <Card className="card-standard overflow-visible">
               <CardContent className="space-y-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex flex-col items-start gap-2">
                     <div className="flex gap-2 items-center">
                       <Clock3 className="h-5 w-5 text-info" />
-                      <h3 className="text-sm font-black text-foreground">Último análisis</h3>
+                      <h3 className="text-sm font-black text-foreground">Curriculum base</h3>
+                      <div className="group relative">
+                        <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+                        <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
+                          CV activo del cual se extraen las competencias y datos de tu perfil.
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <p className="text-[11px] text-muted-foreground mt-1">
-                        CV analizado más recientemente.
+                        CV utilizado para el análisis de perfil.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {!isDiagnosed && currentCV && (
-                  <div className="flex items-center gap-3 p-3 rounded-xl border border-info/20 bg-info/5 animate-pulse">
-                    <Loader2 className="h-4 w-4 animate-spin text-info shrink-0" />
-                    <p className="text-xs text-muted-foreground">
-                      Completando diagnóstico de habilidades...
+                {!currentCV ? (
+                  <div className="w-full rounded-xl border border-dashed border-border p-6 text-center">
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      Aún no hay curriculum cargado.
                     </p>
                   </div>
-                )}
-
-                {currentCV && (
-                  <div className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border">
-                    <div className="h-9 w-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
-                      <FileText className="h-4 w-4" />
+                ) : isUpdating && !isDiagnosed ? (
+                  <div className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border animate-pulse">
+                    <div className="h-9 w-9 rounded-lg bg-muted" />
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div className="h-4 w-48 bg-muted rounded" />
+                      <div className="h-3 w-32 bg-muted/60 rounded" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-black text-foreground flex items-center gap-1.5 min-w-0">
-                        <span className="truncate">{currentCV.original_filename}</span>
-                        <BadgeCheck className="h-3.5 w-3.5 text-success shrink-0" />
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {formatDate(currentCV.uploaded_at)} · {formatFileSize(currentCV.size_bytes)}
-                      </p>
-                    </div>
-                    {currentCV.download_url && (
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg shrink-0"
-                        title="Vista previa del CV"
-                      >
-                        <a href={currentCV.download_url} target="_blank" rel="noreferrer">
-                          <Eye className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
+                    <div className="h-8 w-8 bg-muted rounded-lg" />
                   </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 min-w-0 bg-secondary/10 p-3 rounded-xl border border-border">
+                      <div className="h-9 w-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-black text-foreground flex items-center gap-1.5 min-w-0">
+                          <span className="truncate">{currentCV.original_filename}</span>
+                          <BadgeCheck className="h-3.5 w-3.5 text-success shrink-0" />
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {formatDate(currentCV.uploaded_at)} ·{' '}
+                          {formatFileSize(currentCV.size_bytes)}
+                        </p>
+                      </div>
+                      {currentCV.download_url && (
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg shrink-0"
+                          title="Vista previa del CV"
+                        >
+                          <a href={currentCV.download_url} target="_blank" rel="noreferrer">
+                            <Eye className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -663,29 +606,14 @@ export default function ProfileDashboardView() {
         </div>
       </div>
 
-      <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-        <DialogContent className="sm:max-w-[500px] border-border bg-card">
-          <DialogHeader>
-            <DialogTitle className="text-sm font-bold text-foreground">Subir nuevo CV</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              Carga una versión reciente para actualizar tu perfil y recalcular tus afinidades.
-            </DialogDescription>
-          </DialogHeader>
-          <CVUploader
-            onUploadSuccess={(newCvId) => {
-              setUploadStarted(true);
-              setIsUploadOpen(false);
-              startAnalysis(newCvId);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-
       <CVHistoryModal
         isOpen={isHistoryOpen}
         onOpenChange={setIsHistoryOpen}
         activeCvId={profile?.cv_id}
-        onReanalyzeTriggered={(cvId) => startAnalysis(cvId)}
+        onReanalyzeTriggered={(cvId) => {
+          setIsHistoryOpen(false);
+          router.push(`/profile/upload?cvId=${cvId}`);
+        }}
       />
 
       <SkillEvidenceModal

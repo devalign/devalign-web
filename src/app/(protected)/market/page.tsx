@@ -25,6 +25,9 @@ import {
 } from 'lucide-react';
 import { InsightCard } from '@/components/shared';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
+import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
+import { DiagnosticLoadingBanner } from '@/components/shared/diagnostic-loading-banner';
+import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { useMarketClusters } from '@/hooks/use-market-clusters';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { evaluateClusterDiagnostic } from '@/lib/api/user-service';
@@ -47,8 +50,39 @@ function TopologyContent() {
 
   const hasProfileData = !!(profile?.cv_id || (profile?.detected_skills && profile.detected_skills.length > 0));
 
+  const [isBannerDismissed, setIsBannerDismissed] = React.useState(false);
+  const statusParam = searchParams.get('status');
+  const isUpdating = statusParam === 'updating';
+  const isDiagnosed = profile?.is_diagnosed ?? false;
+
+  const [diagnosticBanner, setDiagnosticBanner] = React.useState<{
+    show: boolean;
+    isCompleted: boolean;
+    clusterName: string | null;
+  }>({ show: false, isCompleted: false, clusterName: null });
+
   const [filterMode, setFilterMode] = React.useState<'all' | 'evaluated' | 'unevaluated'>('all');
   const [isGenerating, setIsGenerating] = React.useState<string | null>(null);
+
+  const isUrlUpdating = isUpdating && !isBannerDismissed;
+  const showBanner = isUrlUpdating || diagnosticBanner.show;
+  const bannerIsDiagnosed = diagnosticBanner.show ? diagnosticBanner.isCompleted : isDiagnosed;
+
+  const handleBannerDismiss = () => {
+    if (diagnosticBanner.show) {
+      setDiagnosticBanner({ show: false, isCompleted: false, clusterName: null });
+    } else {
+      setIsBannerDismissed(true);
+    }
+  };
+
+  const handleBannerViewResults = () => {
+    if (diagnosticBanner.show && diagnosticBanner.clusterName) {
+      router.push(`/diagnosis?cluster=${encodeURIComponent(diagnosticBanner.clusterName)}`);
+    } else {
+      router.push('/diagnosis');
+    }
+  };
 
   const initialCluster = activeClusterParam || profile?.primary_specialty || '';
   const [selectedCluster, setSelectedCluster] = React.useState(initialCluster);
@@ -111,19 +145,18 @@ function TopologyContent() {
     }
 
     setIsGenerating(clusterName);
-    const toastId = toast.loading(`Generando diagnóstico para ${clusterName}...`);
+    setDiagnosticBanner({ show: true, isCompleted: false, clusterName });
+    
     try {
       await evaluateClusterDiagnostic(clusterName);
       await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-      toast.dismiss(toastId);
-      toast.success(`¡Diagnóstico para ${clusterName} generado con éxito!`);
-      // Update local selection and route
+      
       setSelectedCluster(clusterName);
-      router.push(`/diagnosis?cluster=${encodeURIComponent(clusterName)}`);
+      setDiagnosticBanner({ show: true, isCompleted: true, clusterName });
     } catch (err) {
       console.error(err);
-      toast.dismiss(toastId);
       toast.error('Error al generar el diagnóstico. Inténtalo de nuevo.');
+      setDiagnosticBanner({ show: false, isCompleted: false, clusterName: null });
     } finally {
       setIsGenerating(null);
     }
@@ -219,6 +252,13 @@ function TopologyContent() {
         </div>
       </div>
 
+      <ProfileUploadBanner />
+      <DiagnosticLoadingBanner
+        isUpdating={showBanner}
+        isDiagnosed={bannerIsDiagnosed}
+        onDismiss={handleBannerDismiss}
+        onViewResults={handleBannerViewResults}
+      />
       <EmptyProfileBanner show={!hasProfileData} />
 
       {/* Grid: 2 Columns on desktop. Left column: Technical specs. Right/bottom: Grid of clusters */}

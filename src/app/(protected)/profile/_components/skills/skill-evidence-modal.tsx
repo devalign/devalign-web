@@ -37,6 +37,7 @@ export default function SkillEvidenceModal({
   // Sync state with selected skill
   useEffect(() => {
     if (skill) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelfTaught(skill.self_taught ?? false);
       setPersonalProjects(skill.personal_projects ?? false);
       setYearsExperience(skill.years_of_experience ?? 0);

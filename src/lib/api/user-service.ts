@@ -1,12 +1,6 @@
 import { apiClient } from './api-client';
-import { UserProfile, CVUploadResult, CVList, UserProfileData, SkillItem, Cluster } from '@/types';
-
-/**
- * Gets the currently logged-in user profile, provisioning JIT if needed.
- */
-export async function getCurrentUser(): Promise<UserProfile> {
-  return apiClient<UserProfile>('/me');
-}
+import { CVUploadResult, CVList, CVStatus, UserProfileData, SkillItem, Cluster } from '@/types';
+import { FinalizeResponse } from './types';
 
 /**
  * Uploads a CV document (PDF or DOCX, max 5MB).
@@ -26,6 +20,13 @@ export async function uploadCV(file: File): Promise<CVUploadResult> {
  */
 export async function listUserCVs(): Promise<CVList> {
   return apiClient<CVList>('/me/cvs');
+}
+
+/**
+ * Gets the processing status for a specific CV.
+ */
+export async function getCVStatus(cvId: string): Promise<CVStatus> {
+  return apiClient<CVStatus>(`/me/cvs/${cvId}/status`);
 }
 
 /**
@@ -76,6 +77,23 @@ export async function updateUserProfileSkills(skills: SkillItem[]): Promise<User
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ skills }),
+  });
+}
+
+/**
+ * Finalizes CV analysis (Phase 2) with validated skills.
+ * Called after the user has reviewed their detected skills.
+ */
+export async function finalizeCVAnalysis(
+  cvId: string,
+  skills?: SkillItem[],
+): Promise<FinalizeResponse> {
+  return apiClient<FinalizeResponse>(`/me/cv/${cvId}/finalize`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(skills ? { skills } : {}),
   });
 }
 

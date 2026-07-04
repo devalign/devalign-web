@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, TrendingUp, Map, ArrowRight, ChevronRight, Loader2 } from 'lucide-react';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
-import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 
 // Local Components
 import { ActionPlanTimeline } from './_components/action-plan-timeline';
@@ -236,7 +236,7 @@ function RoadmapContent() {
           <div className="transition-all duration-700">
             {/* Header */}
             <div className="max-w-4xl mx-auto mb-8">
-              <CVUpdateBanner mode="proactive" />
+              <ProfileUploadBanner />
 
               <div className="flex items-center gap-2 mb-2">
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
@@ -336,3 +336,4 @@ export default function ActionPlanPage() {
     </Suspense>
   );
 }
+

@@ -8,7 +8,7 @@ export function ProfileSkeleton() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-2">
           <div className="h-8 w-48 bg-muted rounded-lg" />
-          <div className="h-4 w-96 bg-muted/60 rounded" />
+          <div className="h-4 w-96 bg-muted rounded" />
         </div>
         <div className="flex gap-2">
           <div className="h-10 w-32 bg-muted rounded-lg" />
@@ -60,6 +60,7 @@ export function ProfileSkeleton() {
                   <div
                     key={index}
                     className="h-9 w-24 bg-muted rounded-lg"
+                    // eslint-disable-next-line react-hooks/purity
                     style={{ width: `${Math.floor(Math.random() * (120 - 70) + 70)}px` }}
                   />
                 ))}

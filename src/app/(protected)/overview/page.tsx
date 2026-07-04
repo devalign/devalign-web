@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Network, Cpu, Layers, Info, X, Sparkles } from 'lucide-react';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
-import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 import { useUserProfileSelector } from '@/hooks/use-user-profile-selector';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
@@ -14,7 +14,10 @@ import { useSidebar } from '@/components/layout/sidebar-context';
 
 // Local Components
 import { OverviewSideDrawer, FilterMode } from './_components/overview-side-drawer';
-import { KnowledgeGraphVisualization, GraphNode } from '../profile/_components/graph/knowledge-graph-visualization';
+import {
+  KnowledgeGraphVisualization,
+  GraphNode,
+} from '../profile/_components/graph/knowledge-graph-visualization';
 import { NodeDetailCard } from './_components/node-detail-card';
 
 // UI components
@@ -29,9 +32,13 @@ export default function OverviewPage() {
   const searchParams = useSearchParams();
   const clusterParam = searchParams.get('cluster');
 
-  const { data: graphData, isLoading: isGraphLoading, error: graphError } = useKnowledgeGraph(
+  const {
+    data: graphData,
+    isLoading: isGraphLoading,
+    error: graphError,
+  } = useKnowledgeGraph(
     clusterParam || profile?.primary_specialty,
-    !!(clusterParam || profile?.primary_specialty)
+    !!(clusterParam || profile?.primary_specialty),
   );
 
   // Node selection & view states
@@ -54,21 +61,29 @@ export default function OverviewPage() {
     );
   }
 
-  const hasProfileData = !!(profile.cv_id || (profile.detected_skills && profile.detected_skills.length > 0));
+  const hasProfileData = !!(
+    profile.cv_id ||
+    (profile.detected_skills && profile.detected_skills.length > 0)
+  );
 
   const allAffinities = profile.all_affinities || [];
-  const activeCluster = allAffinities.find(
-    (a) => clusterParam ? a.cluster_name.toLowerCase() === clusterParam.toLowerCase() : a.is_primary
-  ) || allAffinities[0] || null;
+  const activeCluster =
+    allAffinities.find((a) =>
+      clusterParam ? a.cluster_name.toLowerCase() === clusterParam.toLowerCase() : a.is_primary,
+    ) ||
+    allAffinities[0] ||
+    null;
 
-  const activeScore = activeCluster ? Math.round(activeCluster.affinity_score * 100) : profile.alignment_score;
+  const activeScore = activeCluster
+    ? Math.round(activeCluster.affinity_score * 100)
+    : profile.alignment_score;
 
   return (
     <div className="relative w-full h-screen bg-background flex flex-col">
       {/* CV Update / Empty Profile Banner */}
-      <div className="absolute top-20 lg:top-24 left-3 lg:left-6 right-3 lg:right-6 z-10 max-w-2xl pointer-events-none flex flex-col gap-2">
+      <div className="absolute top-20 lg:top-24 left-3 lg:left-6 right-3 lg:right-6 z-10 max-w-3xl pointer-events-none flex flex-col gap-2">
         <div className="pointer-events-auto">
-          <CVUpdateBanner mode="proactive" />
+          <ProfileUploadBanner />
           <EmptyProfileBanner show={!hasProfileData} />
         </div>
       </div>
