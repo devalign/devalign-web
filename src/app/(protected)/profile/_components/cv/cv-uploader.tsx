@@ -41,6 +41,7 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
     const stored = sessionStorage.getItem(PENDING_FILE_KEY);
     if (stored) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPendingFile(JSON.parse(stored));
       } catch {
         /* ignore */

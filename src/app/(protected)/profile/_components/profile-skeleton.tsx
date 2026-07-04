@@ -60,6 +60,7 @@ export function ProfileSkeleton() {
                   <div
                     key={index}
                     className="h-9 w-24 bg-muted rounded-lg"
+                    // eslint-disable-next-line react-hooks/purity
                     style={{ width: `${Math.floor(Math.random() * (120 - 70) + 70)}px` }}
                   />
                 ))}

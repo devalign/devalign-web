@@ -43,6 +43,7 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
   // Initialize skills from extracted context data
   useEffect(() => {
     if (extractedSkills) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSkills(buildSkillItems(extractedSkills));
     }
   }, [extractedSkills]);

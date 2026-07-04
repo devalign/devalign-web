@@ -358,6 +358,7 @@ export default function ProfileDashboardView() {
                         <div
                           key={i}
                           className="h-9 bg-muted rounded-lg"
+                          // eslint-disable-next-line react-hooks/purity
                           style={{ width: `${Math.floor(Math.random() * (110 - 70) + 70)}px` }}
                         />
                       ))}

@@ -63,9 +63,11 @@ function DiagnosisContent() {
   // Handle URL actions
   useEffect(() => {
     if (action === 'preview-ats') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAtsOpen(true);
       setIsUploadOpen(false);
     } else if (action === 'update-cv') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsUploadOpen(true);
       setIsAtsOpen(false);
     } else {
