@@ -89,7 +89,7 @@ export function DomainAffinityCard({ domainAffinities, isDiagnosed, isUpdating }
 
           {/* Dominios List */}
           <div className="space-y-3">
-            {processedAffinities.length === 0 && isUpdating && !isDiagnosed ? (
+            {isUpdating && !isDiagnosed ? (
               <div className="space-y-3 animate-pulse">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="flex items-center gap-3">

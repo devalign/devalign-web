@@ -113,8 +113,11 @@ export default function ProfileDashboardView() {
 
   const action = searchParams.get('action');
   const statusParam = searchParams.get('status');
+  const expectedCvId = searchParams.get('expectedCvId');
   const isUpdating = statusParam === 'updating';
-  const isDiagnosed = profile?.is_diagnosed ?? false;
+  const isDiagnosed = Boolean(
+    profile?.is_diagnosed && (!expectedCvId || profile?.cv_id === expectedCvId),
+  );
   const isAtsOpen = action === 'preview-ats';
 
   // Poll profile when waiting for diagnosis completion
@@ -123,13 +126,13 @@ export default function ProfileDashboardView() {
 
     const interval = setInterval(async () => {
       const result = await refetchProfile();
-      if (result.data?.is_diagnosed) {
+      if (result.data?.is_diagnosed && (!expectedCvId || result.data?.cv_id === expectedCvId)) {
         clearInterval(interval);
       }
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [isUpdating, isDiagnosed, isBannerDismissed, refetchProfile]);
+  }, [isUpdating, isDiagnosed, isBannerDismissed, expectedCvId, refetchProfile]);
 
   // Clear the ?status=updating param when banner is dismissed
   useEffect(() => {
@@ -235,8 +238,8 @@ export default function ProfileDashboardView() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:mt-10">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="space-y-1">
             <h1 className="text-2xl font-black tracking-tight text-foreground">Mi Perfil</h1>
             <p className="text-xs text-muted-foreground">
@@ -267,8 +270,9 @@ export default function ProfileDashboardView() {
           isUpdating={isUpdating}
           isDiagnosed={isDiagnosed}
           onDismiss={() => setIsBannerDismissed(true)}
+          onViewResults={() => router.push('/diagnosis')}
         />
-        <EmptyProfileBanner show={!profile?.cv_id} />
+        <EmptyProfileBanner show={!profile?.cv_id && !isUpdating} />
 
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-5">
           <div className="space-y-5">
@@ -305,15 +309,15 @@ export default function ProfileDashboardView() {
                   <div className="flex flex-col sm:flex-row lg:flex-col gap-3"></div>
                 </div>
 
-                {summary ? (
-                  <div className="rounded-xl border border-primary/10 bg-primary/[0.04] p-4 md:p-5">
-                    <p className="text-xs leading-7 text-foreground">{summary}</p>
-                  </div>
-                ) : isUpdating && !isDiagnosed ? (
+                {isUpdating && !isDiagnosed ? (
                   <div className="w-full rounded-xl border border-primary/5 bg-muted/10 p-4 md:p-5 space-y-2 animate-pulse">
                     <div className="h-4 w-full bg-muted rounded" />
                     <div className="h-4 w-[85%] bg-muted rounded" />
                     <div className="h-4 w-[60%] bg-muted rounded" />
+                  </div>
+                ) : summary ? (
+                  <div className="rounded-xl border border-primary/10 bg-primary/[0.04] p-4 md:p-5">
+                    <p className="text-xs leading-7 text-foreground">{summary}</p>
                   </div>
                 ) : (
                   <div className="w-full rounded-xl border border-dashed border-border p-6 text-center">
@@ -348,7 +352,7 @@ export default function ProfileDashboardView() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {skills.length === 0 && isUpdating && !isDiagnosed ? (
+                  {isUpdating && !isDiagnosed ? (
                     <div className="flex flex-wrap gap-2 animate-pulse">
                       {Array.from({ length: 8 }).map((_, i) => (
                         <div
@@ -365,9 +369,9 @@ export default function ProfileDashboardView() {
                       </p>
                     </div>
                   ) : (
-                    skills.map((skill) => (
+                    skills.map((skill, index) => (
                       <span
-                        key={`${skill.name}-${skill.skill_type}`}
+                        key={`${skill.name}-${skill.skill_type}-${index}`}
                         onClick={() => {
                           setSelectedSkillForEvidence(skill);
                           setIsEvidenceModalOpen(true);
@@ -441,7 +445,7 @@ export default function ProfileDashboardView() {
                 </div>
 
                 <div className="space-y-4">
-                  {affinities.length === 0 && isUpdating && !isDiagnosed ? (
+                  {isUpdating && !isDiagnosed ? (
                     <div className="space-y-4 animate-pulse">
                       {Array.from({ length: 3 }).map((_, i) => (
                         <div key={i} className="space-y-2">

@@ -57,8 +57,8 @@ export function UploadWizard() {
   }, [router]);
 
   const handleComplete = useCallback(() => {
-    router.push('/profile?status=updating');
-  }, [router]);
+    router.push(`/profile?status=updating&expectedCvId=${cvId}`);
+  }, [router, cvId]);
 
   const stepLabels = ['Cargar CV', 'Procesando CV', 'Confirmar competencias'];
   const stepIndex = currentStep === 'load' ? 0 : currentStep === 'processing' ? 1 : 2;

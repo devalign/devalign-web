@@ -36,8 +36,8 @@ export function useUserProfileSelector() {
     const activeCluster = allAffinities.find((a) => a.is_primary) || allAffinities[0] || null;
     const activeScore = activeCluster ? Math.round(activeCluster.affinity_score * 100) : 50;
 
-    const activeCvId = profile?.cv_id || cvData?.cvs?.[0]?.cv_id || null;
-    const currentCv = cvData?.cvs?.find((cv) => cv.cv_id === activeCvId) || cvData?.cvs?.[0];
+    const activeCvId = profile?.cv_id || null;
+    const currentCv = activeCvId ? cvData?.cvs?.find((cv) => cv.cv_id === activeCvId) : null;
     const lastAnalysisDate = currentCv?.uploaded_at || null;
 
     return {

@@ -9,12 +9,14 @@ interface DiagnosticLoadingBannerProps {
   isUpdating: boolean;
   isDiagnosed: boolean;
   onDismiss: () => void;
+  onViewResults?: () => void;
 }
 
 export function DiagnosticLoadingBanner({
   isUpdating,
   isDiagnosed,
   onDismiss,
+  onViewResults,
 }: DiagnosticLoadingBannerProps) {
   if (!isUpdating) return null;
 
@@ -57,7 +59,7 @@ export function DiagnosticLoadingBanner({
       <div className="flex items-center gap-2 shrink-0">
         {isDiagnosed ? (
           <Button
-            onClick={onDismiss}
+            onClick={onViewResults || onDismiss}
             className="w-full sm:w-auto bg-success hover:bg-success/90 text-success-foreground text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md active:scale-[0.98] shrink-0"
           >
             Ver resultados
