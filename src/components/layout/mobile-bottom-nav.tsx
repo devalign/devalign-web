@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Network, TrendingUp, Activity, Settings, User } from 'lucide-react';
-import { useUserProfile } from '@/hooks/use-user-profile';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { createClient } from '@/lib/supabase/client';
@@ -16,11 +15,10 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: profile } = useUserProfile();
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: cvData } = useUserCVs();
   const hasCV = !!(cvData?.cvs && cvData.cvs.length > 0);
-  const cluster = searchParams.get('cluster') || profile?.primary_specialty || '';
+  const cluster = searchParams.get('cluster') || '';
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = React.useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);

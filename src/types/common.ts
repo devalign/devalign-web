@@ -24,3 +24,13 @@ export interface CVList {
   cvs: CVUploadResult[];
   total: number;
 }
+
+import type { SkillItem } from './profile';
+
+export interface CVStatus {
+  cv_id: string | null;
+  status: string | null;
+  uploaded_at?: string | null;
+  error_message?: string | null;
+  extracted_skills?: SkillItem[] | null;
+}

@@ -25,6 +25,9 @@ import {
 } from 'lucide-react';
 import { InsightCard } from '@/components/shared';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
+import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
+import { DiagnosticLoadingBanner } from '@/components/shared/diagnostic-loading-banner';
+import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 import { useMarketClusters } from '@/hooks/use-market-clusters';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { evaluateClusterDiagnostic } from '@/lib/api/user-service';
@@ -46,6 +49,11 @@ function TopologyContent() {
   const { data: profile } = useUserProfile();
 
   const hasProfileData = !!(profile?.cv_id || (profile?.detected_skills && profile.detected_skills.length > 0));
+
+  const [isBannerDismissed, setIsBannerDismissed] = React.useState(false);
+  const statusParam = searchParams.get('status');
+  const isUpdating = statusParam === 'updating';
+  const isDiagnosed = profile?.is_diagnosed ?? false;
 
   const [filterMode, setFilterMode] = React.useState<'all' | 'evaluated' | 'unevaluated'>('all');
   const [isGenerating, setIsGenerating] = React.useState<string | null>(null);
@@ -219,6 +227,12 @@ function TopologyContent() {
         </div>
       </div>
 
+      <ProfileUploadBanner />
+      <DiagnosticLoadingBanner
+        isUpdating={isUpdating}
+        isDiagnosed={isDiagnosed}
+        onDismiss={() => setIsBannerDismissed(true)}
+      />
       <EmptyProfileBanner show={!hasProfileData} />
 
       {/* Grid: 2 Columns on desktop. Left column: Technical specs. Right/bottom: Grid of clusters */}

@@ -3,7 +3,8 @@
 import React from 'react';
 import { FileSearch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 
 interface EmptyProfileBannerProps {
   show?: boolean;
@@ -11,9 +12,9 @@ interface EmptyProfileBannerProps {
 
 export function EmptyProfileBanner({ show = true }: EmptyProfileBannerProps) {
   const router = useRouter();
-  const pathname = usePathname();
+  const { isAnalyzing, isAnalysisReady } = useCVAnalysis();
 
-  if (!show) return null;
+  if (!show || isAnalyzing || isAnalysisReady) return null;
 
   return (
     <div className="my-2 lg:my-6 p-4 rounded-xl border border-orange-500/20 bg-orange-500/5 dark:bg-orange-500/15 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-300">
@@ -28,14 +29,12 @@ export function EmptyProfileBanner({ show = true }: EmptyProfileBannerProps) {
           </p>
         </div>
       </div>
-      {pathname !== '/profile' && (
-        <Button
-          onClick={() => router.push('/profile')}
-          className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md active:scale-[0.98] shrink-0"
-        >
-          Cargar Perfil
-        </Button>
-      )}
+      <Button
+        onClick={() => router.push('/profile/upload')}
+        className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md active:scale-[0.98] shrink-0"
+      >
+        Cargar Perfil
+      </Button>
     </div>
   );
 }

@@ -42,7 +42,9 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
     if (stored) {
       try {
         setPendingFile(JSON.parse(stored));
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }, []);
 
@@ -104,7 +106,9 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
 
     const isValidMagic = await validateMagicBytes(file);
     if (!isValidMagic) {
-      toast.error('El archivo no es un PDF o DOCX válido. Verifica que el archivo no esté corrupto.');
+      toast.error(
+        'El archivo no es un PDF o DOCX válido. Verifica que el archivo no esté corrupto.',
+      );
       return;
     }
 
@@ -169,13 +173,9 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
         />
 
         <div className="space-y-4">
-          {(!selectedFile || isUploading) && (
+          {!selectedFile && (
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-              {isUploading ? (
-                <Loader2 className="h-7 w-7 animate-spin" />
-              ) : (
-                <UploadCloud className="h-7 w-7" />
-              )}
+              <UploadCloud className="h-7 w-7" />
             </div>
           )}
 
@@ -183,11 +183,15 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
             {selectedFile ? (
               <div className="w-full flex flex-col items-center justify-center space-y-4">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
-                  <FileText className="h-7 w-7" />
+                  {isUploading ? (
+                    <Loader2 className="h-7 w-7 animate-spin" />
+                  ) : (
+                    <FileText className="h-7 w-7" />
+                  )}
                 </div>
                 <div className="space-y-1 text-center">
                   <p className="text-sm font-semibold text-foreground">
-                    Archivo listo para análisis
+                    {isUploading ? 'Procesando archivo...' : 'Archivo listo para análisis'}
                   </p>
                   <p className="text-xs text-muted-foreground font-mono truncate max-w-[200px] sm:max-w-[320px] mx-auto px-2">
                     {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
@@ -226,16 +230,6 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
             </div>
           )}
         </div>
-
-        {isUploading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/85 rounded-2xl backdrop-blur-[2px] transition-all">
-            <Loader2 className="h-8 w-8 text-primary animate-spin mb-3" />
-            <p className="text-sm font-bold text-foreground">Subiendo y analizando...</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Extrayendo habilidades con Inteligencia Artificial
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Archivo pendiente de sesión anterior */}
@@ -244,7 +238,8 @@ export default function CVUploader({ onUploadSuccess }: CVUploaderProps) {
           <div className="flex items-center gap-2 min-w-0">
             <History className="h-4 w-4 text-warning shrink-0" />
             <span className="text-xs text-muted-foreground truncate">
-              Tenías un archivo pendiente: <strong className="text-foreground">{pendingFile.name}</strong>
+              Tenías un archivo pendiente:{' '}
+              <strong className="text-foreground">{pendingFile.name}</strong>
             </span>
           </div>
           <div className="flex gap-1.5 shrink-0">

@@ -17,7 +17,7 @@ import {
 import { Sparkles, Loader2, ChevronLeft, ChevronDown, RefreshCw } from 'lucide-react';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
-import { CVUpdateBanner } from '@/components/shared/cv-update-banner';
+import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 import { InsightCard } from '@/components/shared/insight-card';
 
@@ -39,7 +39,11 @@ import CVUploader from '../profile/_components/cv/cv-uploader';
 import CVAtsPreviewModal from '../profile/_components/cv/cv-ats-preview-modal';
 
 function DiagnosisContent() {
-  const { data: profile, isLoading: isProfileLoading, error: profileError } = useUserProfileSelector();
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    error: profileError,
+  } = useUserProfileSelector();
   const { startAnalysis, isAnalyzing } = useCVAnalysis();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -110,7 +114,10 @@ function DiagnosisContent() {
   const isLoading = isProfileLoading || isDiagLoading;
   const error = profileError || diagError;
 
-  const hasProfileData = !!(profile?.cv_id || (profile?.detected_skills && profile.detected_skills.length > 0));
+  const hasProfileData = !!(
+    profile?.cv_id ||
+    (profile?.detected_skills && profile.detected_skills.length > 0)
+  );
 
   const fallbackDiagnostic: DiagnosticDetail = {
     user_id: '',
@@ -128,10 +135,10 @@ function DiagnosisContent() {
     skill_gaps: [],
     last_analysis_date: null,
     job_offer_count: 0,
-    top_skills: []
+    top_skills: [],
   };
 
-  const diagnostic = apiDiagnostic || (!hasProfileData ? fallbackDiagnostic : null);
+  const diagnostic = apiDiagnostic || (!activeClusterName ? fallbackDiagnostic : null);
 
   if (isLoading) {
     return <LoadingScreen message="Cargando tu diagnóstico..." />;
@@ -221,18 +228,17 @@ function DiagnosisContent() {
 
   // Matching cluster for market stats
   const jobOfferCount = diagnostic.job_offer_count;
-  const totalOffers = profile.all_affinities?.reduce((sum, c) => sum + (c.job_offer_count ?? 0), 0) || 0;
+  const totalOffers =
+    profile.all_affinities?.reduce((sum, c) => sum + (c.job_offer_count ?? 0), 0) || 0;
   const marketPercent =
     totalOffers > 0 ? parseFloat(((jobOfferCount / totalOffers) * 100).toFixed(1)) : 0;
   const topSkills = diagnostic.top_skills || [];
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <CVUpdateBanner mode="proactive" />
-
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6 ">
         {/* Page Header */}
-        <div className="flex flex-col gap-2 my-10">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-1">
               <button
@@ -300,6 +306,7 @@ function DiagnosisContent() {
           </p>
         </div>
 
+        <ProfileUploadBanner />
         <EmptyProfileBanner show={!hasProfileData} />
 
         {/* Main Grid: Left (Profile & Radar) / Right (Details & Insights) */}
@@ -379,11 +386,9 @@ function DiagnosisContent() {
               description={
                 <>
                   En promedio, los postulantes a{' '}
-                  <strong className="text-foreground">
-                    {diagnostic.cluster_name}
-                  </strong>{' '}
-                  solo cumplen con el <strong className="text-emerald-500">58%</strong> del perfil
-                  técnico ideal. ¡Destacar aquí te da una gran ventaja!
+                  <strong className="text-foreground">{diagnostic.cluster_name}</strong> solo
+                  cumplen con el <strong className="text-emerald-500">58%</strong> del perfil
+                  técnico ideal. Â¡Destacar aquí te da una gran ventaja!
                 </>
               }
               type="compliance"
