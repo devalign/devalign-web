@@ -33,6 +33,7 @@ export interface SkillItem {
   has_certification?: boolean;
   ict_score?: number;
   trend?: 'growing' | 'stable' | 'shrinking' | null;
+  is_custom?: boolean;
 }
 
 export interface UserProfileData {

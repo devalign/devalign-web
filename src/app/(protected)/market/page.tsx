@@ -488,22 +488,6 @@ function TopologyContent() {
                       </p>
                     </div>
 
-                    {/* Skills/Technologies Badges */}
-                    <div className="space-y-2 mt-4 pt-3 border-t border-border/40">
-                      <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-widest block">
-                        Habilidades Nucleares
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {cluster.top_skills.map((skill) => (
-                          <span
-                            key={skill}
-                            className="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-secondary text-foreground/80 hover:text-primary hover:bg-primary/5 transition-all"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
 
                     {isSelected && (
                       <div className="mt-4 pt-3 flex justify-end">

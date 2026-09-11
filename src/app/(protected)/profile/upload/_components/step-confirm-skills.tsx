@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Check, X, Plus, Loader2 } from 'lucide-react';
+import { Check, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { SkillItem } from '@/types';
 import { finalizeCVAnalysis } from '@/lib/api/user-service';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
+import { SkillAutocompleteInput } from '@/components/shared';
 import SkillEvidenceModal from '../../_components/skills/skill-evidence-modal';
 
 interface StepConfirmSkillsProps {
@@ -28,6 +28,7 @@ function buildSkillItems(skills?: SkillItem[]) {
     years_of_experience: skill.years_of_experience ?? 0,
     has_certification: skill.has_certification ?? false,
     ict_score: skill.ict_score ?? 0.0,
+    is_custom: skill.is_custom ?? false,
   }));
 }
 
@@ -35,7 +36,6 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
   const { extractedSkills, startFinalization } = useCVAnalysis();
 
   const [skills, setSkills] = useState<SkillItem[]>([]);
-  const [newSkillText, setNewSkillText] = useState('');
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [selectedSkillForEvidence, setSelectedSkillForEvidence] = useState<SkillItem | null>(null);
   const [isEvidenceModalOpen, setIsEvidenceModalOpen] = useState(false);
@@ -48,28 +48,27 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
     }
   }, [extractedSkills]);
 
-  const handleAddSkill = (event: React.FormEvent) => {
-    event.preventDefault();
-    const skillName = newSkillText.trim();
-    if (!skillName) return;
+  const handleAddSkillFromAutocomplete = useCallback(
+    ({ name, skill_type }: { name: string; skill_type?: string }) => {
+      const exists = skills.some((s) => s.name.toLowerCase() === name.toLowerCase());
+      if (exists) {
+        toast.error('Esta competencia ya está registrada.');
+        return;
+      }
 
-    const exists = skills.some((s) => s.name.toLowerCase() === skillName.toLowerCase());
-    if (exists) {
-      toast.error('Esta competencia ya está registrada.');
-      return;
-    }
-
-    setSkills((current) => [
-      ...current,
-      {
-        name: skillName,
-        skill_type: 'tech',
-        market_importance: 'consolidated',
-        market_demand_percentage: null,
-      },
-    ]);
-    setNewSkillText('');
-  };
+      setSkills((current) => [
+        ...current,
+        {
+          name,
+          skill_type: skill_type || 'tech',
+          market_importance: 'consolidated',
+          market_demand_percentage: null,
+        },
+      ]);
+      toast.success(`"${name}" agregada.`);
+    },
+    [skills],
+  );
 
   const handleRemoveSkill = (skillName: string) => {
     setSkills((current) => current.filter((s) => s.name !== skillName));
@@ -113,18 +112,10 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
           competencias, y ajustar la evidencia de cada una haciendo clic sobre ellas.
         </p>
 
-        <form onSubmit={handleAddSkill} className="flex gap-2 sm:min-w-[320px]">
-          <Input
-            value={newSkillText}
-            onChange={(event) => setNewSkillText(event.target.value)}
-            placeholder="Ej. React, Docker, AWS..."
-            className="h-9 text-xs bg-background"
-          />
-          <Button type="submit" variant="outline" className="h-9 gap-2 text-xs bg-background">
-            <Plus className="h-4 w-4" />
-            Agregar
-          </Button>
-        </form>
+        <SkillAutocompleteInput
+          onAddSkill={handleAddSkillFromAutocomplete}
+          placeholder="Buscar en el catálogo oficial de Lightcast o escribir competencia..."
+        />
 
         {hasSkills ? (
           <div className="flex flex-wrap gap-2">
@@ -141,6 +132,14 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
                 <span className="max-w-[180px] truncate group-hover:text-primary transition-colors">
                   {skill.name}
                 </span>
+                {skill.is_custom && (
+                  <span
+                    className="text-[9px] bg-warning/15 text-warning px-1.5 py-0.5 rounded font-medium border border-warning/30"
+                    title="Competencia personalizada (fuera del catálogo estándar)"
+                  >
+                    Personalizada
+                  </span>
+                )}
                 {skill.ict_score !== undefined ? (
                   <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">
                     ICT {skill.ict_score.toFixed(1)}

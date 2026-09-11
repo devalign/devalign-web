@@ -130,3 +130,11 @@ export interface Cluster {
   top_skills: string[];
   job_offer_count: number;
 }
+
+export interface SkillSearchResult {
+  id: string;
+  name: string;
+  skill_type: string;
+  domain_tags?: string[];
+  core_domains?: string[];
+}
