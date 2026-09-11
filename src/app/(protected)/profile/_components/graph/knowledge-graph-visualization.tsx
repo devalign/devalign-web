@@ -59,7 +59,7 @@ export function KnowledgeGraphVisualization({
       else if (n.status === 'neutral') neutral++;
     });
     return { acquired, gap, neutral };
-  }, [data.nodes]);
+  }, [data?.nodes]);
 
   useEffect(() => {
     const container = document.getElementById('graph-container');
@@ -78,61 +78,62 @@ export function KnowledgeGraphVisualization({
     return () => resizeObserver.disconnect();
   }, [isLoading]);
 
+  // Enhance nodes with visual properties based on their status and active filter
+  const enhancedData = useMemo(() => {
+    const isNodeHighlighted = (node: GraphNode) => {
+      if (node.status === 'market') return false; // General market background is always faded
+      if (highlightMode === 'all') return true;
+      if (highlightMode === 'strengths') return node.status === 'acquired';
+      if (highlightMode === 'gaps') return node.status === 'gap';
+      return true;
+    };
+
+    return {
+      nodes: (data?.nodes || []).map((n) => {
+        const highlighted = isNodeHighlighted(n);
+        return {
+          ...n,
+          highlighted,
+          val: n.status === 'acquired' ? 2 : n.status === 'gap' ? 1.5 : 1,
+          color: !highlighted
+            ? colors.faded
+            : n.status === 'acquired'
+              ? colors.acquired
+              : n.status === 'gap'
+                ? colors.gap
+                : colors.neutral,
+        };
+      }),
+      links: (data?.links || []).map((l) => {
+        // Find source/target node IDs
+        const sourceId = typeof l.source === 'object' ? (l.source as any).id : l.source;
+        const targetId = typeof l.target === 'object' ? (l.target as any).id : l.target;
+
+        const sourceNode = data?.nodes?.find((n) => n.id === sourceId);
+        const targetNode = data?.nodes?.find((n) => n.id === targetId);
+
+        const isHighlighted =
+          highlightMode === 'all' ||
+          !!(
+            sourceNode &&
+            isNodeHighlighted(sourceNode) &&
+            targetNode &&
+            isNodeHighlighted(targetNode)
+          );
+
+        const isImplicit = (l.type || '').includes('implicit');
+        return {
+          ...l,
+          color: colors.getLinkColor(isHighlighted, isImplicit),
+          width: isImplicit ? 0.75 : 2.0,
+        };
+      }),
+    };
+  }, [data, highlightMode, colors]);
+
   if (isLoading) {
     return <GraphLoading message="Cargando red neuronal..." />;
   }
-
-  // Determine if a node matches the active filter
-  const isNodeHighlighted = (node: GraphNode) => {
-    if (node.status === 'market') return false; // General market background is always faded
-    if (highlightMode === 'all') return true;
-    if (highlightMode === 'strengths') return node.status === 'acquired';
-    if (highlightMode === 'gaps') return node.status === 'gap';
-    return true;
-  };
-
-  // Enhance nodes with visual properties based on their status and active filter
-  const enhancedData = {
-    nodes: data.nodes.map((n) => {
-      const highlighted = isNodeHighlighted(n);
-      return {
-        ...n,
-        highlighted,
-        val: n.status === 'acquired' ? 2 : n.status === 'gap' ? 1.5 : 1,
-        color: !highlighted
-          ? colors.faded
-          : n.status === 'acquired'
-            ? colors.acquired
-            : n.status === 'gap'
-              ? colors.gap
-              : colors.neutral,
-      };
-    }),
-    links: data.links.map((l) => {
-      // Find source/target node IDs
-      const sourceId = typeof l.source === 'object' ? (l.source as any).id : l.source;
-      const targetId = typeof l.target === 'object' ? (l.target as any).id : l.target;
-
-      const sourceNode = data.nodes.find((n) => n.id === sourceId);
-      const targetNode = data.nodes.find((n) => n.id === targetId);
-
-      const isHighlighted =
-        highlightMode === 'all' ||
-        !!(
-          sourceNode &&
-          isNodeHighlighted(sourceNode) &&
-          targetNode &&
-          isNodeHighlighted(targetNode)
-        );
-
-      const isImplicit = (l.type || '').includes('implicit');
-      return {
-        ...l,
-        color: colors.getLinkColor(isHighlighted, isImplicit),
-        width: isImplicit ? 0.75 : 2.0,
-      };
-    }),
-  };
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-transparent touch-none">

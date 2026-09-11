@@ -25,41 +25,44 @@ interface DomainAffinityCardProps {
 }
 
 const DOMAIN_ICONS: Record<string, React.ComponentType<any>> = {
-  Backend: Code2,
-  Cloud: Cloud,
-  DevOps: Infinity,
-  Frontend: Monitor,
-  Data: Database,
-  Mobile: Smartphone,
-  QA: ShieldCheck,
+  backend: Code2,
+  cloud: Cloud,
+  devops: Infinity,
+  frontend: Monitor,
+  data: Database,
+  mobile: Smartphone,
+  qa: ShieldCheck,
 };
 
 const DOMAIN_LABELS: Record<string, string> = {
-  Backend: 'Backend',
-  Cloud: 'Cloud',
-  DevOps: 'DevOps',
-  Frontend: 'Frontend',
-  Data: 'Data Engineering',
-  Mobile: 'Mobile',
-  QA: 'QA',
+  backend: 'Backend',
+  cloud: 'Cloud',
+  devops: 'DevOps',
+  frontend: 'Frontend',
+  data: 'Data Engineering',
+  mobile: 'Mobile',
+  qa: 'QA',
 };
 
 export function DomainAffinityCard({ domainAffinities, isDiagnosed, isUpdating }: DomainAffinityCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Process and sort domain affinities
-  const processedAffinities = (domainAffinities || [])
-    .map((d) => {
-      const key = d.domain;
-      const rawScore = d.affinity_score || 0;
-      const score = Math.min(20 + Math.round(rawScore * 80), 95);
-      return {
-        key,
-        label: DOMAIN_LABELS[key] || key,
-        score,
-        icon: DOMAIN_ICONS[key] || Target,
-      };
-    })
+  // Process, deduplicate and sort domain affinities
+  const domainMap = new Map<string, { key: string; label: string; score: number; icon: React.ComponentType<any> }>();
+  for (const d of domainAffinities || []) {
+    const lower = d.domain.trim().toLowerCase();
+    if (lower === 'software_engineering' || lower === 'security') continue;
+    const label = DOMAIN_LABELS[lower] || d.domain;
+    const rawScore = d.affinity_score || 0;
+    const score = Math.min(20 + Math.round(rawScore * 80), 95);
+    const icon = DOMAIN_ICONS[lower] || Target;
+
+    if (!domainMap.has(lower) || domainMap.get(lower)!.score < score) {
+      domainMap.set(lower, { key: lower, label, score, icon });
+    }
+  }
+
+  const processedAffinities = Array.from(domainMap.values())
     .sort((a, b) => b.score - a.score)
     .slice(0, 5); // Show top 5 in the card
 

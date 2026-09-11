@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -20,9 +20,11 @@ import {
   Target,
   TrendingUp,
   Upload,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { LoadingScreen } from '@/components/shared/loading-screen';
+import { SkillAutocompleteInput } from '@/components/shared';
 import { ProfileSkeleton } from './profile-skeleton';
 
 import CVAtsPreviewModal from './cv/cv-ats-preview-modal';
@@ -216,6 +218,32 @@ export default function ProfileDashboardView() {
     }
   };
 
+  const handleAddSkillFromAutocomplete = useCallback(
+    ({ name, skill_type }: { name: string; skill_type?: string }) => {
+      const exists = skills.some((s) => s.name.toLowerCase() === name.toLowerCase());
+      if (exists) {
+        toast.error('Esta competencia ya está registrada en tu perfil.');
+        return;
+      }
+
+      setSkills((current) => [
+        ...current,
+        {
+          name,
+          skill_type: skill_type || 'tech',
+          market_importance: 'consolidated',
+          market_demand_percentage: null,
+        },
+      ]);
+      toast.success(`"${name}" agregada a tu lista. Haz clic en "Guardar competencias" para persistir.`);
+    },
+    [skills],
+  );
+
+  const handleRemoveSkill = useCallback((skillName: string) => {
+    setSkills((current) => current.filter((s) => s.name !== skillName));
+  }, []);
+
   const handleOpenDiagnosis = (clusterName: string) => {
     router.push(`/diagnosis?cluster=${encodeURIComponent(clusterName)}`);
   };
@@ -351,6 +379,13 @@ export default function ProfileDashboardView() {
                   </p>
                 </div>
 
+                <div className="pt-1">
+                  <SkillAutocompleteInput
+                    onAddSkill={handleAddSkillFromAutocomplete}
+                    placeholder="Buscar en el catálogo oficial de Lightcast o escribir competencia..."
+                  />
+                </div>
+
                 <div className="flex flex-wrap gap-2">
                   {isUpdating && !isDiagnosed ? (
                     <div className="flex flex-wrap gap-2 animate-pulse">
@@ -377,10 +412,10 @@ export default function ProfileDashboardView() {
                           setSelectedSkillForEvidence(skill);
                           setIsEvidenceModalOpen(true);
                         }}
-                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-bold text-foreground hover:border-primary/50 cursor-pointer transition-all select-none"
+                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-bold text-foreground hover:border-primary/50 cursor-pointer transition-all select-none group"
                         title="Haga clic para editar evidencias e ICT score"
                       >
-                        <span className="max-w-[180px] truncate hover:text-primary transition-colors">
+                        <span className="max-w-[180px] truncate group-hover:text-primary transition-colors">
                           {skill.name}
                         </span>
                         {skill.ict_score !== undefined && isDiagnosed ? (
@@ -392,6 +427,18 @@ export default function ProfileDashboardView() {
                             ICT --
                           </span>
                         ) : null}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveSkill(skill.name);
+                          }}
+                          className="text-muted-foreground hover:text-destructive transition-colors ml-1 p-0.5 rounded"
+                          aria-label={`Eliminar ${skill.name}`}
+                          title={`Eliminar ${skill.name}`}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
                       </span>
                     ))
                   )}

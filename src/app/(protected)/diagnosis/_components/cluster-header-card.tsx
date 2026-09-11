@@ -108,36 +108,7 @@ export function ClusterHeaderCard({
         </div>
       </div>
 
-      {/* Bottom Area: Core Skills badges */}
-      {topSkills && topSkills.length > 0 && (
-        <div className="border-t border-border/40 pt-3 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div className="flex flex-col gap-2 flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-              <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-widest block">
-                Habilidades Nucleares Demandadas
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {topSkills.map((skill) => (
-                <Badge
-                  key={skill}
-                  variant="secondary"
-                  className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-secondary border border-border/40 text-muted-foreground hover:text-primary hover:border-primary/20 transition-all cursor-default"
-                >
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          <Link
-            href="/market"
-            className="text-[10px] font-bold text-primary hover:underline shrink-0 flex items-center gap-1 mt-2 sm:mt-0"
-          >
-            Explorar otros clústers <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
-      )}
+
     </Card>
   );
 }

@@ -1,6 +1,6 @@
 import { apiClient } from './api-client';
 import { CVUploadResult, CVList, CVStatus, UserProfileData, SkillItem, Cluster } from '@/types';
-import { FinalizeResponse } from './types';
+import { FinalizeResponse, SkillSearchResult } from './types';
 
 /**
  * Uploads a CV document (PDF or DOCX, max 5MB).
@@ -129,5 +129,16 @@ export async function deleteAccount(): Promise<void> {
   return apiClient<void>('/me', {
     method: 'DELETE',
   });
+}
+
+/**
+ * Searches skills in the canonical Lightcast catalog for autocomplete.
+ */
+export async function searchSkills(query: string, limit = 15): Promise<SkillSearchResult[]> {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+  return apiClient<SkillSearchResult[]>(
+    `/market/skills/search?q=${encodeURIComponent(trimmed)}&limit=${limit}`,
+  );
 }
 
