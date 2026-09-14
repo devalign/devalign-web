@@ -33,7 +33,6 @@ function TopologyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const activeClusterParam = searchParams.get('cluster') || '';
 
   const { data: clusters = [], isLoading, error } = useMarketClusters();
   const { data: profile } = useUserProfile();
@@ -76,9 +75,6 @@ function TopologyContent() {
       router.push('/diagnosis');
     }
   };
-
-  const initialCluster = activeClusterParam || profile?.primary_specialty || '';
-  const [selectedCluster, setSelectedCluster] = React.useState(initialCluster);
 
   // Helper to check if a cluster has a diagnostic in profile.all_affinities
   const getClusterAffinityItem = React.useCallback(
@@ -135,14 +131,6 @@ function TopologyContent() {
     });
   }, [sortedClusters, isSearching, normalizedQuery]);
 
-  // Check if a cluster is currently selected
-  const isSelectedCluster = (clusterName: string) => {
-    if (!selectedCluster) return false;
-    const nameLow = clusterName.toLowerCase();
-    const paramLow = selectedCluster.toLowerCase();
-    return nameLow === paramLow || nameLow.includes(paramLow) || paramLow.includes(nameLow);
-  };
-
   const handleGenerateDiagnostic = async (clusterName: string) => {
     if (!hasProfileData) {
       toast.info('Primero debes subir tu CV para poder generar un diagnóstico.', {
@@ -159,7 +147,6 @@ function TopologyContent() {
       await evaluateClusterDiagnostic(clusterName);
       await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
 
-      setSelectedCluster(clusterName);
       setDiagnosticBanner({ show: true, isCompleted: true, clusterName });
     } catch (err) {
       console.error(err);
@@ -294,10 +281,8 @@ function TopologyContent() {
                       key={cluster.id}
                       cluster={cluster}
                       affinityItem={getClusterAffinityItem(cluster.name)}
-                      isSelected={isSelectedCluster(cluster.name)}
                       totalOffers={totalOffers}
                       isGenerating={isGenerating === cluster.name}
-                      onSelect={setSelectedCluster}
                       onEvaluate={handleGenerateDiagnostic}
                       onViewDiagnostic={handleViewDiagnostic}
                     />
@@ -337,10 +322,8 @@ function TopologyContent() {
                         key={cluster.id}
                         cluster={cluster}
                         affinityItem={getClusterAffinityItem(cluster.name)}
-                        isSelected={isSelectedCluster(cluster.name)}
                         totalOffers={totalOffers}
                         isGenerating={isGenerating === cluster.name}
-                        onSelect={setSelectedCluster}
                         onEvaluate={handleGenerateDiagnostic}
                         onViewDiagnostic={handleViewDiagnostic}
                       />
@@ -384,10 +367,8 @@ function TopologyContent() {
                           key={cluster.id}
                           cluster={cluster}
                           affinityItem={null}
-                          isSelected={isSelectedCluster(cluster.name)}
                           totalOffers={totalOffers}
                           isGenerating={isGenerating === cluster.name}
-                          onSelect={setSelectedCluster}
                           onEvaluate={handleGenerateDiagnostic}
                           onViewDiagnostic={handleViewDiagnostic}
                         />

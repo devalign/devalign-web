@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Database, Binary, Cpu, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
-import { InsightCard } from '@/components/shared';
+import { MarketInsightsCarousel } from './market-insights-carousel';
 
 export interface MarketSidebarProps {
   totalOffers: number;
@@ -104,41 +104,8 @@ export function MarketSidebar({ totalOffers, className }: MarketSidebarProps) {
         </Card>
       </div>
 
-      {/* Market Insights Context Panel */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
-            Insights de Mercado
-          </span>
-          <div className="h-px flex-1 bg-border/40" />
-        </div>
-
-        <InsightCard
-          title="Brecha del Perfil Predominante"
-          description={
-            <>
-              El <strong className="text-foreground">45%</strong> del mercado demanda{' '}
-              <strong>Desarrolladores Web Full Stack</strong>. Su mayor deficiencia generalizada
-              es el <strong className="text-foreground">Testing Automatizado</strong>.
-            </>
-          }
-          type="trend"
-          value="Tendencia"
-        />
-
-        <InsightCard
-          title="Brechas Más Frecuentes"
-          description={
-            <>
-              De las últimas evaluaciones, el <strong className="text-foreground">62%</strong>{' '}
-              de los desarrolladores presentan debilidades críticas en{' '}
-              <strong>DevOps (Docker/CI/CD)</strong> independientemente de su rol.
-            </>
-          }
-          type="gap"
-          value="Top Brecha"
-        />
-      </div>
+      {/* Market Insights Context Panel (Circular Carousel) */}
+      <MarketInsightsCarousel />
     </aside>
   );
 }
