@@ -198,50 +198,55 @@ function TopologyContent() {
   const remainingCount = Math.max(0, unevaluatedClusters.length - INITIAL_VISIBLE_COUNT);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Header with Search and Navigation */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-1">
+    <div className="min-h-full flex flex-col">
+      {/* Sticky Header with Search and Navigation */}
+      <header className="sticky top-0 z-30 bg-background border-b border-border/50 py-4 sm:py-5 transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => router.push('/overview')}
-              className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer -ml-1"
+              className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer p-1 rounded-lg hover:bg-secondary/60 shrink-0 -ml-1"
               aria-label="Volver a Panorama General"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            Topología del Mercado IT
-          </h1>
-          <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
-            Descubre los {clusters.length} clústeres de especialidades técnicas identificados
-            mediante clustering jerárquico no supervisado en ofertas laborales de tecnología.
-          </p>
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg md:text-xl font-black tracking-tight text-foreground truncate">
+                Topología del Mercado IT
+              </h1>
+              <p className="text-[11px] text-muted-foreground hidden sm:block truncate">
+                {clusters.length} especialidades identificadas mediante clustering no supervisado.
+              </p>
+            </div>
+          </div>
+
+          {/* Real-time Search Input */}
+          <div className="w-full sm:w-80 shrink-0">
+            <MarketSearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              resultCount={isSearching ? searchResults.length : undefined}
+            />
+          </div>
         </div>
+      </header>
 
-        {/* Real-time Search Input */}
-        <div className="w-full md:w-80 shrink-0">
-          <MarketSearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onClear={() => setSearchQuery('')}
-            resultCount={isSearching ? searchResults.length : undefined}
-          />
-        </div>
-      </div>
+      {/* Main Body (Horizontal Padding Only) */}
+      <div className="px-4 sm:px-6 md:px-8 pb-8 space-y-6 max-w-7xl mx-auto w-full flex-1">
+        <ProfileUploadBanner />
+        <DiagnosticLoadingBanner
+          isUpdating={showBanner}
+          isDiagnosed={bannerIsDiagnosed}
+          onDismiss={handleBannerDismiss}
+          onViewResults={handleBannerViewResults}
+        />
+        <EmptyProfileBanner show={!hasProfileData} />
 
-      <ProfileUploadBanner />
-      <DiagnosticLoadingBanner
-        isUpdating={showBanner}
-        isDiagnosed={bannerIsDiagnosed}
-        onDismiss={handleBannerDismiss}
-        onViewResults={handleBannerViewResults}
-      />
-      <EmptyProfileBanner show={!hasProfileData} />
-
-      {/* Main Layout: Sticky Sidebar (Left) + Compact Rows (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left Column: Sticky Specs and Insights */}
-        <MarketSidebar totalOffers={totalOffers} />
+        {/* Main Layout: Sticky Sidebar (Left) + Compact Rows (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Left Column: Sticky Specs and Insights */}
+          <MarketSidebar totalOffers={totalOffers} />
 
         {/* Right Column: Compact Cluster Rows and Progressive Disclosure */}
         <div className="lg:col-span-2 space-y-6">
@@ -407,7 +412,8 @@ function TopologyContent() {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default function MarketTopologyPage() {

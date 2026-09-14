@@ -16,7 +16,7 @@ export interface MarketSidebarProps {
  */
 export function MarketSidebar({ totalOffers, className }: MarketSidebarProps) {
   return (
-    <aside className={cn('space-y-6 lg:sticky lg:top-6 self-start', className)}>
+    <aside className={cn('space-y-6 lg:sticky lg:top-20 self-start', className)}>
       {/* Technical Model Sheet */}
       <div className="space-y-4">
         <Card className="card-standard overflow-hidden border-border/80">
