@@ -180,9 +180,10 @@ export function SkillAutocompleteInput({
               {suggestions.map((item, index) => {
                 const isSelected = index === selectedIndex;
                 const domainLabel =
-                  item.core_domains && item.core_domains.length > 0
+                  item.subcategory_name ||
+                  (item.core_domains && item.core_domains.length > 0
                     ? item.core_domains[0]
-                    : item.skill_type;
+                    : item.skill_type);
 
                 return (
                   <button
@@ -199,7 +200,7 @@ export function SkillAutocompleteInput({
                       <span className="font-semibold truncate">{item.name}</span>
                     </div>
                     {domainLabel && (
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-full shrink-0 ml-2">
+                      <span className="text-[10px] font-bold text-muted-foreground bg-secondary/80 border border-border/40 px-2 py-0.5 rounded-full shrink-0 ml-2">
                         {domainLabel}
                       </span>
                     )}

@@ -19,19 +19,19 @@ import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
-import { InsightCard } from '@/components/shared/insight-card';
 
 // Local _components (Diagnosis)
-import { UserHeroCard } from './_components/user-hero-card';
 import { StrengthsCard } from './_components/strengths-card';
 import { PriorityGapsCard } from './_components/priority-gaps-card';
 import { ClusterDemandCard } from './_components/cluster-demand-card';
-import { MarketImpactCard } from './_components/market-impact-card';
 import { AiInsightCard } from './_components/ai-insight-card';
 import { StrengthsDrawer } from './_components/strengths-drawer';
 import { GapsDrawer } from './_components/gaps-drawer';
 import { ProfileRadarCard } from './_components/profile-radar-card';
+import { MicroConceptsCard } from './_components/micro-concepts-card';
 import { ClusterHeaderCard } from './_components/cluster-header-card';
+import { SalaryProjectionCard } from './_components/salary-projection-card';
+import { ConceptCoverageCard } from './_components/concept-coverage-bars';
 import { useClusterDiagnostic, DiagnosticDetail } from '@/hooks/use-cluster-diagnostic';
 
 // Reallocated Profile Components (CV & Graph)
@@ -181,6 +181,8 @@ function DiagnosisContent() {
         category: s.skill_type,
         ict_score: s.ict_score,
         trend: s.trend,
+        domain_tags: s.domain_tags,
+        core_domains: s.core_domains,
       };
     })
     .sort((a, b) => {
@@ -208,6 +210,8 @@ function DiagnosisContent() {
         importanceScore,
         market_demand_percentage: g.market_demand_percentage ?? 50,
         trend: g.trend,
+        domain_tags: g.domain_tags,
+        core_domains: g.core_domains,
       };
     })
     .sort((a, b) => {
@@ -238,10 +242,10 @@ function DiagnosisContent() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6 ">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6">
         {/* Page Header */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-1">
               <button
                 onClick={() => router.push('/overview')}
@@ -311,19 +315,21 @@ function DiagnosisContent() {
         <ProfileUploadBanner />
         <EmptyProfileBanner show={!hasProfileData} />
 
-        {/* Main Grid: Left (Profile & Radar) / Right (Details & Insights) */}
+        {/* Main Grid: Left (Profile & Radar + Recomendación) / Right (Details & Insights) */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-6">
-          {/* Left Column (col-span-4): Perfil y Radar */}
-          <div className="xl:col-span-4 flex flex-col">
+          {/* Left Column (col-span-4): Perfil, Radar y Recomendación */}
+          <div className="xl:col-span-4 flex flex-col gap-6">
             <ProfileRadarCard
               fullName={diagnostic.full_name || 'Desarrollador'}
               roleTitle={diagnostic.current_job_role || ''}
               seniority={diagnostic.seniority}
               totalSkills={diagnostic.total_profile_skills}
+              detectedSkills={diagnostic.detected_skills || []}
+              skillGaps={diagnostic.skill_gaps || []}
               domainAffinities={diagnostic.domain_affinities || []}
               isLoading={isAnalyzing}
-              className="h-full"
             />
+            <AiInsightCard marketGaps={gaps} isLoading={isAnalyzing} />
           </div>
 
           {/* Right Column (col-span-8): Header + Strengths/Gaps + Vertical Insights */}
@@ -335,11 +341,13 @@ function DiagnosisContent() {
               lastAnalysisDate={formattedDate}
               jobOfferCount={jobOfferCount}
               marketPercent={marketPercent}
+              opportunityProjection={diagnostic.opportunity_projection}
+              marketInsights={diagnostic.market_insights}
               topSkills={topSkills}
               isLoading={isAnalyzing}
             />
 
-            {/* Split bottom of right column: Left (Strengths & Gaps) / Right (Insights) */}
+            {/* Split bottom of right column: Left (Strengths & Gaps) / Right (Micro-concepts, Demand & Salary) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Sub-column: Strengths & Gaps */}
               <div className="flex flex-col gap-6">
@@ -355,61 +363,41 @@ function DiagnosisContent() {
                 />
               </div>
 
-              {/* Right Sub-column: Vertical Market Insights (Blue Rectangle 1) */}
+              {/* Right Sub-column: Micro-concepts, Financial Projections & Market Insights */}
               <div className="flex flex-col gap-6">
-                <ClusterDemandCard
+                <MicroConceptsCard
+                  detectedSkills={diagnostic.detected_skills || []}
+                  skillGaps={diagnostic.skill_gaps || []}
+                  isLoading={isAnalyzing}
+                />
+                <SalaryProjectionCard
+                  salaryProjection={diagnostic.salary_projection}
+                  marketInsights={diagnostic.market_insights}
+                  gapImpacts={diagnostic.gap_impacts}
+                  skillGaps={gaps}
                   clusterName={diagnostic.cluster_name}
+                  seniority={diagnostic.seniority}
+                  isLoading={isAnalyzing}
+                />
+                <ClusterDemandCard
+                  opportunityProjection={diagnostic.opportunity_projection}
+                  jobOfferCount={jobOfferCount}
+                  affinityScore={diagnostic.affinity_score}
                   marketInsights={diagnostic.market_insights || undefined}
                   isLoading={isAnalyzing}
                 />
-                <MarketImpactCard
-                  marketGaps={gaps}
-                  marketInsights={diagnostic.market_insights || undefined}
-                  isLoading={isAnalyzing}
-                />
-                <AiInsightCard marketGaps={gaps} isLoading={isAnalyzing} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section (Blue Rectangle 2: full width horizontal insights) */}
-        <div className="mt-8 space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
-              Contexto de mercado adicional
-            </span>
-            <div className="h-px flex-1 bg-border/40" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InsightCard
-              title="Cumplimiento de Perfiles"
-              description={
-                <>
-                  En promedio, los postulantes a{' '}
-                  <strong className="text-foreground">{diagnostic.cluster_name}</strong> solo
-                  cumplen con el <strong className="text-emerald-500">58%</strong> del perfil
-                  técnico ideal. Â¡Destacar aquí te da una gran ventaja!
-                </>
-              }
-              type="compliance"
-              value="Benchmarking"
-            />
-
-            <InsightCard
-              title="Competencias Críticas"
-              description={
-                <>
-                  El mercado requiere alto nivel en <strong>Arquitectura en la Nube y CI/CD</strong>{' '}
-                  para tu perfil, pero el nivel promedio de los candidatos es muy bajo. Enfócate en
-                  esto.
-                </>
-              }
-              type="critical"
-              value="Oportunidad"
-            />
-          </div>
+        {/* Cobertura de Conceptos por Habilidades Clave */}
+        <div className="mt-6">
+          <ConceptCoverageCard
+            detectedSkills={diagnostic.detected_skills || []}
+            skillGaps={diagnostic.skill_gaps || []}
+            isLoading={isAnalyzing}
+          />
         </div>
       </div>
 

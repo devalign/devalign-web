@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Activity,
+  Award,
   BadgeCheck,
   CalendarClock,
   Clock3,
@@ -13,6 +14,7 @@ import {
   FileText,
   History,
   Info,
+  Layers,
   Loader2,
   MoreVertical,
   RefreshCw,
@@ -44,6 +46,7 @@ import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useUserProfile, useUpdateUserSkills } from '@/hooks/use-user-profile';
 import { useUserProfileSelector } from '@/hooks/use-user-profile-selector';
 import type { ClusterAffinityItem, SkillItem, UserProfileData } from '@/types';
+import { cn } from '@/lib/utils';
 
 function formatDate(value?: string | null, includeTime = false) {
   if (!value) return 'Sin fecha';
@@ -259,10 +262,7 @@ export default function ProfileDashboardView() {
     );
   }
 
-  // Show skeleton only during actual loading
-  if (isLoading || !profile) {
-    return <ProfileSkeleton />;
-  }
+  const totalSkillsCount = skills.length || profile?.detected_skills?.length || 0;
 
   return (
     <>
@@ -276,7 +276,7 @@ export default function ProfileDashboardView() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-row gap-2">
             <Button variant="outline" asChild className="h-10 gap-2 text-xs font-bold bg-card">
               <Link href="/profile/upload">
                 <Upload className="h-4 w-4" />
@@ -321,14 +321,56 @@ export default function ProfileDashboardView() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          <p className="text-sm font-bold">{roleTitle}</p>
-                          <Badge
-                            variant="outline"
-                            className="border-0 bg-info/10 text-info hover:bg-info/10"
-                          >
-                            {profile?.seniority || 'mid'}
-                          </Badge>
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <p className="text-sm font-bold text-foreground">{roleTitle}</p>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {[
+                              {
+                                key: 'junior',
+                                label: 'Jr (0-2 años)',
+                                active:
+                                  (profile?.seniority || '').toLowerCase().includes('junior') ||
+                                  (profile?.seniority || '').toLowerCase().includes('jr'),
+                              },
+                              {
+                                key: 'mid',
+                                label: 'Mid (3-5 años)',
+                                active:
+                                  !(profile?.seniority || '').toLowerCase().includes('junior') &&
+                                  !(profile?.seniority || '').toLowerCase().includes('jr') &&
+                                  !(profile?.seniority || '').toLowerCase().includes('senior') &&
+                                  !(profile?.seniority || '').toLowerCase().includes('sr') &&
+                                  !(profile?.seniority || '').toLowerCase().includes('lead'),
+                              },
+                              {
+                                key: 'senior',
+                                label: 'Senior (6+ años)',
+                                active:
+                                  (profile?.seniority || '').toLowerCase().includes('senior') ||
+                                  (profile?.seniority || '').toLowerCase().includes('sr') ||
+                                  (profile?.seniority || '').toLowerCase().includes('lead'),
+                              },
+                            ].map((lvl) => (
+                              <span
+                                key={lvl.key}
+                                className={cn(
+                                  'inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider transition-colors',
+                                  lvl.active
+                                    ? 'bg-info/20 text-info border border-info/40 font-extrabold shadow-2xs'
+                                    : 'bg-secondary/70 text-muted-foreground border border-border/50'
+                                )}
+                              >
+                                {lvl.label}
+                              </span>
+                            ))}
+
+                            {totalSkillsCount > 0 && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-primary/15 text-primary border border-primary/30 uppercase tracking-wider">
+                                <Award className="w-2.5 h-2.5 text-primary" />
+                                {totalSkillsCount} Skills Evaluadas
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

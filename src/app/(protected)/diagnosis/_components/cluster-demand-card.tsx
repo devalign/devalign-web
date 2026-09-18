@@ -2,64 +2,65 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, TrendingUp } from 'lucide-react';
-import { MarketInsights } from '@/lib/api/types';
+import { Loader2, Briefcase } from 'lucide-react';
+import { OpportunityProjection, MarketInsights } from '@/lib/api/types';
+import { cn } from '@/lib/utils';
 
 interface ClusterDemandCardProps {
   clusterName?: string;
+  opportunityProjection?: OpportunityProjection | null;
+  jobOfferCount?: number;
   marketInsights?: MarketInsights;
+  affinityScore?: number;
   isLoading?: boolean;
+  className?: string;
 }
 
 export function ClusterDemandCard({
-  clusterName = 'Data Engineering',
-  marketInsights,
+  opportunityProjection,
+  jobOfferCount = 0,
+  affinityScore = 0.21,
   isLoading = false,
+  className,
 }: ClusterDemandCardProps) {
-  const growth = marketInsights?.growth_percentage ?? null;
-  const isPositive = growth !== null && growth >= 0;
+  const totalOffers = opportunityProjection?.total_cluster_offers ?? jobOfferCount ?? 100;
+  const directMatches =
+    opportunityProjection?.direct_matches_count ??
+    Math.max(1, Math.round(totalOffers * Math.max(0.05, affinityScore)));
+  const unlockable = Math.max(0, totalOffers - directMatches);
+  const unlockPct =
+    opportunityProjection?.unlock_percentage ??
+    Math.round((directMatches / Math.max(1, totalOffers)) * 100);
+
   return (
-    <Card className="card-ai! flex flex-col justify-between h-auto min-h-[220px]">
-      <CardContent className="p-5 flex flex-col justify-between h-auto gap-4">
+    <Card className={cn(className)}>
+      <CardContent className="space-y-2">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-3 h-full">
-            <Loader2 className="w-6 h-6 text-primary animate-spin" />
+          <div className="flex flex-col items-center justify-center py-6 gap-2">
+            <Loader2 className="w-5 h-5 text-primary animate-spin" />
             <span className="text-[10px] font-bold font-mono text-muted-foreground animate-pulse">
-              Cargando demanda...
+              Calculando ofertas compatibles...
             </span>
           </div>
         ) : (
           <>
-            {/* Header */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <TrendingUp className="w-3.5 h-3.5 text-success" />
-                <span className="text-[10px] font-bold font-mono uppercase tracking-wider">
-                  Demanda del Cluster
-                </span>
-              </div>
-              <div className="flex items-baseline gap-1.5 pt-1">
-                <span
-                  className={`text-lg font-black tracking-tight ${isPositive ? 'text-foreground' : 'text-foreground'}`}
-                >
-                  {growth !== null ? `${isPositive ? '+' : ''}${growth}%` : 'N/A'}
-                </span>
-                <span
-                  className={`text-[10px] font-bold uppercase tracking-wider ${isPositive ? 'text-success' : 'text-destructive'}`}
-                >
-                  Crecimiento
-                </span>
-              </div>
+            {/* Metric & Description */}
+            <div className="flex items-baseline gap-2 pt-0.5">
+              <span className="text-base sm:text-lg font-black tracking-tight text-foreground">
+                {directMatches} de {totalOffers}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                ofertas del mercado
+              </span>
             </div>
 
             {/* Description */}
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Las ofertas para el clúster <strong className="text-foreground">{clusterName}</strong>{' '}
-              han mostrado este comportamiento recientemente (Market Share:{' '}
-              {marketInsights?.market_share_percentage ?? 'N/A'}%).
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Tu perfil califica directamente para el{' '}
+              <strong className="text-foreground">{unlockPct}%</strong> de las ofertas del clúster.
+              Cubrir tus brechas prioritarias te habilita para competir por el{' '}
+              <strong className="text-primary font-semibold">100% ({totalOffers} ofertas)</strong>.
             </p>
-
-
           </>
         )}
       </CardContent>

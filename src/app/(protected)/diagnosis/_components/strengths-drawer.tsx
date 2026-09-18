@@ -3,16 +3,18 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Search, CheckCircle2 } from 'lucide-react';
-import { SkillItem } from '@/types';
+import { getSkillConcepts } from '@/lib/skill-concepts';
 
 interface StrengthListItem {
   name: string;
   level: string;
   score: number;
   demandPercentage: number;
-  category: string;
+  category?: string;
   trend?: 'growing' | 'stable' | 'shrinking' | null;
   ict_score?: number;
+  domain_tags?: string[];
+  core_domains?: string[];
 }
 
 interface StrengthsDrawerProps {
@@ -30,7 +32,7 @@ export function StrengthsDrawer({ isOpen, onOpenChange, strengths }: StrengthsDr
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
+      <SheetContent className="sm:max-w-md bg-background border-l border-border flex flex-col h-full">
         <SheetHeader className="pb-4">
           <SheetTitle className="flex items-center gap-2 text-success dark:text-success font-bold">
             <CheckCircle2 className="h-5 w-5 text-success" />
@@ -55,54 +57,63 @@ export function StrengthsDrawer({ isOpen, onOpenChange, strengths }: StrengthsDr
 
         {/* List */}
         <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
-          {filteredStrengths.map((strength, idx) => (
-            <div
-              key={`${strength.name}-${idx}`}
-              className="flex flex-col justify-between p-3 rounded-lg bg-success/5 border border-success/10 transition-colors hover:bg-success/10"
-            >
-              <div className="flex justify-between items-start gap-1">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
-                    {strength.name}
+          {filteredStrengths.map((strength, idx) => {
+            const concepts = getSkillConcepts(
+              strength.name,
+              strength.domain_tags,
+              strength.core_domains
+            );
+
+            return (
+              <div
+                key={`${strength.name}-${idx}`}
+                className="flex flex-col justify-between p-3 rounded-lg bg-success/5 border border-success/10 transition-colors hover:bg-success/10"
+              >
+                <div className="flex justify-between items-start gap-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="font-semibold text-foreground text-xs truncate">
+                      {strength.name}
+                    </span>
+                    {strength.trend === 'growing' && (
+                      <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/25 shrink-0">
+                        Creciente
+                      </span>
+                    )}
+                    {strength.trend === 'shrinking' && (
+                      <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/25 shrink-0">
+                        Decreciente
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[9px] text-success/80 dark:text-success/80 font-bold shrink-0">
+                    {strength.demandPercentage}% DEMANDA
                   </span>
-                  {strength.trend === 'growing' && (
-                    <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/25 shrink-0">
-                      Creciente
-                    </span>
-                  )}
-                  {strength.trend === 'shrinking' && (
-                    <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/25 shrink-0">
-                      Decreciente
-                    </span>
-                  )}
                 </div>
-                <span className="text-[9px] text-success/80 dark:text-success/80 font-bold shrink-0">
-                  {strength.demandPercentage}% DEMANDA
-                </span>
-              </div>
-              <div className="flex items-center justify-between mt-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-muted-foreground">{strength.level}</span>
-                  {strength.ict_score !== undefined && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/15">
-                      ICT {strength.ict_score.toFixed(1)}
-                    </span>
-                  )}
+                <div className="flex items-center justify-between mt-2 gap-2">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-[10px] text-muted-foreground">{strength.level}</span>
+                    {strength.ict_score !== undefined && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/15">
+                        ICT {strength.ict_score.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Concept Tags */}
+                  <div className="flex items-center gap-1 flex-wrap justify-end">
+                    {concepts.map((concept, cIdx) => (
+                      <span
+                        key={cIdx}
+                        className="text-[9px] px-1.5 py-0.5 rounded-md bg-success/10 text-success dark:text-success font-medium border border-success/20"
+                      >
+                        {concept}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                {strength.category && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-success/10 text-success dark:text-success font-medium">
-                    {strength.category === 'hard_skill'
-                      ? 'Habilidad'
-                      : strength.category === 'tool'
-                        ? 'Herramienta'
-                        : strength.category === 'methodology'
-                          ? 'Metodología'
-                          : strength.category}
-                  </span>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
           {filteredStrengths.length === 0 && (
             <p className="text-center text-xs text-muted-foreground py-8">
               No se encontraron fortalezas con ese nombre.

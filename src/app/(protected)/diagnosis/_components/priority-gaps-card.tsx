@@ -4,11 +4,13 @@ import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowRight, Loader2, AlertTriangle, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import { SkillItem } from '@/lib/api/types';
+import { cn } from '@/lib/utils';
 
 interface PriorityGapsCardProps {
   marketGaps: SkillItem[];
   onViewAll: () => void;
   isLoading?: boolean;
+  className?: string;
 }
 
 const severityBadge = (crit: string) => {
@@ -29,9 +31,10 @@ export function PriorityGapsCard({
   marketGaps,
   onViewAll,
   isLoading = false,
+  className,
 }: PriorityGapsCardProps) {
   return (
-    <Card className="flex flex-col h-full relative overflow-visible min-h-[180px]">
+    <Card className={cn('flex flex-col h-full relative overflow-visible min-h-[180px]', className)}>
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />

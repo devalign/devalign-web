@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowRight, Loader2, CheckCircle2, TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface StrengthItem {
   name: string;
@@ -18,6 +19,7 @@ interface StrengthsCardProps {
   strengths: StrengthItem[];
   onViewAll: () => void;
   isLoading?: boolean;
+  className?: string;
 }
 
 const levelBadge = (level: string) => {
@@ -27,9 +29,14 @@ const levelBadge = (level: string) => {
   return 'bg-secondary/20 text-muted-foreground border-border/40';
 };
 
-export function StrengthsCard({ strengths, onViewAll, isLoading = false }: StrengthsCardProps) {
+export function StrengthsCard({
+  strengths,
+  onViewAll,
+  isLoading = false,
+  className,
+}: StrengthsCardProps) {
   return (
-    <Card className="flex flex-col h-full relative overflow-visible min-h-[200px]">
+    <Card className={cn('flex flex-col h-full relative overflow-visible min-h-[180px]', className)}>
       {isLoading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 text-primary animate-spin" />

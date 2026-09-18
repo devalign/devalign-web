@@ -57,6 +57,8 @@ export interface SkillItem {
   has_certification?: boolean;
   ict_score?: number;
   trend?: 'growing' | 'stable' | 'shrinking' | null;
+  domain_tags?: string[];
+  core_domains?: string[];
 }
 
 export interface CompatibleRoleItem {
@@ -65,12 +67,57 @@ export interface CompatibleRoleItem {
   frequency?: number;
 }
 
+export interface ExperienceDistribution {
+  junior_percentage: number;
+  mid_percentage: number;
+  senior_percentage: number;
+  unspecified_percentage: number;
+}
+
 export interface MarketInsights {
+  average_salary_usd?: number | null;
   average_salary_pen?: number | null;
+  salary_p25_usd?: number | null;
+  salary_median_usd?: number | null;
+  salary_p75_usd?: number | null;
   salary_differential_percentage?: number | null;
   market_share_percentage?: number | null;
   total_demand?: number | null;
+  negotiable_rate?: number | null;
   growth_percentage?: number | null;
+  experience_distribution?: ExperienceDistribution;
+}
+
+export interface SalaryProjection {
+  current_estimated_salary_usd: number;
+  current_estimated_salary_pen: number;
+  projected_salary_usd: number;
+  projected_salary_pen: number;
+  potential_gain_percentage: number;
+  cluster_average_usd: number;
+  cluster_p75_usd: number;
+  salary_p25_usd?: number;
+  salary_p25_pen?: number;
+  salary_median_usd?: number;
+  salary_median_pen?: number;
+  salary_p75_pen?: number;
+}
+
+export interface OpportunityProjection {
+  direct_matches_count: number;
+  potential_matches_count: number;
+  total_cluster_offers: number;
+  unlock_percentage: number;
+}
+
+export interface GapImpactItem {
+  skill_name: string;
+  skill_type: string;
+  market_importance: string;
+  salary_boost_usd: number;
+  salary_boost_pen: number;
+  opportunity_boost_count: number;
+  market_demand_percentage: number;
 }
 
 export interface ClusterAffinityItem {
@@ -135,6 +182,12 @@ export interface SkillSearchResult {
   id: string;
   name: string;
   skill_type: string;
+  status?: string;
+  standard_name?: string | null;
+  standard_type?: string | null;
+  category_name?: string | null;
+  subcategory_name?: string | null;
   domain_tags?: string[];
   core_domains?: string[];
+  matched_alias?: string | null;
 }

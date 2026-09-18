@@ -2,10 +2,9 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Briefcase, Clock3, Award, FileText, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { Briefcase, Clock3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+import { OpportunityProjection, MarketInsights } from '@/lib/api/types';
 
 interface ClusterHeaderCardProps {
   primarySpecialty: string;
@@ -13,28 +12,31 @@ interface ClusterHeaderCardProps {
   lastAnalysisDate?: string;
   jobOfferCount?: number;
   marketPercent?: number;
+  opportunityProjection?: OpportunityProjection | null;
+  marketInsights?: MarketInsights | null;
   topSkills?: string[];
   isLoading?: boolean;
   className?: string;
 }
 
 export function ClusterHeaderCard({
-  primarySpecialty,
   currentScore,
   lastAnalysisDate = 'Recientemente',
   jobOfferCount = 0,
-  marketPercent = 0,
-  topSkills = [],
-  isLoading = false,
+  opportunityProjection,
+  marketInsights,
   className,
 }: ClusterHeaderCardProps) {
+  const totalOffers = opportunityProjection?.total_cluster_offers ?? jobOfferCount;
+  const exp = marketInsights?.experience_distribution;
+
   return (
     <Card
       className={cn('relative overflow-hidden p-5 card-standard flex flex-col gap-4', className)}
     >
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-        {/* Left Side: Specialty Info & Stats */}
-        <div className="space-y-2 flex-1 min-w-0">
+        {/* Left Side: Specialty Info */}
+        <div className="space-y-1.5 flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
               <Briefcase className="w-4 h-4" />
@@ -43,7 +45,8 @@ export function ClusterHeaderCard({
               Especialidad Analizada
             </span>
           </div>
-          <div className="flex items-baseline gap-1.5 flex-wrap pt-0.5">
+
+          <div className="flex items-baseline gap-2 pt-0.5">
             <span className="text-2xl font-black tracking-tight text-foreground leading-none">
               {currentScore}%
             </span>
@@ -63,36 +66,12 @@ export function ClusterHeaderCard({
                   ? 'afinidad media'
                   : 'afinidad baja'}
             </span>
-            <span className="text-xs text-muted-foreground ml-1">
-              con el Clúster de {primarySpecialty}
-            </span>
           </div>
         </div>
 
-        {/* Right Side: Score & Date Blocks */}
+        {/* Right Side: Last Analysis Date */}
         <div className="flex flex-wrap gap-3 shrink-0">
-          {/* Market Share block */}
-          {marketPercent > 0 && (
-            <div className="flex items-center gap-2.5 p-2 px-3.5 rounded-xl border border-border/40 bg-secondary/10 min-w-[140px]">
-              <div className="p-1.5 rounded-lg bg-success/10 text-success shrink-0">
-                <FileText className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-wider block">
-                  Mercado
-                </span>
-                <span className="text-xs font-black text-foreground block truncate mt-0.5">
-                  {marketPercent}%{' '}
-                  <span className="text-[10px] font-medium text-muted-foreground ml-0.5">
-                    de ofertas
-                  </span>
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Last analysis block */}
-          <div className="flex items-center gap-2.5 p-2 px-3.5 rounded-xl border border-border/40 bg-secondary/10 min-w-[140px]">
+          <div className="flex items-center gap-2.5 p-2 px-3.5 rounded-xl border border-border/40 bg-secondary/10 min-w-[130px]">
             <div className="p-1.5 rounded-lg bg-info/10 text-info shrink-0">
               <Clock3 className="w-4 h-4" />
             </div>
@@ -108,7 +87,28 @@ export function ClusterHeaderCard({
         </div>
       </div>
 
-
+      {/* Full-width Horizontal Market Demand & Seniority Row */}
+      <div className="pt-2 border-t border-border/40 flex items-center justify-between flex-wrap gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-xs">
+          <span>Demanda de mercado:</span>
+          <strong className="text-foreground font-semibold">
+            {totalOffers} ofertas
+          </strong>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <span>
+            Jr (<strong className="text-foreground font-semibold">{exp?.junior_percentage ?? 15}%</strong>)
+          </span>
+          <span className="text-border">·</span>
+          <span>
+            Mid (<strong className="text-foreground font-semibold">{exp?.mid_percentage ?? 55}%</strong>)
+          </span>
+          <span className="text-border">·</span>
+          <span>
+            Senior (<strong className="text-foreground font-semibold">{exp?.senior_percentage ?? 30}%</strong>)
+          </span>
+        </div>
+      </div>
     </Card>
   );
 }
