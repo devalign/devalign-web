@@ -16,6 +16,7 @@ import { ProfileRadarCard } from '@/app/(protected)/diagnosis/_components/profil
 import { GraphNode } from '../../profile/_components/graph/knowledge-graph-visualization';
 import { cn } from '@/lib/utils';
 import { ClusterAffinityItem } from '@/lib/api/types';
+import { getSkillConcepts } from '@/lib/skill-concepts';
 
 export type FilterMode = 'all' | 'strengths' | 'gaps';
 
@@ -107,6 +108,48 @@ export function OverviewSideDrawer({
       });
     }
   }, [graphNodes, activeFilter, activeCluster]);
+
+  const getNodeDomain = React.useCallback(
+    (node: GraphNode) => {
+      // 1. Check explicit domain in node.domains
+      if (node.domains && node.domains.length > 0) {
+        const valid = node.domains.find(
+          (d) =>
+            d &&
+            d.toLowerCase() !== 'tech' &&
+            d.toLowerCase() !== 'unknown' &&
+            d.toLowerCase() !== 'hard_skill'
+        );
+        if (valid) return valid;
+      }
+
+      // 2. Check detected_skills or skill_gaps in activeCluster
+      const skillNameLower = node.label.toLowerCase();
+      const match = [
+        ...(activeCluster?.detected_skills || []),
+        ...(activeCluster?.skill_gaps || []),
+      ].find((s) => s.name.toLowerCase() === skillNameLower);
+
+      if (match?.core_domains && match.core_domains.length > 0) {
+        const valid = match.core_domains.find(
+          (d) => d && d.toLowerCase() !== 'tech' && d.toLowerCase() !== 'unknown'
+        );
+        if (valid) return valid;
+      }
+
+      if (match?.domain_tags && match.domain_tags.length > 0) {
+        const valid = match.domain_tags.find(
+          (t) => t && t.toLowerCase() !== 'tech' && t.toLowerCase() !== 'unknown'
+        );
+        if (valid) return valid;
+      }
+
+      // 3. Fallback to conceptual taxonomy
+      const concepts = getSkillConcepts(node.label);
+      return concepts[0] || 'Desarrollo';
+    },
+    [activeCluster]
+  );
 
   return (
     <>
@@ -220,7 +263,7 @@ export function OverviewSideDrawer({
                               {node.label}
                             </span>
                             <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">
-                              {node.group}
+                              {getNodeDomain(node)}
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">

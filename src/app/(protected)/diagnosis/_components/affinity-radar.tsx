@@ -71,7 +71,7 @@ export function AffinityRadar({
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className={cn('relative flex flex-col gap-6 w-full overflow-visible', className)}>
+      <div className={cn('relative flex flex-col gap-2 w-full overflow-visible', className)}>
         {isLoading && (
           <div className="absolute inset-0 bg-background/60 backdrop-blur-xs z-10 flex items-center justify-center rounded-2xl">
             <div className="flex flex-col items-center gap-2">
@@ -84,7 +84,7 @@ export function AffinityRadar({
         )}
 
         {/* Header with Title and Tooltip */}
-        <div className="flex gap-1.5 mb-3 relative z-30">
+        <div className="flex gap-1.5 relative z-30">
           <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider">
             Afinidad por Dominio
           </span>
@@ -98,7 +98,7 @@ export function AffinityRadar({
         </div>
 
         {/* Radar SVG */}
-        <div className="relative w-full max-w-[300px] aspect-square overflow-visible mx-auto">
+        <div className="relative w-full max-w-[285px] aspect-square overflow-visible m-auto">
           <svg className="w-full h-full overflow-visible" viewBox="0 0 200 200">
             {[20, 40, 60, 80, 100].map((r) => {
               const rad = (r / 100) * 80;
@@ -230,7 +230,7 @@ export function AffinityRadar({
         </div>
 
         {/* Legend */}
-        <div className="flex justify-center gap-4 text-[9px] font-mono text-muted-foreground mb-6">
+        <div className="flex justify-center gap-4 text-[9px] font-mono text-muted-foreground mb-1">
           <div className="flex items-center gap-1">
             <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
             <span>Mercado</span>

@@ -62,7 +62,7 @@ export function InsightCard({
 
   return (
     <Card className={cn('card-insight overflow-hidden flex flex-col', className)}>
-      <CardContent className="p-4 sm:p-5 flex flex-col gap-3 h-full">
+      <CardContent className="flex flex-col gap-3 h-full">
         <div className="flex items-start justify-between gap-2">
           <div className={cn('p-2 rounded-xl border shrink-0', config.colorClass)}>
             <Icon className="w-4 h-4" />

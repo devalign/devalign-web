@@ -163,7 +163,7 @@ function TopologyContent() {
 
   if (isLoading) {
     return (
-      <LoadingScreen message="Cargando la Topología del Mercado..." minHeight="min-h-[400px]" />
+      <LoadingScreen message="Cargando la Topología del Mercado..." minHeight="min-h-[70vh]" />
     );
   }
 
@@ -200,7 +200,7 @@ function TopologyContent() {
   return (
     <div className="min-h-full flex flex-col">
       {/* Sticky Header with Search and Navigation */}
-      <header className="sticky top-0 z-30 bg-background border-b border-border/50 py-4 sm:py-5 transition-all">
+      <header className="sticky top-0 z-30 bg-background border-b border-border/50 py-4 sm:py-6 md:py-8 space-y-6 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <button

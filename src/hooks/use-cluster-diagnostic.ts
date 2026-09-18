@@ -1,7 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from './use-current-user';
 import { apiClient } from '@/lib/api/api-client';
-import { MarketInsights, CompatibleRoleItem } from '@/lib/api/types';
+import {
+  MarketInsights,
+  CompatibleRoleItem,
+  SalaryProjection,
+  OpportunityProjection,
+  GapImpactItem,
+} from '@/lib/api/types';
 
 export interface DiagnosticDetail {
   user_id: string;
@@ -16,6 +22,9 @@ export interface DiagnosticDetail {
   market_insights: MarketInsights | null;
   compatible_roles: CompatibleRoleItem[] | null;
   ai_insight: string | null;
+  salary_projection?: SalaryProjection | null;
+  opportunity_projection?: OpportunityProjection | null;
+  gap_impacts?: GapImpactItem[];
   detected_skills: any[];
   skill_gaps: any[];
   domain_affinities: any[];

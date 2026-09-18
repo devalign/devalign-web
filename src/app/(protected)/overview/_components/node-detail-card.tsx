@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { GraphNode } from '../../profile/_components/graph/knowledge-graph-visualization';
 import { ClusterAffinityItem, UserProfileData } from '@/lib/api/types';
+import { getSkillConcepts } from '@/lib/skill-concepts';
 
 interface NodeDetailCardProps {
   node: GraphNode;
@@ -64,9 +65,41 @@ export function NodeDetailCard({ node, activeCluster, profile, onClose }: NodeDe
     priorityColor = 'text-warning bg-warning/10 border-warning/20 dark:border-warning/20';
   }
 
+  // Resolve Domain
+  const nodeDomain = React.useMemo(() => {
+    if (node.domains && node.domains.length > 0) {
+      const valid = node.domains.find(
+        (d) =>
+          d &&
+          d.toLowerCase() !== 'tech' &&
+          d.toLowerCase() !== 'unknown' &&
+          d.toLowerCase() !== 'hard_skill'
+      );
+      if (valid) return valid;
+    }
+    if (acquiredSkill?.core_domains && acquiredSkill.core_domains.length > 0) {
+      const valid = acquiredSkill.core_domains.find((d) => d && d.toLowerCase() !== 'tech');
+      if (valid) return valid;
+    }
+    if (gapSkill?.core_domains && gapSkill.core_domains.length > 0) {
+      const valid = gapSkill.core_domains.find((d) => d && d.toLowerCase() !== 'tech');
+      if (valid) return valid;
+    }
+    return null;
+  }, [node.domains, acquiredSkill, gapSkill]);
+
+  // Resolve Related Concepts
+  const relatedConcepts = React.useMemo(() => {
+    const domainTags = acquiredSkill?.domain_tags || gapSkill?.domain_tags;
+    const coreDomains = acquiredSkill?.core_domains || gapSkill?.core_domains;
+    const concepts = getSkillConcepts(node.label, domainTags, coreDomains);
+    return concepts.filter((c) => c && c.trim().length > 0);
+  }, [node.label, acquiredSkill, gapSkill]);
+
   // Demand
-  const demand =
+  const rawDemand =
     acquiredSkill?.market_demand_percentage ?? gapSkill?.market_demand_percentage ?? null;
+  const demand = rawDemand !== null ? Math.min(100, Math.round(rawDemand)) : null;
 
   // Trend
   const trend = acquiredSkill?.trend ?? gapSkill?.trend ?? null;
@@ -114,12 +147,14 @@ export function NodeDetailCard({ node, activeCluster, profile, onClose }: NodeDe
                 Mercado
               </Badge>
             )}
-            <Badge
-              variant="secondary"
-              className="bg-muted/30 text-muted-foreground border border-border/30 text-[9px] py-0 px-1.5 hover:bg-muted/30"
-            >
-              {node.group}
-            </Badge>
+            {nodeDomain && (
+              <Badge
+                variant="secondary"
+                className="bg-muted/30 text-muted-foreground border border-border/30 text-[9px] py-0 px-1.5 hover:bg-muted/30 font-medium"
+              >
+                {nodeDomain}
+              </Badge>
+            )}
           </div>
         </div>
         <Button
@@ -133,21 +168,25 @@ export function NodeDetailCard({ node, activeCluster, profile, onClose }: NodeDe
       </CardHeader>
 
       <CardContent className="pt-5 space-y-6 flex-1 overflow-y-auto scrollbar-none overflow-visible">
-        {/* Application Domains Section */}
+        {/* Related Concepts Section */}
         <div className="space-y-2">
           <h4 className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Layers className="h-3.5 w-3.5" />
-            Dominios de Aplicación
+            <Layers className="h-3.5 w-3.5 text-primary" />
+            Conceptos Relacionados
           </h4>
           <div className="flex flex-wrap gap-1.5 mt-2">
-            {node.domains.map((domain) => (
-              <span
-                key={domain}
-                className="px-2 py-0.5 text-[10px] font-medium rounded-lg bg-muted/30 text-foreground border border-border/30"
-              >
-                {domain}
-              </span>
-            ))}
+            {relatedConcepts.length > 0 ? (
+              relatedConcepts.map((concept) => (
+                <span
+                  key={concept}
+                  className="px-2 py-0.5 text-[10px] font-medium rounded-lg bg-secondary/80 text-foreground border border-border/50 hover:border-primary/40 transition-colors"
+                >
+                  {concept}
+                </span>
+              ))
+            ) : (
+              <span className="text-[10px] text-muted-foreground">General</span>
+            )}
           </div>
         </div>
 

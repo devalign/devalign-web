@@ -3,14 +3,16 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Search, AlertCircle } from 'lucide-react';
-import { SkillItem } from '@/types';
+import { getSkillConcepts } from '@/lib/skill-concepts';
 
 interface GapListItem {
   name: string;
-  skill_type: string;
+  skill_type?: string;
   market_importance: string;
   market_demand_percentage: number;
   trend?: 'growing' | 'stable' | 'shrinking' | null;
+  domain_tags?: string[];
+  core_domains?: string[];
 }
 
 interface GapsDrawerProps {
@@ -28,7 +30,7 @@ export function GapsDrawer({ isOpen, onOpenChange, gaps }: GapsDrawerProps) {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md bg-card border-l border-border flex flex-col h-full">
+      <SheetContent className="sm:max-w-md bg-background border-l border-border flex flex-col h-full">
         <SheetHeader className="pb-4">
           <SheetTitle className="flex items-center gap-2 text-destructive dark:text-destructive font-bold">
             <AlertCircle className="h-5 w-5 text-destructive" />
@@ -53,7 +55,7 @@ export function GapsDrawer({ isOpen, onOpenChange, gaps }: GapsDrawerProps) {
 
         {/* List */}
         <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
-          {filteredGaps.map((gap) => {
+          {filteredGaps.map((gap, idx) => {
             const crit = gap.market_importance || 'medium';
             const demand = gap.market_demand_percentage || 50;
             const borderClass =
@@ -72,19 +74,21 @@ export function GapsDrawer({ isOpen, onOpenChange, gaps }: GapsDrawerProps) {
                   : crit === 'medium'
                     ? 'Media'
                     : crit;
-            const tagClass =
-              crit === 'critical'
-                ? 'bg-destructive/10 text-destructive dark:text-destructive'
-                : 'bg-warning/10 text-warning dark:text-warning';
+
+            const concepts = getSkillConcepts(
+              gap.name,
+              gap.domain_tags,
+              gap.core_domains
+            );
 
             return (
               <div
-                key={gap.name}
+                key={`${gap.name}-${idx}`}
                 className={`flex flex-col justify-between p-3 rounded-lg border border-dashed transition-colors ${borderClass}`}
               >
                 <div className="flex justify-between items-start gap-1">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">
+                    <span className="font-semibold text-foreground text-xs truncate">
                       {gap.name}
                     </span>
                     {gap.trend === 'growing' && (
@@ -102,21 +106,26 @@ export function GapsDrawer({ isOpen, onOpenChange, gaps }: GapsDrawerProps) {
                     {demand}% DEMANDA
                   </span>
                 </div>
-                <div className="flex items-center justify-between mt-1">
-                  <span className={`text-[10px] font-medium ${textClass}`}>{critLabel}</span>
-                  {gap.skill_type && (
-                    <span
-                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tagClass}`}
-                    >
-                      {gap.skill_type === 'hard_skill'
-                        ? 'Habilidad'
-                        : gap.skill_type === 'tool'
-                          ? 'Herramienta'
-                          : gap.skill_type === 'methodology'
-                            ? 'Metodología'
-                            : gap.skill_type}
-                    </span>
-                  )}
+                <div className="flex items-center justify-between mt-2 gap-2">
+                  <span className={`text-[10px] font-semibold ${textClass} shrink-0`}>
+                    {critLabel}
+                  </span>
+
+                  {/* Concept Tags */}
+                  <div className="flex items-center gap-1 flex-wrap justify-end">
+                    {concepts.map((concept, cIdx) => (
+                      <span
+                        key={cIdx}
+                        className={`text-[9px] px-1.5 py-0.5 rounded-md font-medium border ${
+                          crit === 'critical'
+                            ? 'bg-destructive/10 text-destructive border-destructive/20'
+                            : 'bg-warning/10 text-warning border-warning/20'
+                        }`}
+                      >
+                        {concept}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             );
