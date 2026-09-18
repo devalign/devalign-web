@@ -38,7 +38,7 @@ export function useUserProfileSelector() {
 
     const activeCvId = profile?.cv_id || null;
     const currentCv = activeCvId ? cvData?.cvs?.find((cv) => cv.cv_id === activeCvId) : null;
-    const lastAnalysisDate = currentCv?.uploaded_at || null;
+    const lastAnalysisDate = profile?.last_analysis_date || currentCv?.uploaded_at || null;
 
     return {
       user_id: user?.id || profile?.user_id || '',

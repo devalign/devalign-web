@@ -4,30 +4,22 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Activity,
-  Award,
   BadgeCheck,
-  CalendarClock,
   Clock3,
   Code2,
   Eye,
   FileText,
   History,
   Info,
-  Layers,
   Loader2,
-  MoreVertical,
   RefreshCw,
-  Sparkles,
   Target,
   TrendingUp,
   Upload,
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { LoadingScreen } from '@/components/shared/loading-screen';
 import { SkillAutocompleteInput } from '@/components/shared';
-import { ProfileSkeleton } from './profile-skeleton';
 
 import CVAtsPreviewModal from './cv/cv-ats-preview-modal';
 import CVHistoryModal from './cv/cv-history-modal';
@@ -262,8 +254,6 @@ export default function ProfileDashboardView() {
     );
   }
 
-  const totalSkillsCount = skills.length || profile?.detected_skills?.length || 0;
-
   return (
     <>
       <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6">
@@ -306,77 +296,66 @@ export default function ProfileDashboardView() {
           <div className="space-y-5">
             <Card className="card-standard overflow-visible">
               <CardContent className="space-y-5">
-                <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="min-w-0 space-y-2">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h2 className="text-lg font-black text-foreground truncate">
-                            {fullName}
-                          </h2>
-                          <div className="group relative shrink-0">
-                            <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
-                            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
-                              Datos principales de tu perfil profesional generados desde tu CV.
-                            </div>
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="min-w-0 space-y-2">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-black text-foreground truncate">
+                          {fullName}
+                        </h2>
+                        <div className="group relative shrink-0">
+                          <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+                          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
+                            Datos principales de tu perfil profesional generados desde tu CV.
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2.5">
-                          <p className="text-sm font-bold text-foreground">{roleTitle}</p>
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {[
-                              {
-                                key: 'junior',
-                                label: 'Jr (0-2 años)',
-                                active:
-                                  (profile?.seniority || '').toLowerCase().includes('junior') ||
-                                  (profile?.seniority || '').toLowerCase().includes('jr'),
-                              },
-                              {
-                                key: 'mid',
-                                label: 'Mid (3-5 años)',
-                                active:
-                                  !(profile?.seniority || '').toLowerCase().includes('junior') &&
-                                  !(profile?.seniority || '').toLowerCase().includes('jr') &&
-                                  !(profile?.seniority || '').toLowerCase().includes('senior') &&
-                                  !(profile?.seniority || '').toLowerCase().includes('sr') &&
-                                  !(profile?.seniority || '').toLowerCase().includes('lead'),
-                              },
-                              {
-                                key: 'senior',
-                                label: 'Senior (6+ años)',
-                                active:
-                                  (profile?.seniority || '').toLowerCase().includes('senior') ||
-                                  (profile?.seniority || '').toLowerCase().includes('sr') ||
-                                  (profile?.seniority || '').toLowerCase().includes('lead'),
-                              },
-                            ].map((lvl) => (
-                              <span
-                                key={lvl.key}
-                                className={cn(
-                                  'inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider transition-colors',
-                                  lvl.active
-                                    ? 'bg-info/20 text-info border border-info/40 font-extrabold shadow-2xs'
-                                    : 'bg-secondary/70 text-muted-foreground border border-border/50'
-                                )}
-                              >
-                                {lvl.label}
-                              </span>
-                            ))}
-
-                            {totalSkillsCount > 0 && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-primary/15 text-primary border border-primary/30 uppercase tracking-wider">
-                                <Award className="w-2.5 h-2.5 text-primary" />
-                                {totalSkillsCount} Skills Evaluadas
-                              </span>
-                            )}
-                          </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <p className="text-sm font-bold text-foreground">{roleTitle}</p>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {[
+                            {
+                              key: 'junior',
+                              label: 'Jr (0-2 años)',
+                              active:
+                                (profile?.seniority || '').toLowerCase().includes('junior') ||
+                                (profile?.seniority || '').toLowerCase().includes('jr'),
+                            },
+                            {
+                              key: 'mid',
+                              label: 'Mid (3-5 años)',
+                              active:
+                                !(profile?.seniority || '').toLowerCase().includes('junior') &&
+                                !(profile?.seniority || '').toLowerCase().includes('jr') &&
+                                !(profile?.seniority || '').toLowerCase().includes('senior') &&
+                                !(profile?.seniority || '').toLowerCase().includes('sr') &&
+                                !(profile?.seniority || '').toLowerCase().includes('lead'),
+                            },
+                            {
+                              key: 'senior',
+                              label: 'Senior (6+ años)',
+                              active:
+                                (profile?.seniority || '').toLowerCase().includes('senior') ||
+                                (profile?.seniority || '').toLowerCase().includes('sr') ||
+                                (profile?.seniority || '').toLowerCase().includes('lead'),
+                            },
+                          ].map((lvl) => (
+                            <span
+                              key={lvl.key}
+                              className={cn(
+                                'inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider transition-colors',
+                                lvl.active
+                                  ? 'bg-info/20 text-info border border-info/40 font-extrabold shadow-2xs'
+                                  : 'bg-secondary/70 text-muted-foreground border border-border/50'
+                              )}
+                            >
+                              {lvl.label}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex flex-col sm:flex-row lg:flex-col gap-3"></div>
                 </div>
 
                 {isUpdating && !isDiagnosed ? (
@@ -401,24 +380,33 @@ export default function ProfileDashboardView() {
 
             <Card className="card-standard overflow-visible">
               <CardContent className="space-y-5">
-                <div className="flex flex-col items-start gap-2">
-                  <div className="flex items-center justify-center gap-2 shrink-0">
-                    <div className="h-9 w-9 rounded-xl bg-info/10 text-info flex items-center justify-center shrink-0">
-                      <Code2 className="h-4 w-4" />
-                    </div>
-                    <h3 className="text-md font-black text-foreground">Competencias técnicas</h3>
-                    <div className="group relative">
-                      <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
-                      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
-                        Competencias técnicas detectadas en tu CV. Haz clic para editar evidencias y
-                        puntuación ICT.
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="flex flex-col items-start gap-2 flex-1">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="h-9 w-9 rounded-xl bg-info/10 text-info flex items-center justify-center shrink-0">
+                        <Code2 className="h-4 w-4" />
+                      </div>
+                      <h3 className="text-md font-black text-foreground">Competencias técnicas</h3>
+                      <div className="group relative">
+                        <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+                        <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
+                          Competencias técnicas detectadas en tu CV. Haz clic para editar evidencias y
+                          puntuación ICT.
+                        </div>
                       </div>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Estas competencias se utilizan para el análisis de afinidad y diagnóstico. Haz
+                      clic en una competencia para editar su evidencia y puntuación ICT.
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Estas competencias se utilizan para el análisis de afinidad y diagnóstico. Haz
-                    clic en una competencia para editar su evidencia y puntuación ICT.
-                  </p>
+                  <Badge
+                    variant="secondary"
+                    className="self-start sm:self-center px-2.5 py-1 text-xs font-bold border border-border/50 bg-secondary/80 text-foreground shrink-0 tabular-nums flex items-center gap-1.5"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                    {skills.length} {skills.length === 1 ? 'skill detectada' : 'skills detectadas'}
+                  </Badge>
                 </div>
 
                 <div className="pt-1">

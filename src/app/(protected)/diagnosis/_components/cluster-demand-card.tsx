@@ -23,14 +23,13 @@ export function ClusterDemandCard({
   isLoading = false,
   className,
 }: ClusterDemandCardProps) {
-  const totalOffers = opportunityProjection?.total_cluster_offers ?? jobOfferCount ?? 100;
+  const totalOffers = opportunityProjection?.total_cluster_offers ?? jobOfferCount;
   const directMatches =
     opportunityProjection?.direct_matches_count ??
-    Math.max(1, Math.round(totalOffers * Math.max(0.05, affinityScore)));
-  const unlockable = Math.max(0, totalOffers - directMatches);
+    (totalOffers > 0 ? Math.max(0, Math.round(totalOffers * (affinityScore || 0))) : 0);
   const unlockPct =
     opportunityProjection?.unlock_percentage ??
-    Math.round((directMatches / Math.max(1, totalOffers)) * 100);
+    (totalOffers > 0 ? Math.round((directMatches / totalOffers) * 100) : 0);
 
   return (
     <Card className={cn(className)}>

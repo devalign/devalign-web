@@ -122,20 +122,20 @@ function DiagnosisContent() {
   );
 
   const fallbackDiagnostic: DiagnosticDetail = {
-    user_id: '',
-    full_name: null,
-    current_job_role: null,
-    seniority: 'mid',
-    total_profile_skills: 0,
-    domain_affinities: [],
+    user_id: profile?.user_id || '',
+    full_name: profile?.full_name || null,
+    current_job_role: profile?.current_job_role || null,
+    seniority: profile?.seniority || 'mid',
+    total_profile_skills: profile?.detected_skills?.length || 0,
+    domain_affinities: profile?.domain_affinities || [],
     market_insights: null,
     compatible_roles: null,
     ai_insight: null,
     cluster_name: 'Pendiente de CV',
     affinity_score: 0,
-    detected_skills: [],
-    skill_gaps: [],
-    last_analysis_date: null,
+    detected_skills: profile?.detected_skills || [],
+    skill_gaps: profile?.skill_gaps || [],
+    last_analysis_date: profile?.last_analysis_date || null,
     job_offer_count: 0,
     top_skills: [],
   };
@@ -320,9 +320,9 @@ function DiagnosisContent() {
           {/* Left Column (col-span-4): Perfil, Radar y Recomendación */}
           <div className="xl:col-span-4 flex flex-col gap-6">
             <ProfileRadarCard
-              fullName={diagnostic.full_name || 'Desarrollador'}
-              roleTitle={diagnostic.current_job_role || ''}
-              seniority={diagnostic.seniority}
+              fullName={diagnostic.full_name || profile.full_name || 'Usuario'}
+              roleTitle={diagnostic.current_job_role || profile.current_job_role || ''}
+              seniority={diagnostic.seniority || profile.seniority}
               totalSkills={diagnostic.total_profile_skills}
               detectedSkills={diagnostic.detected_skills || []}
               skillGaps={diagnostic.skill_gaps || []}
