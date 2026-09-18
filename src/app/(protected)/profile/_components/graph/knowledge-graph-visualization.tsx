@@ -78,58 +78,43 @@ export function KnowledgeGraphVisualization({
     return () => resizeObserver.disconnect();
   }, [isLoading]);
 
-  // Enhance nodes with visual properties based on their status and active filter
-  const enhancedData = useMemo(() => {
-    const isNodeHighlighted = (node: GraphNode) => {
-      if (node.status === 'market') return false; // General market background is always faded
-      if (highlightMode === 'all') return true;
-      if (highlightMode === 'strengths') return node.status === 'acquired';
-      if (highlightMode === 'gaps') return node.status === 'gap';
-      return true;
-    };
+  // Centralized check for whether a node is highlighted
+  const isNodeHighlighted = (node: GraphNode) => {
+    if (node.status === 'market') return false; // General market background is always faded
+    if (highlightMode === 'all') return true;
+    if (highlightMode === 'strengths') return node.status === 'acquired';
+    if (highlightMode === 'gaps') return node.status === 'gap';
+    return true;
+  };
 
-    return {
-      nodes: (data?.nodes || []).map((n) => {
-        const highlighted = isNodeHighlighted(n);
-        return {
-          ...n,
-          highlighted,
-          val: n.status === 'acquired' ? 2 : n.status === 'gap' ? 1.5 : 1,
-          color: !highlighted
-            ? colors.faded
-            : n.status === 'acquired'
-              ? colors.acquired
-              : n.status === 'gap'
-                ? colors.gap
-                : colors.neutral,
-        };
-      }),
-      links: (data?.links || []).map((l) => {
-        // Find source/target node IDs
-        const sourceId = typeof l.source === 'object' ? (l.source as any).id : l.source;
-        const targetId = typeof l.target === 'object' ? (l.target as any).id : l.target;
+  const getNodeColor = (node: GraphNode) => {
+    const highlighted = isNodeHighlighted(node);
+    if (!highlighted) return colors.faded;
+    if (node.status === 'acquired') return colors.acquired;
+    if (node.status === 'gap') return colors.gap;
+    return colors.neutral;
+  };
 
-        const sourceNode = data?.nodes?.find((n) => n.id === sourceId);
-        const targetNode = data?.nodes?.find((n) => n.id === targetId);
+  const getLinkColor = (link: any) => {
+    const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+    
+    const sourceNode = data?.nodes?.find((n) => n.id === sourceId);
+    const targetNode = data?.nodes?.find((n) => n.id === targetId);
 
-        const isHighlighted =
-          highlightMode === 'all' ||
-          !!(
-            sourceNode &&
-            isNodeHighlighted(sourceNode) &&
-            targetNode &&
-            isNodeHighlighted(targetNode)
-          );
+    const isHighlighted =
+      highlightMode === 'all' ||
+      !!(
+        sourceNode &&
+        isNodeHighlighted(sourceNode) &&
+        targetNode &&
+        isNodeHighlighted(targetNode)
+      );
 
-        const isImplicit = (l.type || '').includes('implicit');
-        return {
-          ...l,
-          color: colors.getLinkColor(isHighlighted, isImplicit),
-          width: isImplicit ? 0.75 : 2.0,
-        };
-      }),
-    };
-  }, [data, highlightMode, colors]);
+    const isImplicit = (link.type || '').includes('implicit');
+    return colors.getLinkColor(isHighlighted, isImplicit);
+  };
+
 
   if (isLoading) {
     return <GraphLoading message="Cargando red neuronal..." />;
@@ -143,15 +128,20 @@ export function KnowledgeGraphVisualization({
         <ForceGraph2D
           width={dimensions.width}
           height={dimensions.height}
-          graphData={enhancedData}
+          graphData={data || { nodes: [], links: [] }}
+          warmupTicks={40}
+          cooldownTicks={120}
+          cooldownTime={4000}
           nodeLabel={(node: any) => `${node.label} (${node.domains.join(', ')})`}
+          nodeVal={(node: any) => node.status === 'acquired' ? 2 : node.status === 'gap' ? 1.5 : 1}
           onNodeClick={(node: any) => onNodeClick && onNodeClick(node as GraphNode)}
-          linkColor={(link: any) => link.color}
-          linkWidth={(link: any) => link.width}
+          linkColor={(link: any) => getLinkColor(link)}
+          linkWidth={(link: any) => (link.type || '').includes('implicit') ? 0.75 : 2.0}
           linkDirectionalParticles={1}
-          linkDirectionalParticleWidth={(link: any) =>
-            (link.type || '').includes('implicit') ? 1.5 : link.color.includes('0.02') ? 0 : 3.0
-          }
+          linkDirectionalParticleWidth={(link: any) => {
+            const color = getLinkColor(link);
+            return (link.type || '').includes('implicit') ? 1.5 : color.includes('0.02') ? 0 : 2.5;
+          }}
           linkDirectionalParticleSpeed={(link: any) =>
             (link.type || '').includes('implicit') ? 0.007 : 0.015
           }
@@ -170,16 +160,16 @@ export function KnowledgeGraphVisualization({
             }
 
             const r = node.status === 'acquired' ? 7 : node.status === 'gap' ? 6 : 5;
-            const highlighted = node.highlighted;
+            const highlighted = isNodeHighlighted(node);
 
-            // 1. Pulsing neon glow shadow (only if highlighted)
-            if (highlighted) {
+            // 1. Pulsing neon glow shadow (focused on acquired and gap nodes for performance)
+            if (highlighted && (node.status === 'acquired' || node.status === 'gap')) {
               ctx.save();
               ctx.beginPath();
 
-              const time = Date.now() * 0.003;
-              const pulse = Math.sin(time + (node.x || 0)) * 0.15 + 0.85; // unique pulse offset based on node position
-              const glowRadius = r * 2.5 * pulse;
+              const time = Date.now() * 0.002;
+              const pulse = Math.sin(time + (node.x || 0)) * 0.12 + 0.88;
+              const glowRadius = r * 2.2 * pulse;
 
               ctx.arc(node.x, node.y, glowRadius, 0, 2 * Math.PI, false);
 
@@ -195,20 +185,16 @@ export function KnowledgeGraphVisualization({
 
               const startColor =
                 node.status === 'acquired'
-                  ? colors.getAcquiredAlpha(isDark ? 0.4 : 0.25)
-                  : node.status === 'gap'
-                    ? colors.getGapAlpha(isDark ? 0.4 : 0.25)
-                    : colors.getNeutralAlpha(isDark ? 0.4 : 0.25);
+                  ? colors.getAcquiredAlpha(isDark ? 0.35 : 0.22)
+                  : colors.getGapAlpha(isDark ? 0.35 : 0.22);
 
               const endColor =
                 node.status === 'acquired'
                   ? colors.getAcquiredAlpha(0)
-                  : node.status === 'gap'
-                    ? colors.getGapAlpha(0)
-                    : colors.getNeutralAlpha(0);
+                  : colors.getGapAlpha(0);
 
               gradient.addColorStop(0, startColor);
-              gradient.addColorStop(0.2, startColor);
+              gradient.addColorStop(0.3, startColor);
               gradient.addColorStop(1, endColor);
 
               ctx.fillStyle = gradient;
@@ -228,7 +214,7 @@ export function KnowledgeGraphVisualization({
             // 3. Solid inner core
             ctx.beginPath();
             ctx.arc(node.x, node.y, r * 0.9, 0, 2 * Math.PI, false);
-            ctx.fillStyle = node.color;
+            ctx.fillStyle = getNodeColor(node);
             ctx.fill();
 
             // 4. Draw label below the node if zoomed in and highlighted

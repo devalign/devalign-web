@@ -51,8 +51,9 @@ export function GlobalHeader() {
   };
 
   const currentCV = cvData?.cvs?.[0];
-  const formattedDate = currentCV?.uploaded_at
-    ? new Date(currentCV.uploaded_at).toLocaleDateString('es-ES', {
+  const rawDate = profile?.last_analysis_date || currentCV?.uploaded_at;
+  const formattedDate = rawDate
+    ? new Date(rawDate).toLocaleDateString('es-ES', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
