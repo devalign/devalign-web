@@ -182,6 +182,12 @@ export interface SkillSearchResult {
   id: string;
   name: string;
   skill_type: string;
+  status?: string;
+  standard_name?: string | null;
+  standard_type?: string | null;
+  category_name?: string | null;
+  subcategory_name?: string | null;
   domain_tags?: string[];
   core_domains?: string[];
+  matched_alias?: string | null;
 }

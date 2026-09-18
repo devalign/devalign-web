@@ -10,8 +10,6 @@ import {
   Info,
   TrendingUp,
   TrendingDown,
-  AlertTriangle,
-  CheckCircle2,
   Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -66,35 +64,32 @@ export function NodeDetailCard({ node, activeCluster, profile, onClose }: NodeDe
   }
 
   // Resolve Domain
-  const nodeDomain = React.useMemo(() => {
-    if (node.domains && node.domains.length > 0) {
-      const valid = node.domains.find(
-        (d) =>
-          d &&
-          d.toLowerCase() !== 'tech' &&
-          d.toLowerCase() !== 'unknown' &&
-          d.toLowerCase() !== 'hard_skill'
-      );
-      if (valid) return valid;
-    }
-    if (acquiredSkill?.core_domains && acquiredSkill.core_domains.length > 0) {
-      const valid = acquiredSkill.core_domains.find((d) => d && d.toLowerCase() !== 'tech');
-      if (valid) return valid;
-    }
-    if (gapSkill?.core_domains && gapSkill.core_domains.length > 0) {
-      const valid = gapSkill.core_domains.find((d) => d && d.toLowerCase() !== 'tech');
-      if (valid) return valid;
-    }
-    return null;
-  }, [node.domains, acquiredSkill, gapSkill]);
+  let nodeDomain: string | null = null;
+  if (node.domains && node.domains.length > 0) {
+    const valid = node.domains.find(
+      (d) =>
+        d &&
+        d.toLowerCase() !== 'tech' &&
+        d.toLowerCase() !== 'unknown' &&
+        d.toLowerCase() !== 'hard_skill'
+    );
+    if (valid) nodeDomain = valid;
+  }
+  if (!nodeDomain && acquiredSkill?.core_domains && acquiredSkill.core_domains.length > 0) {
+    const valid = acquiredSkill.core_domains.find((d) => d && d.toLowerCase() !== 'tech');
+    if (valid) nodeDomain = valid;
+  }
+  if (!nodeDomain && gapSkill?.core_domains && gapSkill.core_domains.length > 0) {
+    const valid = gapSkill.core_domains.find((d) => d && d.toLowerCase() !== 'tech');
+    if (valid) nodeDomain = valid;
+  }
 
   // Resolve Related Concepts
-  const relatedConcepts = React.useMemo(() => {
-    const domainTags = acquiredSkill?.domain_tags || gapSkill?.domain_tags;
-    const coreDomains = acquiredSkill?.core_domains || gapSkill?.core_domains;
-    const concepts = getSkillConcepts(node.label, domainTags, coreDomains);
-    return concepts.filter((c) => c && c.trim().length > 0);
-  }, [node.label, acquiredSkill, gapSkill]);
+  const domainTags = acquiredSkill?.domain_tags || gapSkill?.domain_tags;
+  const coreDomains = acquiredSkill?.core_domains || gapSkill?.core_domains;
+  const relatedConcepts = getSkillConcepts(node.label, domainTags, coreDomains).filter(
+    (c) => c && c.trim().length > 0
+  );
 
   // Demand
   const rawDemand =
