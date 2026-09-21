@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Check, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { SkillItem } from '@/types';
@@ -104,13 +105,24 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-        <h2 className="text-sm font-bold text-foreground">
-          Paso 3: Valida tus competencias técnicas
-        </h2>
-        <p className="text-xs text-muted-foreground">
-          Revisa las competencias detectadas en tu CV. Puedes agregar o eliminar
-          competencias, y ajustar la evidencia de cada una haciendo clic sobre ellas.
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+          <div className="space-y-1 flex-1">
+            <h2 className="text-sm font-bold text-foreground">
+              Paso 3: Valida tus competencias técnicas
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Revisa las competencias detectadas en tu CV. Puedes agregar o eliminar
+              competencias, y ajustar la evidencia de cada una haciendo clic sobre ellas.
+            </p>
+          </div>
+          <Badge
+            variant="secondary"
+            className="self-start sm:self-center px-2.5 py-1 text-xs font-bold border border-border/50 bg-secondary/80 text-foreground shrink-0 tabular-nums flex items-center gap-1.5"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            {skills.length} {skills.length === 1 ? 'skill detectada' : 'skills detectadas'}
+          </Badge>
+        </div>
 
         <SkillAutocompleteInput
           onAddSkill={handleAddSkillFromAutocomplete}
