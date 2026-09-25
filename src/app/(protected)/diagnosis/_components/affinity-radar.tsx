@@ -30,13 +30,13 @@ export function AffinityRadar({
   const getScore = (key: string): number => {
     const affinity = domainAffinities?.find((d) => d.domain.toLowerCase() === key.toLowerCase());
     const rawScore = affinity?.affinity_score || 0;
-    return Math.min(20 + rawScore * 80, 100);
+    return Math.min(20 + Math.round(rawScore * 80), 95);
   };
 
   const getMarketDemand = (key: string): number => {
     const affinity = domainAffinities?.find((d) => d.domain.toLowerCase() === key.toLowerCase());
     if (affinity?.market_demand !== undefined && affinity?.market_demand !== null) {
-      return Math.min(100, Math.round(affinity.market_demand * 100));
+      return Math.min(100, Math.max(0, Math.round(affinity.market_demand * 100)));
     }
     return 50;
   };
@@ -189,11 +189,6 @@ export function AffinityRadar({
             {DOMAIN_CONFIGS.map((config, index) => {
               const angle = (index * 360) / DOMAIN_CONFIGS.length;
               const score = getScore(config.key);
-              const affinity = domainAffinities?.find((d) => d.domain.toLowerCase() === config.key.toLowerCase());
-              const displayPercentage = affinity?.affinity_score !== undefined
-                ? Math.round(affinity.affinity_score * 100)
-                : 0;
-
               const pt = convert(score, angle);
               const [x, y] = pt.split(',');
               return (
@@ -212,7 +207,7 @@ export function AffinityRadar({
                   </TooltipTrigger>
                   <TooltipContent side="top" sideOffset={8} className="font-mono text-[9px] py-1 px-2">
                     <span className="font-bold text-primary">{config.label}</span>
-                    <div className="mt-0.5 text-muted-foreground">Tu Perfil: <span className="font-bold text-foreground">{displayPercentage}%</span></div>
+                    <div className="mt-0.5 text-muted-foreground">Tu Perfil: <span className="font-bold text-foreground">{score}%</span></div>
                   </TooltipContent>
                 </Tooltip>
               );

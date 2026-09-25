@@ -21,22 +21,21 @@ interface DomainAffinityDetailModalProps {
 const DOMAIN_CONFIGS = [
   { key: 'Backend', label: 'BACKEND' },
   { key: 'Frontend', label: 'FRONTEND' },
+  { key: 'Data', label: 'DATA' },
+  { key: 'DevOps', label: 'DEVOPS' },
   { key: 'Mobile', label: 'MOBILE' },
   { key: 'QA', label: 'QA' },
-  { key: 'DevOps', label: 'DEVOPS' },
   { key: 'Cloud', label: 'CLOUD' },
-  { key: 'Data', label: 'DATA' },
 ];
-
 
 const DOMAIN_COLORS: Record<string, string> = {
   Backend: 'hsl(var(--domain-backend))',
   Frontend: 'hsl(var(--domain-frontend))',
+  Data: 'hsl(var(--domain-data))',
+  DevOps: 'hsl(var(--domain-devops))',
   Mobile: 'hsl(var(--info))',
   QA: 'hsl(var(--warning))',
-  DevOps: 'hsl(var(--domain-devops))',
   Cloud: 'hsl(var(--domain-cloud))',
-  Data: 'hsl(var(--domain-data))',
 };
 
 export function DomainAffinityDetailModal({
@@ -70,7 +69,7 @@ export function DomainAffinityDetailModal({
     const userScore = Math.min(20 + rawScore * 80, 95);
     const marketDemand =
       affinity?.market_demand !== undefined && affinity?.market_demand !== null
-        ? Math.round(affinity.market_demand * 100)
+        ? Math.min(100, Math.max(0, Math.round(affinity.market_demand * 100)))
         : 50;
     return {
       key: config.key,
@@ -79,7 +78,6 @@ export function DomainAffinityDetailModal({
       marketDemand,
       gap: Math.round(userScore) - marketDemand,
     };
-
   }).sort((a, b) => b.userScore - a.userScore); // Sort by highest user score for better presentation in modal
 
   const gapColorClass = (gap: number) => {
