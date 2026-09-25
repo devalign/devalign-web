@@ -2,21 +2,18 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, Map } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface MarketScoreCardProps {
   currentScore: number;
   primarySpecialty?: string;
   isLoading?: boolean;
-  onViewRoadmap?: () => void;
 }
 
 export function MarketScoreCard({
   currentScore,
   primarySpecialty = 'Data Engineering',
   isLoading = false,
-  onViewRoadmap,
 }: MarketScoreCardProps) {
   const getScoreState = (score: number) => {
     if (score >= 75)
@@ -71,7 +68,7 @@ export function MarketScoreCard({
             </div>
           </div>
 
-          {/* Right Side: Specialty Evaluation & Button */}
+          {/* Right Side: Specialty Evaluation */}
           <div className="flex-1 text-center sm:text-right space-y-4 border-t sm:border-t-0 sm:border-l border-border pt-6 sm:pt-0 sm:pl-6 flex flex-col justify-between">
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -81,20 +78,6 @@ export function MarketScoreCard({
                 {primarySpecialty}
               </h3>
             </div>
-
-            {onViewRoadmap && (
-              <div className="flex justify-center sm:justify-end pt-1">
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={onViewRoadmap}
-                  className="text-[10px] font-bold h-7 flex items-center gap-1.5 cursor-pointer shadow-xs"
-                >
-                  <Map className="h-3 w-3" />
-                  Ver Plan
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </CardContent>

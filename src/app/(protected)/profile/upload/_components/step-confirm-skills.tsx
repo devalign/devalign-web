@@ -50,7 +50,7 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
   }, [extractedSkills]);
 
   const handleAddSkillFromAutocomplete = useCallback(
-    ({ name, skill_type }: { name: string; skill_type?: string }) => {
+    ({ name, skill_type, is_custom }: { name: string; skill_type?: string; is_custom?: boolean }) => {
       const exists = skills.some((s) => s.name.toLowerCase() === name.toLowerCase());
       if (exists) {
         toast.error('Esta competencia ya está registrada.');
@@ -64,6 +64,7 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
           skill_type: skill_type || 'tech',
           market_importance: 'consolidated',
           market_demand_percentage: null,
+          is_custom: is_custom ?? false,
         },
       ]);
       toast.success(`"${name}" agregada.`);

@@ -177,7 +177,7 @@ function DiagnosisContent() {
         name: s.name,
         level,
         score,
-        demandPercentage: s.market_demand_percentage ?? 100,
+        demandPercentage: s.market_demand_percentage ?? 0,
         category: s.skill_type,
         ict_score: s.ict_score,
         trend: s.trend,
@@ -208,12 +208,13 @@ function DiagnosisContent() {
         skill_type: g.skill_type,
         market_importance: g.market_importance ?? 'medium',
         importanceScore,
-        market_demand_percentage: g.market_demand_percentage ?? 50,
+        market_demand_percentage: g.market_demand_percentage ?? 0,
         trend: g.trend,
         domain_tags: g.domain_tags,
         core_domains: g.core_domains,
       };
     })
+
     .sort((a, b) => {
       // Sort by importance priority score (Alta > Media > Baja) first
       if (b.importanceScore !== a.importanceScore) {

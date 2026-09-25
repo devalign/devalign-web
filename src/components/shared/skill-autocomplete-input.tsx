@@ -9,7 +9,7 @@ import type { SkillSearchResult } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
 
 interface SkillAutocompleteInputProps {
-  onAddSkill: (skill: { name: string; skill_type?: string }) => void;
+  onAddSkill: (skill: { name: string; skill_type?: string; is_custom?: boolean }) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -71,11 +71,11 @@ export function SkillAutocompleteInput({
   }, [query]);
 
   const handleSelectSkill = useCallback(
-    (skillName: string, skillType = 'tech') => {
+    (skillName: string, skillType = 'tech', isCustom = false) => {
       const cleanName = skillName.trim();
       if (!cleanName) return;
 
-      onAddSkill({ name: cleanName, skill_type: skillType });
+      onAddSkill({ name: cleanName, skill_type: skillType, is_custom: isCustom });
       setQuery('');
       setSuggestions([]);
       setIsOpen(false);
@@ -89,9 +89,9 @@ export function SkillAutocompleteInput({
     e.preventDefault();
     if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
       const item = suggestions[selectedIndex];
-      handleSelectSkill(item.name, item.skill_type);
+      handleSelectSkill(item.name, item.skill_type, false);
     } else if (query.trim()) {
-      handleSelectSkill(query.trim(), 'tech');
+      handleSelectSkill(query.trim(), 'tech', true);
     }
   };
 
@@ -189,7 +189,7 @@ export function SkillAutocompleteInput({
                   <button
                     key={item.id || `${item.name}-${index}`}
                     type="button"
-                    onClick={() => handleSelectSkill(item.name, item.skill_type)}
+                    onClick={() => handleSelectSkill(item.name, item.skill_type, false)}
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={cn(
                       'w-full text-left px-3 py-2 flex items-center justify-between text-xs transition-colors cursor-pointer',
@@ -213,7 +213,7 @@ export function SkillAutocompleteInput({
               <p>No se pudo conectar con el catálogo de habilidades.</p>
               <button
                 type="button"
-                onClick={() => handleSelectSkill(query.trim(), 'tech')}
+                onClick={() => handleSelectSkill(query.trim(), 'tech', true)}
                 className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -225,7 +225,7 @@ export function SkillAutocompleteInput({
               <p>No se encontró en el catálogo de Lightcast.</p>
               <button
                 type="button"
-                onClick={() => handleSelectSkill(query.trim(), 'tech')}
+                onClick={() => handleSelectSkill(query.trim(), 'tech', true)}
                 className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
               >
                 <Plus className="h-3.5 w-3.5" />

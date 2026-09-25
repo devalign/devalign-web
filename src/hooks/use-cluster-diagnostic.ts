@@ -41,7 +41,7 @@ export function useClusterDiagnostic(clusterName: string | null) {
       return apiClient<DiagnosticDetail>(`/me/diagnostics/${encodeURIComponent(clusterName)}`);
     },
     enabled: !!user?.id && !!clusterName,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds
     retry: 1,
   });
 }

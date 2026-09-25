@@ -13,6 +13,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { useMarketClusters } from '@/hooks/use-market-clusters';
 
 interface AllAffinitiesCardProps {
   affinities?: ClusterAffinityItem[];
@@ -21,48 +22,6 @@ interface AllAffinitiesCardProps {
   onSelectAffinity?: (name: string) => void;
 }
 
-const MARKET_CLUSTERS = [
-  {
-    name: 'Data Engineering',
-    offers: 148,
-    percent: 24.6,
-    description:
-      'Procesamiento de datos a gran escala, ETLs y almacenamiento relacional/no-relacional.',
-    skills: ['SQL', 'Python', 'Spark', 'Hadoop', 'AWS', 'PostgreSQL'],
-  },
-  {
-    name: 'Backend Development',
-    offers: 138,
-    percent: 23.0,
-    description:
-      'Construcción de APIs, lógica de negocio del lado del servidor y arquitectura de microservicios.',
-    skills: ['Java', 'Spring Boot', 'Node.js', 'SQL', 'PostgreSQL', 'Docker', 'Git'],
-  },
-  {
-    name: 'Cloud & DevOps Engineer',
-    offers: 125,
-    percent: 20.8,
-    description:
-      'Automatización de despliegues, infraestructura como código y administración de nube.',
-    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Linux', 'Git', 'CI/CD'],
-  },
-  {
-    name: 'Frontend Development',
-    offers: 105,
-    percent: 17.5,
-    description: 'Interfaces de usuario interactivas, rendimiento web y diseño adaptativo.',
-    skills: ['React', 'TypeScript', 'JavaScript', 'CSS', 'HTML', 'Git', 'Tailwind'],
-  },
-  {
-    name: 'QA & Automation',
-    offers: 84,
-    percent: 14.0,
-    description:
-      'Aseguramiento de la calidad de software, pruebas automatizadas y pipelines de integración.',
-    skills: ['QA', 'SQL', 'Selenium', 'Cypress', 'Git', 'Python', 'Postman'],
-  },
-];
-
 export function AllAffinitiesCard({
   affinities = [],
   isLoading = false,
@@ -70,9 +29,14 @@ export function AllAffinitiesCard({
   onSelectAffinity,
 }: AllAffinitiesCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: marketClusters = [], isLoading: isLoadingClusters } = useMarketClusters();
+
+  // Total offers dynamically computed from real market clusters
+  const totalOffers = marketClusters.reduce((acc, c) => acc + (c.job_offer_count || 0), 0);
 
   // Sort affinities by score descending
   const sortedAffinities = [...affinities].sort((a, b) => b.affinity_score - a.affinity_score);
+
 
   return (
     <>
@@ -182,16 +146,16 @@ export function AllAffinitiesCard({
                 </span>
                 <span className="text-foreground font-semibold flex items-center gap-1">
                   <Database className="h-3 w-3 text-muted-foreground" />
-                  600 ofertas reales
+                  {totalOffers > 0 ? `${totalOffers} ofertas reales` : 'Mercado IT activo'}
                 </span>
               </div>
               <div className="flex flex-col gap-0.5 border-l border-border/60 pl-3">
                 <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
-                  Habilidades únicas
+                  Especialidades activas
                 </span>
                 <span className="text-foreground font-semibold flex items-center gap-1">
                   <Binary className="h-3 w-3 text-muted-foreground" />
-                  73 tecnologías
+                  {marketClusters.length} clústeres
                 </span>
               </div>
               <div className="flex flex-col gap-0.5 mt-1">
@@ -217,43 +181,62 @@ export function AllAffinitiesCard({
 
           {/* Cluster List */}
           <div className="flex-1 overflow-y-auto pr-1 space-y-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-            {MARKET_CLUSTERS.map((cluster) => (
-              <div
-                key={cluster.name}
-                className="p-3.5 rounded-xl border border-border/50 hover:border-primary/25 bg-secondary/10 hover:bg-secondary/20 transition-all duration-200 space-y-2.5"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-bold text-sm text-foreground">{cluster.name}</h3>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge
-                      variant="outline"
-                      className="text-[9px] font-bold py-0.5 px-2 bg-background border-border/80 text-muted-foreground"
-                    >
-                      {cluster.offers} ofertas
-                    </Badge>
-                    <Badge className="text-[9px] font-extrabold py-0.5 px-2 bg-primary/10 text-primary border-0">
-                      {cluster.percent}%
-                    </Badge>
-                  </div>
-                </div>
-
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {cluster.description}
-                </p>
-
-                <div className="flex flex-wrap gap-1.5 pt-1.5">
-                  {cluster.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-secondary text-foreground/80 hover:text-foreground transition-colors"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+            {isLoadingClusters && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 text-primary animate-spin" />
               </div>
-            ))}
+            )}
+            {!isLoadingClusters && marketClusters.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center py-6">
+                No hay clústeres disponibles en este momento.
+              </p>
+            )}
+            {marketClusters.map((cluster) => {
+              const clusterOffers = cluster.job_offer_count || 0;
+              const percent = totalOffers > 0 ? Math.round((clusterOffers / totalOffers) * 100) : 0;
+              return (
+                <div
+                  key={cluster.id || cluster.name}
+                  className="p-3.5 rounded-xl border border-border/50 hover:border-primary/25 bg-secondary/10 hover:bg-secondary/20 transition-all duration-200 space-y-2.5"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-bold text-sm text-foreground">{cluster.name}</h3>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] font-bold py-0.5 px-2 bg-background border-border/80 text-muted-foreground"
+                      >
+                        {clusterOffers} ofertas
+                      </Badge>
+                      <Badge className="text-[9px] font-extrabold py-0.5 px-2 bg-primary/10 text-primary border-0">
+                        {percent}%
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {cluster.description && (
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {cluster.description}
+                    </p>
+                  )}
+
+                  {cluster.top_skills && cluster.top_skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1.5">
+                      {cluster.top_skills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-secondary text-foreground/80 hover:text-foreground transition-colors"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
+
         </SheetContent>
       </Sheet>
     </>

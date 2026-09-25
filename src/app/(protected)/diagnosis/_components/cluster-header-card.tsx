@@ -29,6 +29,13 @@ export function ClusterHeaderCard({
 }: ClusterHeaderCardProps) {
   const totalOffers = opportunityProjection?.total_cluster_offers ?? jobOfferCount;
   const exp = marketInsights?.experience_distribution;
+  const totalExpPct = (exp?.junior_percentage || 0) + (exp?.mid_percentage || 0) + (exp?.senior_percentage || 0);
+  const hasValidExp = totalExpPct > 0;
+
+  const jrPct = hasValidExp ? exp!.junior_percentage : null;
+  const midPct = hasValidExp ? exp!.mid_percentage : null;
+  const srPct = hasValidExp ? exp!.senior_percentage : null;
+
 
   return (
     <Card
@@ -95,20 +102,25 @@ export function ClusterHeaderCard({
             {totalOffers} ofertas
           </strong>
         </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span>
-            Jr (<strong className="text-foreground font-semibold">{exp?.junior_percentage ?? 15}%</strong>)
-          </span>
-          <span className="text-border">·</span>
-          <span>
-            Mid (<strong className="text-foreground font-semibold">{exp?.mid_percentage ?? 55}%</strong>)
-          </span>
-          <span className="text-border">·</span>
-          <span>
-            Senior (<strong className="text-foreground font-semibold">{exp?.senior_percentage ?? 30}%</strong>)
-          </span>
-        </div>
+        {hasValidExp ? (
+          <div className="flex items-center gap-2 text-xs">
+            <span>
+              Jr (<strong className="text-foreground font-semibold">{jrPct}%</strong>)
+            </span>
+            <span className="text-border">·</span>
+            <span>
+              Mid (<strong className="text-foreground font-semibold">{midPct}%</strong>)
+            </span>
+            <span className="text-border">·</span>
+            <span>
+              Senior (<strong className="text-foreground font-semibold">{srPct}%</strong>)
+            </span>
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground/70 italic">Distribución de experiencia en análisis</span>
+        )}
       </div>
     </Card>
+
   );
 }

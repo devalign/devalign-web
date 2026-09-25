@@ -50,14 +50,19 @@ export function UploadWizard() {
     setCurrentStep('confirm');
   }, []);
 
-  const handleCancel = useCallback(() => {
-    cancelAnalysis();
+  const handleCancel = useCallback(async () => {
+    const idToDelete = cvId || analyzedCvId || existingCvId;
+    await cancelAnalysis(idToDelete || undefined);
     router.push('/profile');
-  }, [router, cancelAnalysis]);
+  }, [router, cancelAnalysis, cvId, analyzedCvId, existingCvId]);
 
-  const handleBack = useCallback(() => {
+  const handleBack = useCallback(async () => {
+    if (currentStep !== 'load') {
+      const idToDelete = cvId || analyzedCvId || existingCvId;
+      await cancelAnalysis(idToDelete || undefined);
+    }
     router.push('/profile');
-  }, [router]);
+  }, [router, currentStep, cvId, analyzedCvId, existingCvId, cancelAnalysis]);
 
   const handleComplete = useCallback(() => {
     router.push(`/profile?status=updating&expectedCvId=${cvId}`);

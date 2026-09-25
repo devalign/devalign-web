@@ -28,8 +28,8 @@ export default function AIPipelineSteps() {
     },
     {
       num: 4,
-      title: '4. Genera tu roadmap',
-      desc: 'Creamos una ruta personalizada de aprendizaje con IA.',
+      title: '4. Análisis completo',
+      desc: 'Visualiza tus resultados detallados con IA.',
       icon: GitFork,
       color: 'bg-sage-50 text-primary-foreground dark:bg-primary/10 dark:text-primary',
     },

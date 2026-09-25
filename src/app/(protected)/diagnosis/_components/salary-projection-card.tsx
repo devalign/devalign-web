@@ -24,7 +24,7 @@ export function SalaryProjectionCard({
   isLoading = false,
   className,
 }: SalaryProjectionCardProps) {
-  const [currencyMode, setCurrencyMode] = useState<'USD' | 'PEN'>('PEN');
+  const [currencyMode, setCurrencyMode] = useState<'USD' | 'PEN' | 'EUR'>('PEN');
 
   if (isLoading) {
     return (
@@ -39,31 +39,57 @@ export function SalaryProjectionCard({
     );
   }
 
-  const currencySymbol = currencyMode === 'USD' ? '$' : 'S/. ';
   const isUsd = currencyMode === 'USD';
+  const isEur = currencyMode === 'EUR';
+  const currencySymbol = isUsd ? '$' : isEur ? '€' : 'S/. ';
+
+  // Check if real salary data is present
+  const avgUsd = salaryProjection?.cluster_average_usd ?? marketInsights?.average_salary_usd ?? null;
+  const hasSalaryData =
+    avgUsd != null ||
+    salaryProjection?.salary_median_pen != null ||
+    salaryProjection?.salary_median_usd != null ||
+    marketInsights?.salary_median_usd != null;
+
+  if (!hasSalaryData) {
+    return (
+      <Card className={cn('p-5 card-standard flex flex-col justify-center items-center text-center h-full min-h-[160px]', className)}>
+        <p className="text-xs text-muted-foreground font-medium">
+          Datos de benchmark salarial en recopilación para este clúster.
+        </p>
+      </Card>
+    );
+  }
+
+  const baseAvg = avgUsd ?? 0;
 
   // Percentiles calculation
-  const avgUsd = salaryProjection?.cluster_average_usd ?? marketInsights?.average_salary_usd ?? 1800;
   const p25Val = isUsd
-    ? salaryProjection?.salary_p25_usd ?? marketInsights?.salary_p25_usd ?? avgUsd * 0.75
-    : salaryProjection?.salary_p25_pen ??
-      (marketInsights?.salary_p25_usd
-        ? marketInsights.salary_p25_usd * 3.75
-        : avgUsd * 0.75 * 3.75);
+    ? salaryProjection?.salary_p25_usd ?? marketInsights?.salary_p25_usd ?? baseAvg * 0.75
+    : isEur
+      ? (salaryProjection as any)?.salary_p25_eur ?? (baseAvg * 0.75 * 0.92)
+      : salaryProjection?.salary_p25_pen ??
+        (marketInsights?.salary_p25_usd
+          ? marketInsights.salary_p25_usd * 3.75
+          : baseAvg * 0.75 * 3.75);
 
   const p50Val = isUsd
-    ? salaryProjection?.salary_median_usd ?? marketInsights?.salary_median_usd ?? avgUsd
-    : salaryProjection?.salary_median_pen ??
-      (marketInsights?.salary_median_usd
-        ? marketInsights.salary_median_usd * 3.75
-        : avgUsd * 3.75);
+    ? salaryProjection?.salary_median_usd ?? marketInsights?.salary_median_usd ?? baseAvg
+    : isEur
+      ? (salaryProjection as any)?.salary_median_eur ?? (baseAvg * 0.92)
+      : salaryProjection?.salary_median_pen ??
+        (marketInsights?.salary_median_usd
+          ? marketInsights.salary_median_usd * 3.75
+          : baseAvg * 3.75);
 
   const p75Val = isUsd
-    ? salaryProjection?.cluster_p75_usd ?? marketInsights?.salary_p75_usd ?? avgUsd * 1.35
-    : salaryProjection?.salary_p75_pen ??
-      (marketInsights?.salary_p75_usd
-        ? marketInsights.salary_p75_usd * 3.75
-        : avgUsd * 1.35 * 3.75);
+    ? salaryProjection?.cluster_p75_usd ?? marketInsights?.salary_p75_usd ?? baseAvg * 1.35
+    : isEur
+      ? (salaryProjection as any)?.salary_p75_eur ?? (baseAvg * 1.35 * 0.92)
+      : salaryProjection?.salary_p75_pen ??
+        (marketInsights?.salary_p75_usd
+          ? marketInsights.salary_p75_usd * 3.75
+          : baseAvg * 1.35 * 3.75);
 
   const seniorityLower = seniority.toLowerCase();
   const isJunior = seniorityLower.includes('junior');
@@ -76,7 +102,8 @@ export function SalaryProjectionCard({
   const currentSeniorityLabel = isSenior ? 'Senior' : isJunior ? 'Junior' : 'Mid';
 
   // Market differential calculation
-  const diffPercentage = marketInsights?.salary_differential_percentage ?? 2.8;
+  const diffPercentage = marketInsights?.salary_differential_percentage ?? 0;
+
 
   // Relative bar heights for the micro-histogram (min 38% to ensure text fits inside, max 100%)
   const safeP75 = p75Val > 0 ? p75Val : 1;
@@ -118,6 +145,16 @@ export function SalaryProjectionCard({
               }`}
             >
               USD
+            </button>
+            <button
+              onClick={() => setCurrencyMode('EUR')}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                currencyMode === 'EUR'
+                  ? 'bg-background text-foreground shadow-2xs'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              EUR
             </button>
           </div>
         </div>
@@ -191,7 +228,7 @@ export function SalaryProjectionCard({
                 >
                   <span className="text-[11px] tracking-tight truncate">
                     {currencySymbol}
-                    {Math.round(p75Val).toLocaleString('es-ES')}
+                    {Math.round(p75Val).toLocaleString('es-ES')}{isSenior ? '+' : ''}
                   </span>
                 </div>
               </div>
@@ -208,7 +245,7 @@ export function SalaryProjectionCard({
           posiciona en torno a la mediana. Dominar tus brechas prioritarias te habilita para el percentil{' '}
           <strong className="text-primary font-semibold">
             P75 (~{currencySymbol}
-            {Math.round(p75Val).toLocaleString('es-ES')})
+            {Math.round(p75Val).toLocaleString('es-ES')}{isSenior ? '+' : ''})
           </strong>
           .
         </p>
