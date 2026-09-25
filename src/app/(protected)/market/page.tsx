@@ -2,7 +2,6 @@
 
 import React, { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   ChevronLeft,
@@ -20,7 +19,6 @@ import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 import { DiagnosticLoadingBanner } from '@/components/shared/diagnostic-loading-banner';
 import { useMarketClusters } from '@/hooks/use-market-clusters';
 import { useUserProfile } from '@/hooks/use-user-profile';
-import { evaluateClusterDiagnostic } from '@/lib/api/user-service';
 import {
   ClusterCompactCard,
   MarketSearchInput,
@@ -32,7 +30,6 @@ const INITIAL_VISIBLE_COUNT = 8;
 function TopologyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
 
   const { data: clusters = [], isLoading, error } = useMarketClusters();
   const { data: profile } = useUserProfile();
@@ -52,7 +49,6 @@ function TopologyContent() {
     clusterName: string | null;
   }>({ show: false, isCompleted: false, clusterName: null });
 
-  const [isGenerating, setIsGenerating] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isExpanded, setIsExpanded] = React.useState(false);
 
@@ -131,33 +127,14 @@ function TopologyContent() {
     });
   }, [sortedClusters, isSearching, normalizedQuery]);
 
-  const handleGenerateDiagnostic = async (clusterName: string) => {
+  const handleViewDiagnostic = (clusterName: string) => {
     if (!hasProfileData) {
-      toast.info('Primero debes subir tu CV para poder generar un diagnóstico.', {
+      toast.info('Primero debes subir tu CV para poder ver tu diagnóstico.', {
         description: 'Te estamos redirigiendo a tu perfil para cargar tu CV.',
       });
       router.push('/profile');
       return;
     }
-
-    setIsGenerating(clusterName);
-    setDiagnosticBanner({ show: true, isCompleted: false, clusterName });
-
-    try {
-      await evaluateClusterDiagnostic(clusterName);
-      await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-
-      setDiagnosticBanner({ show: true, isCompleted: true, clusterName });
-    } catch (err) {
-      console.error(err);
-      toast.error('Error al generar el diagnóstico. Inténtalo de nuevo.');
-      setDiagnosticBanner({ show: false, isCompleted: false, clusterName: null });
-    } finally {
-      setIsGenerating(null);
-    }
-  };
-
-  const handleViewDiagnostic = (clusterName: string) => {
     router.push(`/diagnosis?cluster=${encodeURIComponent(clusterName)}`);
   };
 
@@ -281,15 +258,13 @@ function TopologyContent() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-3.5">
                   {searchResults.map((cluster) => (
                     <ClusterCompactCard
                       key={cluster.id}
                       cluster={cluster}
                       affinityItem={getClusterAffinityItem(cluster.name)}
                       totalOffers={totalOffers}
-                      isGenerating={isGenerating === cluster.name}
-                      onEvaluate={handleGenerateDiagnostic}
                       onViewDiagnostic={handleViewDiagnostic}
                     />
                   ))}
@@ -322,15 +297,13 @@ function TopologyContent() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-3.5">
                     {evaluatedClusters.map((cluster) => (
                       <ClusterCompactCard
                         key={cluster.id}
                         cluster={cluster}
                         affinityItem={getClusterAffinityItem(cluster.name)}
                         totalOffers={totalOffers}
-                        isGenerating={isGenerating === cluster.name}
-                        onEvaluate={handleGenerateDiagnostic}
                         onViewDiagnostic={handleViewDiagnostic}
                       />
                     ))}
@@ -367,15 +340,13 @@ function TopologyContent() {
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-3.5">
                       {visibleUnevaluatedClusters.map((cluster) => (
                         <ClusterCompactCard
                           key={cluster.id}
                           cluster={cluster}
                           affinityItem={null}
                           totalOffers={totalOffers}
-                          isGenerating={isGenerating === cluster.name}
-                          onEvaluate={handleGenerateDiagnostic}
                           onViewDiagnostic={handleViewDiagnostic}
                         />
                       ))}
