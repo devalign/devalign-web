@@ -22,16 +22,6 @@ const DOMAIN_CONFIGS = [
   { key: 'Data', label: 'DATA' },
 ];
 
-const DEFAULT_MARKET_DEMAND: Record<string, number> = {
-  Backend: 92,
-  Frontend: 42,
-  Mobile: 45,
-  QA: 55,
-  DevOps: 64,
-  Cloud: 78,
-  Data: 64,
-};
-
 export function AffinityRadar({
   domainAffinities,
   isLoading = false,
@@ -40,16 +30,17 @@ export function AffinityRadar({
   const getScore = (key: string): number => {
     const affinity = domainAffinities?.find((d) => d.domain.toLowerCase() === key.toLowerCase());
     const rawScore = affinity?.affinity_score || 0;
-    return Math.min(20 + rawScore * 80, 100);
+    return Math.min(20 + Math.round(rawScore * 80), 95);
   };
 
   const getMarketDemand = (key: string): number => {
     const affinity = domainAffinities?.find((d) => d.domain.toLowerCase() === key.toLowerCase());
-    if (affinity?.market_demand !== undefined) {
-      return Math.min(100, Math.round(affinity.market_demand * 100));
+    if (affinity?.market_demand !== undefined && affinity?.market_demand !== null) {
+      return Math.min(100, Math.max(0, Math.round(affinity.market_demand * 100)));
     }
-    return Math.min(100, DEFAULT_MARKET_DEMAND[key] || 50);
+    return 50;
   };
+
 
   const convert = (val: number, angleDeg: number) => {
     const angleRad = (angleDeg - 90) * (Math.PI / 180);
@@ -186,9 +177,9 @@ export function AffinityRadar({
                       />
                     </g>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="font-mono text-[9px] py-1 px-2 bg-slate-900 border border-slate-800 text-slate-100">
-                    <span className="font-bold text-slate-400">{config.label}</span>
-                    <div className="mt-0.5 text-slate-300">Mercado: <span className="font-bold text-slate-100">{demand}%</span></div>
+                  <TooltipContent side="top" sideOffset={8} className="font-mono text-[9px] py-1 px-2">
+                    <span className="font-bold text-muted-foreground">{config.label}</span>
+                    <div className="mt-0.5 text-muted-foreground">Mercado: <span className="font-bold text-foreground">{demand}%</span></div>
                   </TooltipContent>
                 </Tooltip>
               );
@@ -198,11 +189,6 @@ export function AffinityRadar({
             {DOMAIN_CONFIGS.map((config, index) => {
               const angle = (index * 360) / DOMAIN_CONFIGS.length;
               const score = getScore(config.key);
-              const affinity = domainAffinities?.find((d) => d.domain.toLowerCase() === config.key.toLowerCase());
-              const displayPercentage = affinity?.affinity_score !== undefined
-                ? Math.round(affinity.affinity_score * 100)
-                : 0;
-
               const pt = convert(score, angle);
               const [x, y] = pt.split(',');
               return (
@@ -219,9 +205,9 @@ export function AffinityRadar({
                       />
                     </g>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="font-mono text-[9px] py-1 px-2 bg-slate-900 border border-slate-800 text-slate-100">
+                  <TooltipContent side="top" sideOffset={8} className="font-mono text-[9px] py-1 px-2">
                     <span className="font-bold text-primary">{config.label}</span>
-                    <div className="mt-0.5 text-slate-300">Tu Perfil: <span className="font-bold text-slate-100">{displayPercentage}%</span></div>
+                    <div className="mt-0.5 text-muted-foreground">Tu Perfil: <span className="font-bold text-foreground">{score}%</span></div>
                   </TooltipContent>
                 </Tooltip>
               );

@@ -24,47 +24,59 @@ interface DomainAffinityCardProps {
   isUpdating?: boolean;
 }
 
+const CANONICAL_DOMAINS = ['backend', 'frontend', 'data', 'devops', 'mobile', 'qa', 'cloud'] as const;
+
 const DOMAIN_ICONS: Record<string, React.ComponentType<any>> = {
   backend: Code2,
-  cloud: Cloud,
-  devops: Infinity,
   frontend: Monitor,
   data: Database,
+  devops: Infinity,
   mobile: Smartphone,
   qa: ShieldCheck,
+  cloud: Cloud,
 };
 
 const DOMAIN_LABELS: Record<string, string> = {
   backend: 'Backend',
-  cloud: 'Cloud',
-  devops: 'DevOps',
   frontend: 'Frontend',
-  data: 'Data Engineering',
+  data: 'Data',
+  devops: 'DevOps',
   mobile: 'Mobile',
   qa: 'QA',
+  cloud: 'Cloud',
 };
 
 export function DomainAffinityCard({ domainAffinities, isDiagnosed, isUpdating }: DomainAffinityCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Process, deduplicate and sort domain affinities
-  const domainMap = new Map<string, { key: string; label: string; score: number; icon: React.ComponentType<any> }>();
+  // Process, deduplicate and filter domain affinities with real affinity (rawScore > 0)
+  const domainMap = new Map<string, { key: string; label: string; score: number; rawScore: number; icon: React.ComponentType<any> }>();
   for (const d of domainAffinities || []) {
     const lower = d.domain.trim().toLowerCase();
-    if (lower === 'software_engineering' || lower === 'security') continue;
+    if (!CANONICAL_DOMAINS.includes(lower as any)) continue;
     const label = DOMAIN_LABELS[lower] || d.domain;
     const rawScore = d.affinity_score || 0;
     const score = Math.min(20 + Math.round(rawScore * 80), 95);
     const icon = DOMAIN_ICONS[lower] || Target;
 
-    if (!domainMap.has(lower) || domainMap.get(lower)!.score < score) {
-      domainMap.set(lower, { key: lower, label, score, icon });
+    if (!domainMap.has(lower) || domainMap.get(lower)!.rawScore < rawScore) {
+      domainMap.set(lower, { key: lower, label, score, rawScore, icon });
     }
   }
 
+  // Filter only domains with actual detected affinity (rawScore > 0)
+  // and sort descending by score with deterministic canonical order on ties
   const processedAffinities = Array.from(domainMap.values())
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5); // Show top 5 in the card
+    .filter((item) => item.rawScore > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      const indexA = CANONICAL_DOMAINS.indexOf(a.key as any);
+      const indexB = CANONICAL_DOMAINS.indexOf(b.key as any);
+      return indexA - indexB;
+    })
+    .slice(0, 4); // Executive summary: Top 4 relevant domains
 
   return (
     <>

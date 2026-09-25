@@ -53,8 +53,7 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/onboarding') ||
     request.nextUrl.pathname.startsWith('/market') ||
     request.nextUrl.pathname.startsWith('/upload') ||
-    request.nextUrl.pathname.startsWith('/analysis') ||
-    request.nextUrl.pathname.startsWith('/roadmap');
+    request.nextUrl.pathname.startsWith('/analysis');
 
   const isAuthRoute = request.nextUrl.pathname === '/';
 

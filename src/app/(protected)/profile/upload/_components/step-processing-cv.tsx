@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 import { Loader2, FileText, Brain, X } from 'lucide-react';
@@ -48,7 +48,6 @@ export function StepProcessingCV({ cvId, onSkillsDetected, onCancel }: StepProce
   }, [isSkillsDetected, isAnalysisReady, onSkillsDetected]);
 
   const handleCancel = () => {
-    cancelAnalysis();
     onCancel();
   };
 

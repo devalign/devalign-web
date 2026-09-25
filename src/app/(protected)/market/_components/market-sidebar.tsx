@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import * as React from 'react';
 import { Database, Binary, Cpu, Info } from 'lucide-react';
@@ -8,13 +8,14 @@ import { MarketInsightsCarousel } from './market-insights-carousel';
 
 export interface MarketSidebarProps {
   totalOffers: number;
+  uniqueSkillsCount: number;
   className?: string;
 }
 
 /**
  * Sticky sidebar displaying the technical model sheet and aggregate market insights.
  */
-export function MarketSidebar({ totalOffers, className }: MarketSidebarProps) {
+export function MarketSidebar({ totalOffers, uniqueSkillsCount, className }: MarketSidebarProps) {
   return (
     <aside className={cn('space-y-6 lg:sticky lg:top-28 self-start', className)}>
       {/* Technical Model Sheet */}
@@ -56,7 +57,7 @@ export function MarketSidebar({ totalOffers, className }: MarketSidebarProps) {
                     Habilidades Únicas
                   </h4>
                   <p className="text-xs font-bold text-foreground mt-0.5">
-                    73 tecnologías distintas
+                    {uniqueSkillsCount} tecnologías distintas
                   </p>
                   <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
                     Mapeadas y limpiadas a partir de los requisitos listados en las ofertas.

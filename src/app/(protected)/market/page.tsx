@@ -192,6 +192,7 @@ function TopologyContent() {
   }
 
   const totalOffers = clusters.reduce((sum, c) => sum + c.job_offer_count, 0);
+  const uniqueSkillsCount = new Set(clusters.flatMap((c) => c.top_skills || [])).size;
   const visibleUnevaluatedClusters = isExpanded
     ? unevaluatedClusters
     : unevaluatedClusters.slice(0, INITIAL_VISIBLE_COUNT);
@@ -246,7 +247,7 @@ function TopologyContent() {
         {/* Main Layout: Sticky Sidebar (Left) + Compact Rows (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Column: Sticky Specs and Insights */}
-          <MarketSidebar totalOffers={totalOffers} />
+          <MarketSidebar totalOffers={totalOffers} uniqueSkillsCount={uniqueSkillsCount} />
 
         {/* Right Column: Compact Cluster Rows and Progressive Disclosure */}
         <div className="lg:col-span-2 space-y-6">

@@ -29,7 +29,7 @@ export function LogoutDialog({ open, onOpenChange, onConfirm }: LogoutDialogProp
           </DialogTitle>
           <DialogDescription className="text-left">
             ¿Estás seguro de que deseas cerrar sesión? Tendrás que volver a autenticarte para
-            acceder a tus diagnósticos y roadmaps.
+            acceder a tus diagnósticos.
           </DialogDescription>
         </DialogHeader>
 

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getCVStatus } from '@/lib/api';
+import { getCVStatus, deleteCV } from '@/lib/api';
 import type { UserProfileData } from '@/lib/api';
 import { toast } from 'sonner';
 import type { SkillItem } from '@/types';
@@ -18,7 +18,7 @@ interface CVAnalysisContextType {
   extractedSkills: SkillItem[] | null;
   startAnalysis: (cvId: string) => void;
   commitUpdate: () => Promise<void>;
-  cancelAnalysis: () => void;
+  cancelAnalysis: (targetCvId?: string) => Promise<void>;
   startFinalization: (cvId: string) => void;
 }
 
@@ -159,10 +159,19 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
             clearAllTimers();
             setIsAnalyzing(false);
             setIsAnalysisReady(false);
+            setIsSkillsDetected(false);
+            setExtractedSkills(null);
             setAnalyzedCvId(null);
             setAnalysisPhase('phase1');
             setElapsedSeconds(0);
             saveState(false, false, null);
+            try {
+              await deleteCV(cvId);
+            } catch (cleanupErr) {
+              console.error('Error cleaning up failed CV:', cleanupErr);
+            }
+            queryClient.invalidateQueries({ queryKey: ['userCVs'] });
+            queryClient.invalidateQueries({ queryKey: ['userProfile'] });
             const backendError = cvStatus.error_message;
             let friendlyError = 'Hubo un problema al procesar tu CV. Por favor, intenta de nuevo.';
             if (backendError) {
@@ -243,18 +252,34 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
     [pollCvStatus, queryClient, startPhases],
   );
 
-  const cancelAnalysis = useCallback(() => {
-    clearAllTimers();
-    setIsAnalyzing(false);
-    setIsAnalysisReady(false);
-    setIsSkillsDetected(false);
-    setIsFinalizing(false);
-    setAnalyzedCvId(null);
-    setAnalysisPhase('phase1');
-    setElapsedSeconds(0);
-    saveState(false, false, null);
-    toast.info('Análisis cancelado.');
-  }, [clearAllTimers]);
+  const cancelAnalysis = useCallback(
+    async (targetCvId?: string) => {
+      const idToDelete = targetCvId || analyzedCvId;
+      clearAllTimers();
+      setIsAnalyzing(false);
+      setIsAnalysisReady(false);
+      setIsSkillsDetected(false);
+      setIsFinalizing(false);
+      setExtractedSkills(null);
+      setAnalyzedCvId(null);
+      setAnalysisPhase('phase1');
+      setElapsedSeconds(0);
+      saveState(false, false, null);
+
+      if (idToDelete) {
+        try {
+          await deleteCV(idToDelete);
+        } catch (err) {
+          console.error('Error deleting canceled CV from storage/database:', err);
+        }
+        queryClient.invalidateQueries({ queryKey: ['userCVs'] });
+        queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      }
+
+      toast.info('Análisis cancelado y documento descartado.');
+    },
+    [analyzedCvId, clearAllTimers, queryClient],
+  );
 
   const startFinalization = useCallback(
     (cvId: string) => {
@@ -269,6 +294,7 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
       saveState(false, false, null);
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       queryClient.invalidateQueries({ queryKey: ['userCVs'] });
+      queryClient.invalidateQueries({ queryKey: ['clusterDiagnostic'] });
     },
     [clearAllTimers, queryClient],
   );
@@ -279,6 +305,7 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['userProfile'] }),
         queryClient.invalidateQueries({ queryKey: ['userCVs'] }),
+        queryClient.invalidateQueries({ queryKey: ['clusterDiagnostic'] }),
       ]);
 
       clearAllTimers();
@@ -369,10 +396,18 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
                 clearAllTimers();
                 setIsAnalyzing(false);
                 setIsAnalysisReady(false);
+                setIsSkillsDetected(false);
+                setExtractedSkills(null);
                 setAnalyzedCvId(null);
                 setAnalysisPhase('phase1');
                 setElapsedSeconds(0);
                 saveState(false, false, null);
+                if (parsed.analyzedCvId) {
+                  deleteCV(parsed.analyzedCvId).catch((err) =>
+                    console.error('Error cleaning up failed CV on restore:', err),
+                  );
+                  queryClient.invalidateQueries({ queryKey: ['userCVs'] });
+                }
                 return;
               }
               // not_found, processing, uploaded, etc. — resume polling

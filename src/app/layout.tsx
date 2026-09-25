@@ -17,9 +17,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Devalign — Diagnóstico de Alineación y Roadmap IT',
+  title: 'Devalign — Diagnóstico de Alineación IT',
   description:
-    'Diagnostica tus competencias técnicas frente al mercado IT real del Perú mediante Inteligencia Artificial y genera tu ruta de aprendizaje óptima.',
+    'Diagnostica tus competencias técnicas frente al mercado IT real del Perú mediante Inteligencia Artificial.',
 };
 
 export default function RootLayout({
