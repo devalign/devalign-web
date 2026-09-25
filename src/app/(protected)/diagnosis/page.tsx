@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useUserProfileSelector } from '@/hooks/use-user-profile-selector';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
-import { toast } from 'sonner';
 
 // UI Layout Components
 import {
@@ -14,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Sparkles, Loader2, ChevronLeft, ChevronDown, RefreshCw } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronDown, RefreshCw } from 'lucide-react';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
@@ -32,7 +31,6 @@ import { MicroConceptsCard } from './_components/micro-concepts-card';
 import { ClusterHeaderCard } from './_components/cluster-header-card';
 import { SalaryProjectionCard } from './_components/salary-projection-card';
 import { ConceptCoverageCard } from './_components/concept-coverage-bars';
-import { SpecialtySelectorModal } from './_components/specialty-selector-modal';
 import { useClusterDiagnostic, DiagnosticDetail } from '@/hooks/use-cluster-diagnostic';
 
 // Reallocated Profile Components (CV & Graph)
@@ -53,7 +51,6 @@ function DiagnosisContent() {
   const [isStrengthsDrawerOpen, setIsStrengthsDrawerOpen] = useState(false);
   const [isGapsDrawerOpen, setIsGapsDrawerOpen] = useState(false);
   const [isSpecialtyOpen, setIsSpecialtyOpen] = useState(false);
-  const [isSpecialtyModalOpen, setIsSpecialtyModalOpen] = useState(false);
 
   // Modal visibility states linked to URL query param
   const [isAtsOpen, setIsAtsOpen] = useState(false);
@@ -303,7 +300,7 @@ function DiagnosisContent() {
                     <button
                       onClick={() => {
                         setIsSpecialtyOpen(false);
-                        setIsSpecialtyModalOpen(true);
+                        router.push('/market');
                       }}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-primary hover:bg-primary/10 transition-colors font-semibold text-xs cursor-pointer"
                     >
@@ -439,15 +436,6 @@ function DiagnosisContent() {
       {isAtsOpen && (
         <CVAtsPreviewModal isOpen={isAtsOpen} onOpenChange={handleCloseAts} profile={profile} />
       )}
-
-      {/* Specialty Selector Modal */}
-      <SpecialtySelectorModal
-        isOpen={isSpecialtyModalOpen}
-        onClose={() => setIsSpecialtyModalOpen(false)}
-        onSelectSpecialty={handleChangeSpecialty}
-        currentSpecialty={diagnostic.cluster_name}
-        affinities={allAffinities}
-      />
 
       {/* Drawers */}
       <StrengthsDrawer

@@ -13,6 +13,7 @@ export interface ClusterCompactCardProps {
   totalOffers: number;
   isGenerating?: boolean;
   onViewDiagnostic: (clusterName: string) => void;
+  onRequestDiagnostic?: (clusterName: string) => void;
 }
 
 /**
@@ -43,6 +44,7 @@ export function ClusterCompactCard({
   totalOffers,
   isGenerating = false,
   onViewDiagnostic,
+  onRequestDiagnostic,
 }: ClusterCompactCardProps) {
   const percent =
     totalOffers > 0
@@ -57,11 +59,21 @@ export function ClusterCompactCard({
         : Math.round(rawScore * 100)
       : null;
 
-  const isDiagnosed = affinityItem !== null;
+  const isDiagnosed = affinityItem !== null && !!affinityItem.is_evaluated;
+
+  const handleAction = () => {
+    if (isDiagnosed) {
+      onViewDiagnostic(cluster.name);
+    } else if (onRequestDiagnostic) {
+      onRequestDiagnostic(cluster.name);
+    } else {
+      onViewDiagnostic(cluster.name);
+    }
+  };
 
   return (
     <div
-      onClick={() => onViewDiagnostic(cluster.name)}
+      onClick={handleAction}
       className="group relative p-4 rounded-xl border border-border/80 bg-card hover:border-primary/40 hover:bg-secondary/15 hover:shadow-xs transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
     >
       {/* Left Area: Title, Skills, and Market Stats */}
@@ -124,7 +136,7 @@ export function ClusterCompactCard({
           disabled={isGenerating}
           onClick={(e) => {
             e.stopPropagation();
-            onViewDiagnostic(cluster.name);
+            handleAction();
           }}
           className="h-8 text-xs font-bold gap-1.5 px-3 cursor-pointer shadow-none"
         >

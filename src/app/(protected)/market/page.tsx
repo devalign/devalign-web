@@ -17,6 +17,7 @@ import { LoadingScreen } from '@/components/shared/loading-screen';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 import { DiagnosticLoadingBanner } from '@/components/shared/diagnostic-loading-banner';
+import { ConfirmDiagnosticDialog } from '@/components/shared/confirm-diagnostic-dialog';
 import { useMarketClusters } from '@/hooks/use-market-clusters';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import {
@@ -49,6 +50,7 @@ function TopologyContent() {
     clusterName: string | null;
   }>({ show: false, isCompleted: false, clusterName: null });
 
+  const [pendingCluster, setPendingCluster] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isExpanded, setIsExpanded] = React.useState(false);
 
@@ -95,13 +97,14 @@ function TopologyContent() {
     });
   }, [clusters, getClusterAffinityItem]);
 
-  // Partition clusters into evaluated and unevaluated
+  // Partition clusters into evaluated and unevaluated based on is_evaluated flag
   const { evaluatedClusters, unevaluatedClusters } = React.useMemo(() => {
     const evaluated: typeof sortedClusters = [];
     const unevaluated: typeof sortedClusters = [];
 
     sortedClusters.forEach((c) => {
-      if (getClusterAffinityItem(c.name)) {
+      const aff = getClusterAffinityItem(c.name);
+      if (aff && aff.is_evaluated) {
         evaluated.push(c);
       } else {
         unevaluated.push(c);
@@ -136,6 +139,24 @@ function TopologyContent() {
       return;
     }
     router.push(`/diagnosis?cluster=${encodeURIComponent(clusterName)}`);
+  };
+
+  const handleRequestDiagnostic = (clusterName: string) => {
+    if (!hasProfileData) {
+      toast.info('Primero debes subir tu CV para poder generar un diagnóstico.', {
+        description: 'Te estamos redirigiendo a tu perfil para cargar tu CV.',
+      });
+      router.push('/profile');
+      return;
+    }
+    setPendingCluster(clusterName);
+  };
+
+  const handleConfirmDiagnostic = () => {
+    if (!pendingCluster) return;
+    const targetCluster = pendingCluster;
+    setPendingCluster(null);
+    handleViewDiagnostic(targetCluster);
   };
 
   if (isLoading) {
@@ -266,6 +287,7 @@ function TopologyContent() {
                       affinityItem={getClusterAffinityItem(cluster.name)}
                       totalOffers={totalOffers}
                       onViewDiagnostic={handleViewDiagnostic}
+                      onRequestDiagnostic={handleRequestDiagnostic}
                     />
                   ))}
                 </div>
@@ -305,6 +327,7 @@ function TopologyContent() {
                         affinityItem={getClusterAffinityItem(cluster.name)}
                         totalOffers={totalOffers}
                         onViewDiagnostic={handleViewDiagnostic}
+                        onRequestDiagnostic={handleRequestDiagnostic}
                       />
                     ))}
                   </div>
@@ -345,9 +368,10 @@ function TopologyContent() {
                         <ClusterCompactCard
                           key={cluster.id}
                           cluster={cluster}
-                          affinityItem={null}
+                          affinityItem={getClusterAffinityItem(cluster.name)}
                           totalOffers={totalOffers}
                           onViewDiagnostic={handleViewDiagnostic}
+                          onRequestDiagnostic={handleRequestDiagnostic}
                         />
                       ))}
                     </div>
@@ -383,6 +407,14 @@ function TopologyContent() {
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog for On-Demand Diagnostics */}
+      <ConfirmDiagnosticDialog
+        open={!!pendingCluster}
+        onOpenChange={(open) => !open && setPendingCluster(null)}
+        clusterName={pendingCluster || ''}
+        onConfirm={handleConfirmDiagnostic}
+      />
     </div>
   </div>
 );

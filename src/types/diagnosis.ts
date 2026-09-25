@@ -12,6 +12,7 @@ export interface ClusterAffinityItem {
   cluster_name: string;
   affinity_score: number;
   is_primary: boolean;
+  is_evaluated?: boolean;
   market_insights?: MarketInsights;
   compatible_roles?: CompatibleRoleItem[];
   detected_skills?: SkillItem[];
