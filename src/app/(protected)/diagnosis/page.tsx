@@ -32,6 +32,7 @@ import { MicroConceptsCard } from './_components/micro-concepts-card';
 import { ClusterHeaderCard } from './_components/cluster-header-card';
 import { SalaryProjectionCard } from './_components/salary-projection-card';
 import { ConceptCoverageCard } from './_components/concept-coverage-bars';
+import { SpecialtySelectorModal } from './_components/specialty-selector-modal';
 import { useClusterDiagnostic, DiagnosticDetail } from '@/hooks/use-cluster-diagnostic';
 
 // Reallocated Profile Components (CV & Graph)
@@ -52,6 +53,7 @@ function DiagnosisContent() {
   const [isStrengthsDrawerOpen, setIsStrengthsDrawerOpen] = useState(false);
   const [isGapsDrawerOpen, setIsGapsDrawerOpen] = useState(false);
   const [isSpecialtyOpen, setIsSpecialtyOpen] = useState(false);
+  const [isSpecialtyModalOpen, setIsSpecialtyModalOpen] = useState(false);
 
   // Modal visibility states linked to URL query param
   const [isAtsOpen, setIsAtsOpen] = useState(false);
@@ -272,8 +274,8 @@ function DiagnosisContent() {
               {isSpecialtyOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsSpecialtyOpen(false)} />
-                  <div className="absolute right-0 top-full mt-1.5 w-56 bg-card border border-border rounded-lg shadow-lg z-50 p-1">
-                    {allAffinities.map((cluster) => {
+                  <div className="absolute right-0 top-full mt-1.5 w-60 bg-card border border-border rounded-lg shadow-lg z-50 p-1">
+                    {allAffinities.slice(0, 5).map((cluster) => {
                       const isActive = cluster.cluster_name === diagnostic.cluster_name;
                       return (
                         <button
@@ -282,21 +284,26 @@ function DiagnosisContent() {
                             handleChangeSpecialty(cluster.cluster_name);
                             setIsSpecialtyOpen(false);
                           }}
-                          className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold text-left transition-colors cursor-pointer ${
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-xs font-semibold text-left transition-colors cursor-pointer ${
                             isActive
                               ? 'bg-primary/10 text-primary'
                               : 'text-foreground hover:bg-secondary/50'
                           }`}
                         >
-                          {cluster.cluster_name}
+                          <span className="truncate">{cluster.cluster_name}</span>
+                          {cluster.affinity_score > 0 && (
+                            <span className="text-[10px] font-bold opacity-75 shrink-0">
+                              {Math.round(cluster.affinity_score > 1 ? cluster.affinity_score : cluster.affinity_score * 100)}%
+                            </span>
+                          )}
                         </button>
                       );
                     })}
                     <div className="border-t border-border/60 my-1" />
                     <button
                       onClick={() => {
-                        router.push('/market');
                         setIsSpecialtyOpen(false);
+                        setIsSpecialtyModalOpen(true);
                       }}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-primary hover:bg-primary/10 transition-colors font-semibold text-xs cursor-pointer"
                     >
@@ -432,6 +439,15 @@ function DiagnosisContent() {
       {isAtsOpen && (
         <CVAtsPreviewModal isOpen={isAtsOpen} onOpenChange={handleCloseAts} profile={profile} />
       )}
+
+      {/* Specialty Selector Modal */}
+      <SpecialtySelectorModal
+        isOpen={isSpecialtyModalOpen}
+        onClose={() => setIsSpecialtyModalOpen(false)}
+        onSelectSpecialty={handleChangeSpecialty}
+        currentSpecialty={diagnostic.cluster_name}
+        affinities={allAffinities}
+      />
 
       {/* Drawers */}
       <StrengthsDrawer
