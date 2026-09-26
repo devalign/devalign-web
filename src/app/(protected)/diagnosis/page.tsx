@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useUserProfileSelector } from '@/hooks/use-user-profile-selector';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
-import { toast } from 'sonner';
 
 // UI Layout Components
 import {
@@ -14,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Sparkles, Loader2, ChevronLeft, ChevronDown, RefreshCw } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronDown, RefreshCw } from 'lucide-react';
 import { LoadingScreen } from '@/components/shared/loading-screen';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
@@ -272,8 +271,8 @@ function DiagnosisContent() {
               {isSpecialtyOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsSpecialtyOpen(false)} />
-                  <div className="absolute right-0 top-full mt-1.5 w-56 bg-card border border-border rounded-lg shadow-lg z-50 p-1">
-                    {allAffinities.map((cluster) => {
+                  <div className="absolute right-0 top-full mt-1.5 w-60 bg-card border border-border rounded-lg shadow-lg z-50 p-1">
+                    {allAffinities.slice(0, 5).map((cluster) => {
                       const isActive = cluster.cluster_name === diagnostic.cluster_name;
                       return (
                         <button
@@ -282,21 +281,26 @@ function DiagnosisContent() {
                             handleChangeSpecialty(cluster.cluster_name);
                             setIsSpecialtyOpen(false);
                           }}
-                          className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold text-left transition-colors cursor-pointer ${
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-xs font-semibold text-left transition-colors cursor-pointer ${
                             isActive
                               ? 'bg-primary/10 text-primary'
                               : 'text-foreground hover:bg-secondary/50'
                           }`}
                         >
-                          {cluster.cluster_name}
+                          <span className="truncate">{cluster.cluster_name}</span>
+                          {cluster.affinity_score > 0 && (
+                            <span className="text-[10px] font-bold opacity-75 shrink-0">
+                              {Math.round(cluster.affinity_score > 1 ? cluster.affinity_score : cluster.affinity_score * 100)}%
+                            </span>
+                          )}
                         </button>
                       );
                     })}
                     <div className="border-t border-border/60 my-1" />
                     <button
                       onClick={() => {
-                        router.push('/market');
                         setIsSpecialtyOpen(false);
+                        router.push('/market');
                       }}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-left text-primary hover:bg-primary/10 transition-colors font-semibold text-xs cursor-pointer"
                     >

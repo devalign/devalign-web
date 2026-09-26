@@ -28,6 +28,7 @@ import { DomainAffinityCard } from './domain-affinity-card';
 import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 import { DiagnosticLoadingBanner } from '@/components/shared/diagnostic-loading-banner';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
+import { ConfirmDiagnosticDialog } from '@/components/shared/confirm-diagnostic-dialog';
 import { ErrorFallback } from '@/components/shared/error-fallback';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -239,8 +240,17 @@ export default function ProfileDashboardView() {
     setSkills((current) => current.filter((s) => s.name !== skillName));
   }, []);
 
+  const [pendingCluster, setPendingCluster] = useState<string | null>(null);
+
   const handleOpenDiagnosis = (clusterName: string) => {
     router.push(`/diagnosis?cluster=${encodeURIComponent(clusterName)}`);
+  };
+
+  const handleConfirmDiagnostic = () => {
+    if (!pendingCluster) return;
+    const targetCluster = pendingCluster;
+    setPendingCluster(null);
+    handleOpenDiagnosis(targetCluster);
   };
 
   if (error) {
@@ -547,6 +557,7 @@ export default function ProfileDashboardView() {
                   ) : (
                     affinities.slice(0, 3).map((affinity) => {
                       const score = normalizeScore(affinity.affinity_score);
+                      const isEvaluated = !!affinity.is_evaluated;
                       return (
                         <div
                           key={affinity.cluster_id || affinity.cluster_name}
@@ -566,10 +577,16 @@ export default function ProfileDashboardView() {
                               />
                             </div>
                             <Button
-                              variant="outline"
+                              variant={isEvaluated ? 'default' : 'outline'}
                               size="sm"
-                              onClick={() => handleOpenDiagnosis(affinity.cluster_name)}
-                              className="h-8 text-[10px] font-bold bg-card"
+                              onClick={() => {
+                                if (isEvaluated) {
+                                  handleOpenDiagnosis(affinity.cluster_name);
+                                } else {
+                                  setPendingCluster(affinity.cluster_name);
+                                }
+                              }}
+                              className="h-8 text-[10px] font-bold cursor-pointer shadow-none"
                             >
                               Ver diagnóstico
                             </Button>
@@ -583,8 +600,8 @@ export default function ProfileDashboardView() {
                 {affinities.length > 3 ? (
                   <Button
                     variant="outline"
-                    onClick={() => router.push('/diagnosis')}
-                    className="w-full justify-between h-9 text-xs text-primary font-bold"
+                    onClick={() => router.push('/market')}
+                    className="w-full justify-between h-9 text-xs text-primary font-bold cursor-pointer hover:bg-primary/5"
                   >
                     Ver todas las afinidades ({affinities.length})
                     <TrendingUp className="h-4 w-4" />
@@ -593,7 +610,7 @@ export default function ProfileDashboardView() {
                   <Button
                     variant="outline"
                     onClick={() => router.push('/market')}
-                    className="w-full justify-between h-9 text-xs text-primary font-bold border-dashed hover:bg-primary/5"
+                    className="w-full justify-between h-9 text-xs text-primary font-bold border-dashed hover:bg-primary/5 cursor-pointer"
                   >
                     Explorar más especialidades
                     <TrendingUp className="h-4 w-4" />
@@ -714,6 +731,13 @@ export default function ProfileDashboardView() {
           userEmail={user?.email || undefined}
         />
       )}
+
+      <ConfirmDiagnosticDialog
+        open={!!pendingCluster}
+        onOpenChange={(open) => !open && setPendingCluster(null)}
+        clusterName={pendingCluster || ''}
+        onConfirm={handleConfirmDiagnostic}
+      />
     </>
   );
 }
