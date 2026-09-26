@@ -298,7 +298,7 @@ export default function ProfileDashboardView() {
           isUpdating={isUpdating}
           isDiagnosed={isDiagnosed}
           onDismiss={() => setIsBannerDismissed(true)}
-          onViewResults={() => router.push('/diagnosis')}
+          onViewResults={() => router.push('/overview')}
         />
         <EmptyProfileBanner show={!profile?.cv_id && !isUpdating} />
 

@@ -19,6 +19,9 @@ import { ErrorFallback } from '@/components/shared/error-fallback';
 import { ProfileUploadBanner } from '@/components/shared/profile-upload-banner';
 import { EmptyProfileBanner } from '@/components/shared/empty-profile-banner';
 
+// UI Shared Components
+import { ConfirmDiagnosticDialog } from '@/components/shared/confirm-diagnostic-dialog';
+
 // Local _components (Diagnosis)
 import { StrengthsCard } from './_components/strengths-card';
 import { PriorityGapsCard } from './_components/priority-gaps-card';
@@ -55,6 +58,7 @@ function DiagnosisContent() {
   // Modal visibility states linked to URL query param
   const [isAtsOpen, setIsAtsOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [pendingCluster, setPendingCluster] = useState<string | null>(null);
 
   const action = searchParams.get('action');
   const clusterParam = searchParams.get('cluster');
@@ -93,6 +97,13 @@ function DiagnosisContent() {
     const params = new URLSearchParams(searchParams.toString());
     params.set('cluster', clusterName);
     router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const handleConfirmDiagnostic = () => {
+    if (!pendingCluster) return;
+    const target = pendingCluster;
+    setPendingCluster(null);
+    handleChangeSpecialty(target);
   };
 
   // Determine active cluster name
@@ -278,8 +289,15 @@ function DiagnosisContent() {
                         <button
                           key={cluster.cluster_name}
                           onClick={() => {
-                            handleChangeSpecialty(cluster.cluster_name);
                             setIsSpecialtyOpen(false);
+                            if (
+                              cluster.is_evaluated ||
+                              cluster.cluster_name.toLowerCase() === diagnostic.cluster_name.toLowerCase()
+                            ) {
+                              handleChangeSpecialty(cluster.cluster_name);
+                            } else {
+                              setPendingCluster(cluster.cluster_name);
+                            }
                           }}
                           className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-xs font-semibold text-left transition-colors cursor-pointer ${
                             isActive
@@ -445,6 +463,12 @@ function DiagnosisContent() {
       />
 
       <GapsDrawer isOpen={isGapsDrawerOpen} onOpenChange={setIsGapsDrawerOpen} gaps={gaps} />
+      <ConfirmDiagnosticDialog
+        open={!!pendingCluster}
+        onOpenChange={(open) => !open && setPendingCluster(null)}
+        clusterName={pendingCluster || ''}
+        onConfirm={handleConfirmDiagnostic}
+      />
     </>
   );
 }
