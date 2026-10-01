@@ -2,12 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getUserProfile, updateUserProfile, updateUserProfileSkills, resetAccount, deleteAccount } from '@/lib/api';
 import { UserProfileData, SkillItem } from '@/lib/api/types';
 
-export function useUserProfile() {
+export function useUserProfile(pollingInterval?: number | false) {
   return useQuery({
     queryKey: ['userProfile'],
     queryFn: getUserProfile,
     staleTime: 5 * 60 * 1000,
     retry: 1,
+    refetchInterval: pollingInterval,
   });
 }
 

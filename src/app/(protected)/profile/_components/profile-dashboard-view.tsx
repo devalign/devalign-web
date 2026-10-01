@@ -38,8 +38,11 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUserCVs } from '@/hooks/use-user-cvs';
 import { useUserProfile, useUpdateUserSkills } from '@/hooks/use-user-profile';
 import { useUserProfileSelector } from '@/hooks/use-user-profile-selector';
+import { useQueryClient } from '@tanstack/react-query';
 import type { ClusterAffinityItem, SkillItem, UserProfileData } from '@/types';
 import { cn } from '@/lib/utils';
+
+const SKELETON_SKILL_WIDTHS = [88, 104, 76, 112, 96, 80, 100, 92];
 
 function formatDate(value?: string | null, includeTime = false) {
   if (!value) return 'Sin fecha';
@@ -98,11 +101,18 @@ export default function ProfileDashboardView() {
   const searchParams = useSearchParams();
   const { data: user } = useCurrentUser();
   const { data: profile, isLoading, error } = useUserProfileSelector();
-  const { refetch: refetchProfile } = useUserProfile();
+
+  const isUpdating = searchParams.get('status') === 'updating';
+  const isDiagnosed = Boolean(profile?.is_diagnosed);
+  
+  // Use React Query's native refetchInterval for safe polling
+  const { refetch: refetchProfile } = useUserProfile(isUpdating && !isDiagnosed ? 1500 : false);
+  
   const { data: cvData } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
   const { startAnalysis, isAnalyzing, isAnalysisReady } = useCVAnalysis();
 
+  const queryClient = useQueryClient();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [skills, setSkills] = useState<SkillItem[]>([]);
   const [selectedSkillForEvidence, setSelectedSkillForEvidence] = useState<SkillItem | null>(null);
@@ -110,27 +120,10 @@ export default function ProfileDashboardView() {
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
 
   const action = searchParams.get('action');
-  const statusParam = searchParams.get('status');
   const expectedCvId = searchParams.get('expectedCvId');
-  const isUpdating = statusParam === 'updating';
-  const isDiagnosed = Boolean(
-    profile?.is_diagnosed && (!expectedCvId || profile?.cv_id === expectedCvId),
-  );
   const isAtsOpen = action === 'preview-ats';
 
-  // Poll profile when waiting for diagnosis completion
-  useEffect(() => {
-    if (!isUpdating || isDiagnosed || isBannerDismissed) return;
-
-    const interval = setInterval(async () => {
-      const result = await refetchProfile();
-      if (result.data?.is_diagnosed && (!expectedCvId || result.data?.cv_id === expectedCvId)) {
-        clearInterval(interval);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [isUpdating, isDiagnosed, isBannerDismissed, expectedCvId, refetchProfile]);
+  // Cleared custom setInterval logic in favor of React Query's native refetchInterval
 
   // Clear the ?status=updating param when banner is dismissed
   useEffect(() => {
@@ -140,10 +133,7 @@ export default function ProfileDashboardView() {
   }, [isBannerDismissed, router]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setSkills(buildSkillItems(profile?.detected_skills));
-    }, 0);
-    return () => clearTimeout(timer);
+    setSkills(buildSkillItems(profile?.detected_skills));
   }, [profile?.detected_skills]);
 
   const cvs = useMemo(() => {
@@ -410,13 +400,23 @@ export default function ProfileDashboardView() {
                       clic en una competencia para editar su evidencia y puntuación ICT.
                     </p>
                   </div>
-                  <Badge
-                    variant="secondary"
-                    className="self-start sm:self-center px-2.5 py-1 text-xs font-bold border border-border/50 bg-secondary/80 text-foreground shrink-0 tabular-nums flex items-center gap-1.5"
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                    {skills.length} {skills.length === 1 ? 'skill detectada' : 'skills detectadas'}
-                  </Badge>
+                  {isUpdating && !isDiagnosed ? (
+                    <Badge
+                      variant="secondary"
+                      className="self-start sm:self-center px-2.5 py-1 text-xs font-bold border border-border/50 bg-secondary/80 text-muted-foreground shrink-0 flex items-center gap-1.5"
+                    >
+                      <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                      <span>{skills.length > 0 ? `${skills.length} skills (calculando ICT...)` : 'Analizando...'}</span>
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="secondary"
+                      className="self-start sm:self-center px-2.5 py-1 text-xs font-bold border border-border/50 bg-secondary/80 text-foreground shrink-0 tabular-nums flex items-center gap-1.5"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                      {skills.length} {skills.length === 1 ? 'skill detectada' : 'skills detectadas'}
+                    </Badge>
+                  )}
                 </div>
 
                 <div className="pt-1">
@@ -428,13 +428,12 @@ export default function ProfileDashboardView() {
 
                 <div className="flex flex-wrap gap-2">
                   {isUpdating && !isDiagnosed ? (
-                    <div className="flex flex-wrap gap-2 animate-pulse">
-                      {Array.from({ length: 8 }).map((_, i) => (
+                    <div className="flex flex-wrap gap-2">
+                      {SKELETON_SKILL_WIDTHS.map((width, i) => (
                         <div
                           key={i}
-                          className="h-9 bg-muted rounded-lg"
-                          // eslint-disable-next-line react-hooks/purity
-                          style={{ width: `${Math.floor(Math.random() * (110 - 70) + 70)}px` }}
+                          className="h-9 bg-muted/60 animate-pulse rounded-lg"
+                          style={{ width: `${width}px` }}
                         />
                       ))}
                     </div>
