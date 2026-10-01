@@ -34,7 +34,7 @@ function buildSkillItems(skills?: SkillItem[]) {
 }
 
 export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSkillsProps) {
-  const { extractedSkills, startFinalization } = useCVAnalysis();
+  const { extractedSkills, startFinalization, isAnalyzing } = useCVAnalysis();
 
   const [skills, setSkills] = useState<SkillItem[]>([]);
   const [isFinalizing, setIsFinalizing] = useState(false);
@@ -45,7 +45,12 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
   useEffect(() => {
     if (extractedSkills) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSkills(buildSkillItems(extractedSkills));
+      setSkills((prev) => {
+        if (prev.length === 0) return buildSkillItems(extractedSkills);
+        const currentNames = new Set(prev.map(s => s.name.toLowerCase()));
+        const newItems = buildSkillItems(extractedSkills).filter(s => !currentNames.has(s.name.toLowerCase()));
+        return [...prev, ...newItems];
+      });
     }
   }, [extractedSkills]);
 
@@ -129,6 +134,13 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
           onAddSkill={handleAddSkillFromAutocomplete}
           placeholder="Buscar en el catálogo oficial de Lightcast o escribir competencia..."
         />
+
+        {isAnalyzing && (
+          <div className="flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs text-primary animate-pulse">
+            <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+            <span>Identificando competencias adicionales con IA en segundo plano...</span>
+          </div>
+        )}
 
         {hasSkills ? (
           <div className="flex flex-wrap gap-2">

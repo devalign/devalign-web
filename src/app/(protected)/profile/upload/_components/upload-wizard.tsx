@@ -32,8 +32,11 @@ export function UploadWizard() {
     } else if (isAnalyzing) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentStep('processing');
+    } else if (currentStep === 'processing' && !isAnalyzing && !isSkillsDetected) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentStep('load');
     }
-  }, [isSkillsDetected, isAnalyzing]);
+  }, [isSkillsDetected, isAnalyzing, currentStep]);
 
   useEffect(() => {
     if (analyzedCvId && cvId !== analyzedCvId) {

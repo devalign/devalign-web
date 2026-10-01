@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Loader2, FileText, Brain, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
@@ -52,6 +52,16 @@ export function StepProcessingCV({ cvId, onSkillsDetected, onCancel }: StepProce
   };
 
   const stallWarning = elapsedSeconds >= 30;
+
+  const progressPercentage = useMemo(() => {
+    if (isSkillsDetected || isAnalysisReady) return 100;
+    if (analysisPhase === 'phase1') {
+      return Math.min(45, Math.round((elapsedSeconds / 3) * 45));
+    }
+    const p2Elapsed = Math.max(0, elapsedSeconds - 3);
+    const p2Progress = 45 + Math.min(47, Math.round((1 - Math.exp(-p2Elapsed / 4)) * 50));
+    return Math.min(95, Math.max(45, p2Progress));
+  }, [analysisPhase, elapsedSeconds, isSkillsDetected, isAnalysisReady]);
 
   return (
     <div className="space-y-6">
@@ -114,14 +124,31 @@ export function StepProcessingCV({ cvId, onSkillsDetected, onCancel }: StepProce
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2">
-          <span className="text-xs text-muted-foreground">
-            {elapsedSeconds}s transcurridos
-          </span>
-          {stallWarning && (
-            <span className="text-xs text-amber-500 font-medium">
-              Está tomando más tiempo de lo habitual
+        <div className="space-y-2 pt-2 border-t border-border/40">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground font-medium">
+              {progressPercentage === 100
+                ? '¡Información extraída con éxito!'
+                : analysisPhase === 'phase1'
+                  ? 'Extrayendo texto y metadatos...'
+                  : 'Analizando competencias con IA...'}
             </span>
+            <span className="text-muted-foreground font-mono text-[11px] font-semibold">
+              {progressPercentage}%
+            </span>
+          </div>
+
+          <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+
+          {stallWarning && (
+            <p className="text-[11px] text-warning font-medium pt-1">
+              El análisis está tomando más tiempo de lo habitual, seguimos procesando...
+            </p>
           )}
         </div>
       </div>

@@ -27,7 +27,7 @@ const CVAnalysisContext = createContext<CVAnalysisContextType | undefined>(undef
 const LOCAL_STORAGE_KEY = 'devalign_cv_analysis_state';
 const MAX_POLLING_DURATION = 90000;
 const STALL_WARNING_MS = 30000;
-const PHASE1_DURATION_MS = 7000;
+const PHASE1_DURATION_MS = 3000;
 
 export function CVAnalysisProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
@@ -134,7 +134,17 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
           const cvStatus = await getCVStatus(cvId);
           if (!cvStatus) return;
 
-          if (cvStatus.status === 'skills_detected') {
+          if (cvStatus.status === 'skills_detected_partial') {
+            setAnalysisPhase('phase2');
+            setIsSkillsDetected(true);
+            setAnalyzedCvId(cvId);
+            if (cvStatus.extracted_skills) {
+              setExtractedSkills(cvStatus.extracted_skills);
+            }
+            saveState(true, false, cvId, undefined, 'phase2', undefined, true);
+            // Notice we do NOT clear timers or set isAnalyzing to false here, so polling continues.
+            return;
+          } else if (cvStatus.status === 'skills_detected') {
             clearAllTimers();
             setIsAnalyzing(false);
             setIsSkillsDetected(true);
@@ -215,16 +225,23 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
     [clearAllTimers, clearPollInterval, queryClient],
   );
 
-  const startPhases = useCallback(() => {
+  const startPhases = useCallback((startTime?: number) => {
     setAnalysisPhase('phase1');
-    setElapsedSeconds(0);
+    const start = startTime || Date.now();
+    setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
 
+    if (phaseTimerRef.current) {
+      clearTimeout(phaseTimerRef.current);
+    }
     phaseTimerRef.current = setTimeout(() => {
       setAnalysisPhase('phase2');
     }, PHASE1_DURATION_MS);
 
+    if (elapsedTimerRef.current) {
+      clearInterval(elapsedTimerRef.current);
+    }
     elapsedTimerRef.current = setInterval(() => {
-      setElapsedSeconds((prev) => prev + 1);
+      setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
     }, 1000);
   }, []);
 
@@ -246,7 +263,7 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
       // and EmptyProfileState transitions to the profile view.
       queryClient.invalidateQueries({ queryKey: ['userCVs'] });
 
-      startPhases();
+      startPhases(startTime);
       pollCvStatus(cvId, startTime);
     },
     [pollCvStatus, queryClient, startPhases],
@@ -374,7 +391,14 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
             if (!active) return;
 
             if (cvStatus) {
-              if (cvStatus.status === 'skills_detected') {
+              if (cvStatus.status === 'skills_detected_partial') {
+                setIsSkillsDetected(true);
+                setAnalyzedCvId(parsed.analyzedCvId);
+                if (cvStatus.extracted_skills) {
+                  setExtractedSkills(cvStatus.extracted_skills);
+                }
+                saveState(true, false, parsed.analyzedCvId, undefined, undefined, undefined, true);
+              } else if (cvStatus.status === 'skills_detected') {
                 clearAllTimers();
                 setIsAnalyzing(false);
                 setIsSkillsDetected(true);
@@ -439,17 +463,21 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
             }
 
             const savedPhase = parsed.analysisPhase || 'phase1';
-            const savedElapsed = parsed.elapsedSeconds || 0;
+            const currentElapsed = Math.floor((Date.now() - startTime) / 1000);
             setAnalysisPhase(savedPhase);
-            setElapsedSeconds(savedElapsed);
+            setElapsedSeconds(currentElapsed);
 
             if (savedPhase === 'phase1') {
+              const remainingPhase1 = Math.max(0, PHASE1_DURATION_MS - (Date.now() - startTime));
               phaseTimerRef.current = setTimeout(() => {
                 setAnalysisPhase('phase2');
-              }, PHASE1_DURATION_MS);
+              }, remainingPhase1);
+            }
+            if (elapsedTimerRef.current) {
+              clearInterval(elapsedTimerRef.current);
             }
             elapsedTimerRef.current = setInterval(() => {
-              setElapsedSeconds((prev) => prev + 1);
+              setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
             }, 1000);
 
             pollCvStatus(parsed.analyzedCvId, startTime);
