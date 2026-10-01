@@ -34,7 +34,7 @@ function buildSkillItems(skills?: SkillItem[]) {
 }
 
 export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSkillsProps) {
-  const { extractedSkills, startFinalization } = useCVAnalysis();
+  const { extractedSkills, startFinalization, isAnalyzing } = useCVAnalysis();
 
   const [skills, setSkills] = useState<SkillItem[]>([]);
   const [isFinalizing, setIsFinalizing] = useState(false);
@@ -45,7 +45,12 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
   useEffect(() => {
     if (extractedSkills) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSkills(buildSkillItems(extractedSkills));
+      setSkills((prev) => {
+        if (prev.length === 0) return buildSkillItems(extractedSkills);
+        const currentNames = new Set(prev.map(s => s.name.toLowerCase()));
+        const newItems = buildSkillItems(extractedSkills).filter(s => !currentNames.has(s.name.toLowerCase()));
+        return [...prev, ...newItems];
+      });
     }
   }, [extractedSkills]);
 

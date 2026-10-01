@@ -134,7 +134,16 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
           const cvStatus = await getCVStatus(cvId);
           if (!cvStatus) return;
 
-          if (cvStatus.status === 'skills_detected') {
+          if (cvStatus.status === 'skills_detected_partial') {
+            setIsSkillsDetected(true);
+            setAnalyzedCvId(cvId);
+            if (cvStatus.extracted_skills) {
+              setExtractedSkills(cvStatus.extracted_skills);
+            }
+            saveState(true, false, cvId, undefined, undefined, undefined, true);
+            // Notice we do NOT clear timers or set isAnalyzing to false here, so polling continues.
+            return;
+          } else if (cvStatus.status === 'skills_detected') {
             clearAllTimers();
             setIsAnalyzing(false);
             setIsSkillsDetected(true);
@@ -374,7 +383,14 @@ export function CVAnalysisProvider({ children }: { children: React.ReactNode }) 
             if (!active) return;
 
             if (cvStatus) {
-              if (cvStatus.status === 'skills_detected') {
+              if (cvStatus.status === 'skills_detected_partial') {
+                setIsSkillsDetected(true);
+                setAnalyzedCvId(parsed.analyzedCvId);
+                if (cvStatus.extracted_skills) {
+                  setExtractedSkills(cvStatus.extracted_skills);
+                }
+                saveState(true, false, parsed.analyzedCvId, undefined, undefined, undefined, true);
+              } else if (cvStatus.status === 'skills_detected') {
                 clearAllTimers();
                 setIsAnalyzing(false);
                 setIsSkillsDetected(true);
