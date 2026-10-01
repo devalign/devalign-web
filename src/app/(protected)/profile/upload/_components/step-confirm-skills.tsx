@@ -135,6 +135,13 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
           placeholder="Buscar en el catálogo oficial de Lightcast o escribir competencia..."
         />
 
+        {isAnalyzing && (
+          <div className="flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs text-primary animate-pulse">
+            <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+            <span>Identificando competencias adicionales con IA en segundo plano...</span>
+          </div>
+        )}
+
         {hasSkills ? (
           <div className="flex flex-wrap gap-2">
             {skills.map((skill) => (
