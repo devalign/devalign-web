@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   FileText,
   Eye,
@@ -76,6 +77,12 @@ export default function CVHistoryModal({
 
   const handleDeleteConfirm = async () => {
     if (!deletingCvId) return;
+
+    if (deletingCvId === activeCvId) {
+      toast.error('No puedes eliminar la versión activa de tu currículum.');
+      setDeletingCvId(null);
+      return;
+    }
 
     const toastId = toast.loading('Eliminando currículum...');
     try {
@@ -211,12 +218,11 @@ export default function CVHistoryModal({
               <div className="bg-destructive/10 border border-destructive/20 text-destructive dark:text-destructive p-4 rounded-xl text-xs space-y-1.5 leading-relaxed">
                 <p className="font-bold flex items-center gap-1.5">
                   <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                  ¡Advertencia Crítica!
+                  Operación bloqueada
                 </p>
                 <p>
-                  Este currículum es tu **documento activo**. Si lo eliminas, tu perfil ya no estará
-                  vinculado a ningún archivo CV. Tu información de perfil y habilidades guardadas se
-                  mantendrán, pero no podrás volver a consultar este documento.
+                  No puedes eliminar la versión activa de tu currículum porque respalda tu
+                  diagnóstico y perfil actual.
                 </p>
               </div>
             ) : (
@@ -235,28 +241,30 @@ export default function CVHistoryModal({
                 className="text-xs font-semibold border-border hover:bg-muted"
                 disabled={deleteMutation.isPending}
               >
-                Cancelar
+                {deletingCv.cv_id === activeCvId ? 'Entendido' : 'Cancelar'}
               </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteConfirm}
-                className="text-xs font-bold"
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                    Eliminando...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                    Sí, eliminar
-                  </>
-                )}
-              </Button>
+              {deletingCv.cv_id !== activeCvId && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteConfirm}
+                  className="text-xs font-bold"
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      Eliminando...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                      Sí, eliminar
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         ) : (
@@ -353,16 +361,42 @@ export default function CVHistoryModal({
                           </Button>
                         )}
 
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeletingCvId(cv.cv_id)}
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer rounded-lg border border-border/30 hover:border-destructive/30"
-                          title="Eliminar esta versión"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        {isActive ? (
+                          <TooltipProvider delayDuration={100}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span tabIndex={0} className="inline-block cursor-not-allowed">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    disabled
+                                    aria-disabled="true"
+                                    className="h-8 w-8 text-muted-foreground/30 opacity-40 cursor-not-allowed rounded-lg border border-border/20 pointer-events-none"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                <p className="text-[11px] font-medium">
+                                  La versión activa no puede eliminarse
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeletingCvId(cv.cv_id)}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer rounded-lg border border-border/30 hover:border-destructive/30"
+                            title="Eliminar esta versión"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
 
                         {isActive ? (
                           <div className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-success dark:text-success bg-success/5 border border-success/20 rounded-lg">
