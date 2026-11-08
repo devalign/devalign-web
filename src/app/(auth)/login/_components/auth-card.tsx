@@ -9,15 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { passwordRequirements, isPasswordSecure } from '@/lib/validators/password';
 
 type AuthMode = 'login' | 'signup' | 'forgot-password' | 'reset-password';
-
-const passwordRequirements = [
-  { label: 'Mínimo 8 caracteres', test: (pw: string) => pw.length >= 8 },
-  { label: 'Una letra mayúscula', test: (pw: string) => /[A-Z]/.test(pw) },
-  { label: 'Una letra minúscula', test: (pw: string) => /[a-z]/.test(pw) },
-  { label: 'Un número o carácter especial', test: (pw: string) => /[\d\W]/.test(pw) },
-];
 
 const translateError = (message: string): string => {
   const lowercaseMessage = message.toLowerCase();
@@ -125,10 +119,6 @@ export default function AuthCard({ onOpenChange }: AuthCardProps = {}) {
   const checkRequirement = (testFn: (pw: string) => boolean) => {
     if (!password) return false;
     return testFn(password);
-  };
-
-  const isPasswordSecure = (pw: string) => {
-    return passwordRequirements.every((req) => req.test(pw));
   };
 
   const handleOAuthLogin = async () => {
