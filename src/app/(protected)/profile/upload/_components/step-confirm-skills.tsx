@@ -136,9 +136,9 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
         />
 
         {isAnalyzing && (
-          <div className="flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs text-primary animate-pulse">
+          <div className="flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-xs text-primary">
             <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-            <span>Identificando competencias adicionales con IA en segundo plano...</span>
+            <span>Sintetizando tu perfil profesional y experiencia en segundo plano...</span>
           </div>
         )}
 
@@ -170,7 +170,7 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
                     ICT {skill.ict_score.toFixed(1)}
                   </span>
                 ) : (
-                  <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium text-muted-foreground animate-pulse">
+                  <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium text-muted-foreground">
                     ICT --
                   </span>
                 )}
@@ -212,15 +212,19 @@ export function StepConfirmSkills({ cvId, onComplete, onCancel }: StepConfirmSki
         <Button
           size="sm"
           onClick={handleAccept}
-          disabled={!hasSkills || isFinalizing}
+          disabled={!hasSkills || isFinalizing || isAnalyzing}
           className="text-xs gap-2"
         >
-          {isFinalizing ? (
+          {isFinalizing || isAnalyzing ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
             <Check className="h-3.5 w-3.5" />
           )}
-          {isFinalizing ? 'Generando diagnóstico...' : 'Aceptar'}
+          {isFinalizing
+            ? 'Generando diagnóstico...'
+            : isAnalyzing
+              ? 'Preparando perfil...'
+              : 'Aceptar'}
         </Button>
       </div>
 

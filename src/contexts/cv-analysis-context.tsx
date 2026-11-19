@@ -25,9 +25,9 @@ interface CVAnalysisContextType {
 const CVAnalysisContext = createContext<CVAnalysisContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'devalign_cv_analysis_state';
-const MAX_POLLING_DURATION = 90000;
-const STALL_WARNING_MS = 30000;
-const PHASE1_DURATION_MS = 3000;
+const MAX_POLLING_DURATION = 60000;
+const STALL_WARNING_MS = 25000;
+const PHASE1_DURATION_MS = 1000;
 
 export function CVAnalysisProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
