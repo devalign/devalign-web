@@ -104,10 +104,10 @@ export default function ProfileDashboardView() {
 
   const isUpdating = searchParams.get('status') === 'updating';
   const isDiagnosed = Boolean(profile?.is_diagnosed);
-  
+
   // Use React Query's native refetchInterval for safe polling
   const { refetch: refetchProfile } = useUserProfile(isUpdating && !isDiagnosed ? 1500 : false);
-  
+
   const { data: cvData } = useUserCVs();
   const updateSkillsMutation = useUpdateUserSkills();
   const { startAnalysis, isAnalyzing, isAnalysisReady } = useCVAnalysis();
@@ -140,7 +140,7 @@ export default function ProfileDashboardView() {
       skillsOverride && skillsOverride.source === profile?.detected_skills
         ? skillsOverride.items
         : buildSkillItems(profile?.detected_skills),
-    [skillsOverride, profile?.detected_skills]
+    [skillsOverride, profile?.detected_skills],
   );
 
   const setSkills = useCallback(
@@ -154,7 +154,7 @@ export default function ProfileDashboardView() {
         return { source: profile?.detected_skills, items: next };
       });
     },
-    [profile?.detected_skills]
+    [profile?.detected_skills],
   );
 
   const cvs = useMemo(() => {
@@ -242,7 +242,9 @@ export default function ProfileDashboardView() {
           market_demand_percentage: null,
         },
       ]);
-      toast.success(`"${name}" agregada a tu lista. Haz clic en "Guardar competencias" para persistir.`);
+      toast.success(
+        `"${name}" agregada a tu lista. Haz clic en "Guardar competencias" para persistir.`,
+      );
     },
     [skills],
   );
@@ -321,9 +323,7 @@ export default function ProfileDashboardView() {
                   <div className="min-w-0 space-y-2">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-black text-foreground truncate">
-                          {fullName}
-                        </h2>
+                        <h2 className="text-lg font-black text-foreground truncate">{fullName}</h2>
                         <div className="group relative shrink-0">
                           <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
                           <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
@@ -367,7 +367,7 @@ export default function ProfileDashboardView() {
                                 'inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider transition-colors',
                                 lvl.active
                                   ? 'bg-info/20 text-info border border-info/40 font-extrabold shadow-2xs'
-                                  : 'bg-secondary/70 text-muted-foreground border border-border/50'
+                                  : 'bg-secondary/70 text-muted-foreground border border-border/50',
                               )}
                             >
                               {lvl.label}
@@ -411,8 +411,8 @@ export default function ProfileDashboardView() {
                       <div className="group relative">
                         <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
                         <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 rounded-md border border-border bg-card p-2 text-[10px] leading-relaxed text-muted-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 z-50">
-                          Competencias técnicas detectadas en tu CV. Haz clic para editar evidencias y
-                          puntuación ICT.
+                          Competencias técnicas detectadas en tu CV. Haz clic para editar evidencias
+                          y puntuación ICT.
                         </div>
                       </div>
                     </div>
@@ -427,7 +427,11 @@ export default function ProfileDashboardView() {
                       className="self-start sm:self-center px-2.5 py-1 text-xs font-bold border border-border/50 bg-secondary/80 text-muted-foreground shrink-0 flex items-center gap-1.5"
                     >
                       <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                      <span>{skills.length > 0 ? `${skills.length} skills (calculando ICT...)` : 'Analizando...'}</span>
+                      <span>
+                        {skills.length > 0
+                          ? `${skills.length} skills (calculando ICT...)`
+                          : 'Analizando...'}
+                      </span>
                     </Badge>
                   ) : (
                     <Badge
@@ -435,7 +439,8 @@ export default function ProfileDashboardView() {
                       className="self-start sm:self-center px-2.5 py-1 text-xs font-bold border border-border/50 bg-secondary/80 text-foreground shrink-0 tabular-nums flex items-center gap-1.5"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                      {skills.length} {skills.length === 1 ? 'skill detectada' : 'skills detectadas'}
+                      {skills.length}{' '}
+                      {skills.length === 1 ? 'skill detectada' : 'skills detectadas'}
                     </Badge>
                   )}
                 </div>
@@ -511,20 +516,18 @@ export default function ProfileDashboardView() {
                       Haz clic en cada competencia para ajustar su evidencia y puntuación ICT.
                     </span>
                   </div>
-                  {hasSkillChanges && (
-                    <Button
-                      onClick={handleSaveSkills}
-                      disabled={updateSkillsMutation.isPending}
-                      className="h-9 gap-2 text-xs font-bold"
-                    >
-                      {updateSkillsMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-4 w-4" />
-                      )}
-                      Guardar competencias
-                    </Button>
-                  )}
+                  <Button
+                    onClick={handleSaveSkills}
+                    disabled={updateSkillsMutation.isPending || !hasSkillChanges}
+                    className="h-9 gap-2 text-xs font-bold cursor-pointer"
+                  >
+                    {updateSkillsMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    Guardar competencias
+                  </Button>
                 </div>
               </CardContent>
             </Card>

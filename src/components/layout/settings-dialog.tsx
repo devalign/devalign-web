@@ -22,6 +22,7 @@ import {
   useResetAccount,
   useDeleteAccount,
 } from '@/hooks/use-user-profile';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { ResetAccountDialog } from './reset-account-dialog';
 import { DeleteAccountDialog } from './delete-account-dialog';
 import { ChangePasswordDialog } from './change-password-dialog';
@@ -32,26 +33,58 @@ interface SettingsDialogProps {
   onLogoutClick: () => void;
 }
 
+function getCommittedTheme(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'light';
+  try {
+    if (localStorage.theme === 'dark') return 'dark';
+    if (localStorage.theme === 'light') return 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } catch {
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  }
+}
+
+function applyThemeToDocument(targetTheme: 'light' | 'dark') {
+  const root = document.documentElement;
+  if (targetTheme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+}
+
 export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDialogProps) {
-  const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
+  const [committedTheme, setCommittedTheme] = React.useState<'light' | 'dark'>('light');
+  const [draftTheme, setDraftTheme] = React.useState<'light' | 'dark' | null>(null);
+  const theme = draftTheme ?? committedTheme;
   const [isResetConfirmOpen, setIsResetConfirmOpen] = React.useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = React.useState(false);
 
+  const { data: user } = useCurrentUser();
   const { data: profile } = useUserProfile();
   const { mutateAsync: updateProfile, isPending: isUpdatingProfile } = useUpdateUserProfile();
   const { mutate: reset, isPending: isResetting } = useResetAccount();
   const { mutate: deleteAcc, isPending: isDeleting } = useDeleteAccount();
 
+  const initialFullName = (profile?.full_name || user?.full_name || '').trim();
   const [draftFullName, setDraftFullName] = React.useState<string | null>(null);
-  const fullName = draftFullName ?? profile?.full_name ?? '';
+  const fullName = draftFullName ?? initialFullName;
+  const trimmedFullName = fullName.trim();
+  const isNameEmpty = trimmedFullName.length === 0;
+  const showNameRequiredError = draftFullName !== null && isNameEmpty;
+  const hasNameChange = trimmedFullName !== initialFullName;
+  const hasThemeChange = theme !== committedTheme;
+  const hasChanges = hasNameChange || hasThemeChange;
+  const isSaveDisabled =
+    isUpdatingProfile || !hasChanges || showNameRequiredError || (isNameEmpty && !hasThemeChange);
 
   const handleResetConfirm = () => {
     reset(undefined, {
       onSuccess: () => {
         toast.success('Cuenta restablecida correctamente.');
         setIsResetConfirmOpen(false);
-        onOpenChange(false);
+        handleDialogClose(false);
       },
       onError: (error) => {
         console.error('Error resetting account:', error);
@@ -66,7 +99,7 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
       onSuccess: () => {
         toast.success('Cuenta eliminada permanentemente.');
         setIsDeleteConfirmOpen(false);
-        onOpenChange(false);
+        handleDialogClose(false);
         onLogoutClick();
       },
       onError: (error) => {
@@ -78,50 +111,50 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
   };
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isDark = document.documentElement.classList.contains('dark');
+    if (typeof window !== 'undefined' && open) {
+      const savedTheme = getCommittedTheme();
       const timer = setTimeout(() => {
-        setTheme(isDark ? 'dark' : 'light');
+        setCommittedTheme(savedTheme);
       }, 0);
       return () => clearTimeout(timer);
     }
   }, [open]);
 
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
-    const root = document.documentElement;
-    if (newTheme === 'dark') {
-      root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-    setTheme(newTheme);
+    // Live preview only; localStorage persistence happens on Guardar Ajustes
+    applyThemeToDocument(newTheme);
+    setDraftTheme(newTheme);
   };
 
   const handleDialogClose = (newOpen: boolean) => {
     if (!newOpen) {
-      // Discard uncommitted edits upon closing modal (CP022)
+      // Discard uncommitted edits and revert preview theme upon closing modal (CP022)
       setDraftFullName(null);
+      setDraftTheme(null);
+      const savedTheme = getCommittedTheme();
+      applyThemeToDocument(savedTheme);
+      setCommittedTheme(savedTheme);
     }
     onOpenChange(newOpen);
   };
 
   const handleSaveSettings = async () => {
-    // Validate empty full name (CP18)
-    if (!fullName.trim()) {
-      toast.error('El nombre completo es requerido.');
+    if (!hasChanges) return;
+
+    // Validate empty full name when edited (CP18)
+    if (hasNameChange && isNameEmpty) {
       return;
     }
 
     try {
-      const currentTrimmed = (profile?.full_name || '').trim();
-      const nextTrimmed = fullName.trim();
-
-      if (nextTrimmed !== currentTrimmed) {
-        await updateProfile({ full_name: nextTrimmed });
+      if (hasNameChange) {
+        await updateProfile({ full_name: trimmedFullName });
       }
 
+      applyThemeToDocument(theme);
+      localStorage.setItem('theme', theme);
+      setCommittedTheme(theme);
+      setDraftTheme(null);
       setDraftFullName(null);
       toast.success('Ajustes guardados correctamente.');
       onOpenChange(false);
@@ -168,13 +201,24 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      handleSaveSettings();
+                      if (!isSaveDisabled) {
+                        handleSaveSettings();
+                      }
                     }
                   }}
                   placeholder="Tu nombre completo"
                   disabled={isUpdatingProfile}
-                  className="h-9 text-xs bg-card border-border"
+                  aria-invalid={showNameRequiredError}
+                  className={cn(
+                    'h-9 text-xs bg-card border-border',
+                    showNameRequiredError && 'border-destructive focus-visible:ring-destructive',
+                  )}
                 />
+                {showNameRequiredError && (
+                  <p className="text-[11px] font-medium text-destructive">
+                    El nombre completo es requerido.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -291,7 +335,7 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
                   variant="destructive"
                   size="sm"
                   onClick={() => {
-                    onOpenChange(false);
+                    handleDialogClose(false);
                     onLogoutClick();
                   }}
                   className="text-[10px] h-7 shrink-0 cursor-pointer"
@@ -316,7 +360,7 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
               variant="default"
               size="sm"
               onClick={handleSaveSettings}
-              disabled={isUpdatingProfile}
+              disabled={isSaveDisabled}
               className="cursor-pointer text-xs gap-1.5"
             >
               {isUpdatingProfile ? (

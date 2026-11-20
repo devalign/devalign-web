@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Plus, Loader2, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { searchSkills } from '@/lib/api/user-service';
 import type { SkillSearchResult } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
@@ -85,13 +84,25 @@ export function SkillAutocompleteInput({
     [onAddSkill],
   );
 
+  const trimmedQuery = query.trim();
+  const hasExactCatalogMatch = suggestions.some(
+    (item) => item.name.toLowerCase() === trimmedQuery.toLowerCase(),
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
       const item = suggestions[selectedIndex];
       handleSelectSkill(item.name, item.skill_type, false);
-    } else if (query.trim()) {
-      handleSelectSkill(query.trim(), 'tech', true);
+    } else if (trimmedQuery) {
+      const exactMatch = suggestions.find(
+        (item) => item.name.toLowerCase() === trimmedQuery.toLowerCase(),
+      );
+      if (exactMatch) {
+        handleSelectSkill(exactMatch.name, exactMatch.skill_type, false);
+      } else {
+        handleSelectSkill(trimmedQuery, 'tech', true);
+      }
     }
   };
 
@@ -152,19 +163,10 @@ export function SkillAutocompleteInput({
             )}
           </div>
         </div>
-
-        <Button
-          type="submit"
-          disabled={disabled || !query.trim()}
-          className="h-10 text-xs font-bold shrink-0 gap-1.5"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Agregar</span>
-        </Button>
       </form>
 
       {/* Autocomplete Dropdown */}
-      {isOpen && query.trim().length > 0 && (
+      {isOpen && trimmedQuery.length > 0 && (
         <div className="absolute left-0 right-0 top-full mt-1.5 z-50 rounded-xl border border-border bg-card shadow-2xl overflow-hidden max-h-72 overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-150">
           {isLoading && suggestions.length === 0 ? (
             <div className="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
@@ -193,7 +195,9 @@ export function SkillAutocompleteInput({
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={cn(
                       'w-full text-left px-3 py-2 flex items-center justify-between text-xs transition-colors cursor-pointer',
-                      isSelected ? 'bg-secondary text-foreground' : 'hover:bg-secondary/60 text-foreground',
+                      isSelected
+                        ? 'bg-secondary text-foreground'
+                        : 'hover:bg-secondary/60 text-foreground',
                     )}
                   >
                     <div className="flex items-center gap-2 min-w-0">
@@ -207,17 +211,29 @@ export function SkillAutocompleteInput({
                   </button>
                 );
               })}
+              {!hasExactCatalogMatch && (
+                <div className="border-t border-border/40 px-3 py-2 bg-secondary/20">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSkill(trimmedQuery, 'tech', true)}
+                    className="w-full text-left inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer"
+                  >
+                    <Plus className="h-3.5 w-3.5 shrink-0" />
+                    <span>Agregar &quot;{trimmedQuery}&quot; como competencia personalizada</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : hasError ? (
             <div className="p-3 text-center text-xs text-destructive">
               <p>No se pudo conectar con el catálogo de habilidades.</p>
               <button
                 type="button"
-                onClick={() => handleSelectSkill(query.trim(), 'tech', true)}
-                className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                onClick={() => handleSelectSkill(trimmedQuery, 'tech', true)}
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Agregar &quot;{query.trim()}&quot; como competencia personalizada
+                Agregar &quot;{trimmedQuery}&quot; como competencia personalizada
               </button>
             </div>
           ) : (
@@ -225,11 +241,11 @@ export function SkillAutocompleteInput({
               <p>No se encontró en el catálogo de Lightcast.</p>
               <button
                 type="button"
-                onClick={() => handleSelectSkill(query.trim(), 'tech', true)}
-                className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                onClick={() => handleSelectSkill(trimmedQuery, 'tech', true)}
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Agregar &quot;{query.trim()}&quot; como competencia personalizada
+                Agregar &quot;{trimmedQuery}&quot; como competencia personalizada
               </button>
             </div>
           )}
