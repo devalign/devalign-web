@@ -199,7 +199,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
               type="submit"
               variant="default"
               size="sm"
-              disabled={isLoading}
+              disabled={isLoading || !password || !confirmPassword}
               className="cursor-pointer text-xs gap-1.5"
             >
               {isLoading ? (

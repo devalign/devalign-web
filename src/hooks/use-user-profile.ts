@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getUserProfile, updateUserProfile, updateUserProfileSkills, resetAccount, deleteAccount } from '@/lib/api';
+import {
+  getUserProfile,
+  updateUserProfile,
+  updateUserProfileSkills,
+  resetAccount,
+  deleteAccount,
+} from '@/lib/api';
 import { UserProfileData, SkillItem } from '@/lib/api/types';
 
 export function useUserProfile(pollingInterval?: number | false) {
@@ -33,6 +39,8 @@ export function useUpdateUserSkills() {
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(['userProfile'], updatedProfile);
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['knowledge-graph'] });
+      queryClient.invalidateQueries({ queryKey: ['clusterDiagnostic'] });
     },
   });
 }
@@ -67,4 +75,3 @@ export function useDeleteAccount() {
     },
   });
 }
-

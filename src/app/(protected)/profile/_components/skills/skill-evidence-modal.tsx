@@ -44,10 +44,7 @@ export function computeIctScore(
   else if (yearsExp === 1) expPoints = 2.5;
 
   const projectsPoints = personalProjects ? 3.0 : 0.0;
-  const trainingPoints = Math.min(
-    2.0,
-    (selfTaught ? 1.0 : 0.0) + (hasCertification ? 2.0 : 0.0),
-  );
+  const trainingPoints = Math.min(2.0, (selfTaught ? 1.0 : 0.0) + (hasCertification ? 2.0 : 0.0));
 
   return Number(Math.min(10.0, expPoints + projectsPoints + trainingPoints).toFixed(1));
 }
@@ -75,6 +72,12 @@ export default function SkillEvidenceModal({
   }, [skill, isOpen]);
 
   if (!skill) return null;
+
+  const hasChanges =
+    selfTaught !== (skill.self_taught ?? false) ||
+    personalProjects !== (skill.personal_projects ?? false) ||
+    yearsExperience !== (skill.years_of_experience ?? 0) ||
+    hasCertification !== (skill.has_certification ?? false);
 
   // Calculate live ICT Score
   const computedScore = computeIctScore(
@@ -118,7 +121,8 @@ export default function SkillEvidenceModal({
             </span>
           </div>
           <DialogDescription className="text-xs text-muted-foreground pt-0.5">
-            Especifica cómo adquiriste y validaste tu conocimiento en esta habilidad. El Índice de Competencia Técnica (ICT) se calcula automáticamente.
+            Especifica cómo adquiriste y validaste tu conocimiento en esta habilidad. El Índice de
+            Competencia Técnica (ICT) se calcula automáticamente.
           </DialogDescription>
         </DialogHeader>
 
@@ -162,7 +166,10 @@ export default function SkillEvidenceModal({
             </div>
 
             <div className="flex items-center gap-3 pl-11">
-              <Label htmlFor="years-exp" className="text-xs text-muted-foreground font-semibold shrink-0">
+              <Label
+                htmlFor="years-exp"
+                className="text-xs text-muted-foreground font-semibold shrink-0"
+              >
                 Años de experiencia:
               </Label>
               <Input
@@ -184,7 +191,10 @@ export default function SkillEvidenceModal({
                 <Code2 className="h-4 w-4" />
               </div>
               <div className="space-y-0.5">
-                <Label htmlFor="personal-projects" className="text-xs font-bold text-foreground cursor-pointer">
+                <Label
+                  htmlFor="personal-projects"
+                  className="text-xs font-bold text-foreground cursor-pointer"
+                >
                   Código y Proyectos
                 </Label>
                 <p className="text-[10px] text-muted-foreground">
@@ -203,12 +213,8 @@ export default function SkillEvidenceModal({
           {/* Formación y Certificaciones (Máx 2.0 pts) */}
           <div className="rounded-xl border border-border p-3 space-y-2.5 hover:bg-muted/30 transition-colors">
             <div className="flex items-center justify-between pb-1 border-b border-border/40">
-              <span className="text-xs font-bold text-foreground">
-                Formación y Certificaciones
-              </span>
-              <span className="text-[10px] font-medium text-muted-foreground">
-                Máx 2.0 pts
-              </span>
+              <span className="text-xs font-bold text-foreground">Formación y Certificaciones</span>
+              <span className="text-[10px] font-medium text-muted-foreground">Máx 2.0 pts</span>
             </div>
 
             {/* Cursos especializados */}
@@ -218,7 +224,10 @@ export default function SkillEvidenceModal({
                   <GraduationCap className="h-3.5 w-3.5" />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="courses-training" className="text-xs font-semibold text-foreground cursor-pointer">
+                  <Label
+                    htmlFor="courses-training"
+                    className="text-xs font-semibold text-foreground cursor-pointer"
+                  >
                     Cursos y Formación Especializada
                   </Label>
                   <p className="text-[10px] text-muted-foreground">
@@ -241,7 +250,10 @@ export default function SkillEvidenceModal({
                   <Award className="h-3.5 w-3.5" />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="certifications" className="text-xs font-semibold text-foreground cursor-pointer">
+                  <Label
+                    htmlFor="certifications"
+                    className="text-xs font-semibold text-foreground cursor-pointer"
+                  >
                     Certificación Oficial
                   </Label>
                   <p className="text-[10px] text-muted-foreground">
@@ -263,7 +275,11 @@ export default function SkillEvidenceModal({
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="h-9 text-xs">
             Cancelar
           </Button>
-          <Button onClick={handleSave} className="h-9 text-xs font-bold gap-2">
+          <Button
+            onClick={handleSave}
+            disabled={!hasChanges}
+            className="h-9 text-xs font-bold gap-2 cursor-pointer"
+          >
             <Check className="h-4 w-4" />
             Guardar Evidencias
           </Button>

@@ -35,6 +35,15 @@ export default function ProfileEditModal({ profile, isOpen, onOpenChange }: Prof
 
   const updateProfileMutation = useUpdateUserProfile();
 
+  const initialYears = profile.years_experience !== null ? String(profile.years_experience) : '';
+  const hasChanges =
+    fullName.trim() !== (profile.full_name || '').trim() ||
+    currentJobRole.trim() !== (profile.current_job_role || '').trim() ||
+    yearsExperience.trim() !== initialYears.trim() ||
+    preferredModality.trim() !== (profile.preferred_modality || '').trim() ||
+    location.trim() !== (profile.location || '').trim() ||
+    availability.trim() !== (profile.availability || '').trim();
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) {
@@ -199,7 +208,7 @@ export default function ProfileEditModal({ profile, isOpen, onOpenChange }: Prof
             <Button
               type="submit"
               size="sm"
-              disabled={updateProfileMutation.isPending}
+              disabled={updateProfileMutation.isPending || !hasChanges}
               className="text-xs font-semibold cursor-pointer"
             >
               {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
