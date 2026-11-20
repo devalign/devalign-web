@@ -18,16 +18,11 @@ export function DiagnosticLoadingBanner({
   onDismiss,
   onViewResults,
 }: DiagnosticLoadingBannerProps) {
-  const [progress, setProgress] = useState(15);
+  const [progress, setProgress] = useState(20);
 
   useEffect(() => {
-    if (!isUpdating) return;
-    if (isDiagnosed) {
-      setProgress(100);
-      return;
-    }
+    if (!isUpdating || isDiagnosed) return;
 
-    setProgress(20);
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 92) return prev;

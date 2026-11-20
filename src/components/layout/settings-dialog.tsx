@@ -43,14 +43,8 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
   const { mutate: reset, isPending: isResetting } = useResetAccount();
   const { mutate: deleteAcc, isPending: isDeleting } = useDeleteAccount();
 
-  const [fullName, setFullName] = React.useState('');
-
-  // Synchronize fullName with existing profile when opening dialog or when profile updates
-  React.useEffect(() => {
-    if (open && profile) {
-      setFullName(profile.full_name || '');
-    }
-  }, [open, profile]);
+  const [draftFullName, setDraftFullName] = React.useState<string | null>(null);
+  const fullName = draftFullName ?? profile?.full_name ?? '';
 
   const handleResetConfirm = () => {
     reset(undefined, {
@@ -108,7 +102,7 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
   const handleDialogClose = (newOpen: boolean) => {
     if (!newOpen) {
       // Discard uncommitted edits upon closing modal (CP022)
-      setFullName(profile?.full_name || '');
+      setDraftFullName(null);
     }
     onOpenChange(newOpen);
   };
@@ -128,6 +122,7 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
         await updateProfile({ full_name: nextTrimmed });
       }
 
+      setDraftFullName(null);
       toast.success('Ajustes guardados correctamente.');
       onOpenChange(false);
     } catch (err) {
@@ -169,7 +164,7 @@ export function SettingsDialog({ open, onOpenChange, onLogoutClick }: SettingsDi
                 <Input
                   id="settings-fullname"
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => setDraftFullName(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();

@@ -114,7 +114,10 @@ export default function ProfileDashboardView() {
 
   const queryClient = useQueryClient();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [skills, setSkills] = useState<SkillItem[]>([]);
+  const [skillsOverride, setSkillsOverride] = useState<{
+    source: NonNullable<typeof profile>['detected_skills'] | undefined;
+    items: SkillItem[];
+  } | null>(null);
   const [selectedSkillForEvidence, setSelectedSkillForEvidence] = useState<SkillItem | null>(null);
   const [isEvidenceModalOpen, setIsEvidenceModalOpen] = useState(false);
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
@@ -132,9 +135,27 @@ export default function ProfileDashboardView() {
     }
   }, [isBannerDismissed, router]);
 
-  useEffect(() => {
-    setSkills(buildSkillItems(profile?.detected_skills));
-  }, [profile?.detected_skills]);
+  const skills = useMemo(
+    () =>
+      skillsOverride && skillsOverride.source === profile?.detected_skills
+        ? skillsOverride.items
+        : buildSkillItems(profile?.detected_skills),
+    [skillsOverride, profile?.detected_skills]
+  );
+
+  const setSkills = useCallback(
+    (updater: React.SetStateAction<SkillItem[]>) => {
+      setSkillsOverride((prev) => {
+        const base =
+          prev && prev.source === profile?.detected_skills
+            ? prev.items
+            : buildSkillItems(profile?.detected_skills);
+        const next = typeof updater === 'function' ? updater(base) : updater;
+        return { source: profile?.detected_skills, items: next };
+      });
+    },
+    [profile?.detected_skills]
+  );
 
   const cvs = useMemo(() => {
     return [...(cvData?.cvs || [])].sort((a, b) => {

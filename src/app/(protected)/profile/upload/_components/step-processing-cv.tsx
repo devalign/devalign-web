@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useMemo } from 'react';
-import { Loader2, FileText, Brain, X } from 'lucide-react';
+import { Loader2, FileText, Cpu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCVAnalysis } from '@/contexts/cv-analysis-context';
 
@@ -56,10 +56,10 @@ export function StepProcessingCV({ cvId, onSkillsDetected, onCancel }: StepProce
   const progressPercentage = useMemo(() => {
     if (isSkillsDetected || isAnalysisReady) return 100;
     if (analysisPhase === 'phase1') {
-      return Math.min(45, Math.round((elapsedSeconds / 3) * 45));
+      return Math.min(45, Math.round((elapsedSeconds / 1) * 45));
     }
-    const p2Elapsed = Math.max(0, elapsedSeconds - 3);
-    const p2Progress = 45 + Math.min(47, Math.round((1 - Math.exp(-p2Elapsed / 4)) * 50));
+    const p2Elapsed = Math.max(0, elapsedSeconds - 1);
+    const p2Progress = 45 + Math.min(47, Math.round((1 - Math.exp(-p2Elapsed / 3)) * 50));
     return Math.min(95, Math.max(45, p2Progress));
   }, [analysisPhase, elapsedSeconds, isSkillsDetected, isAnalysisReady]);
 
@@ -106,7 +106,7 @@ export function StepProcessingCV({ cvId, onSkillsDetected, onCancel }: StepProce
               }`}
             >
               {isSkillsDetected || isAnalysisReady ? (
-                <Brain className="h-4 w-4" />
+                <Cpu className="h-4 w-4" />
               ) : analysisPhase === 'phase2' ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -115,10 +115,10 @@ export function StepProcessingCV({ cvId, onSkillsDetected, onCancel }: StepProce
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-foreground">
-                Procesando con IA
+                Escaneando competencias
               </p>
               <p className="text-xs text-muted-foreground">
-                Detectando tus competencias técnicas y blandas
+                Identificando habilidades técnicas en el catálogo estándar
               </p>
             </div>
           </div>
@@ -131,7 +131,7 @@ export function StepProcessingCV({ cvId, onSkillsDetected, onCancel }: StepProce
                 ? '¡Información extraída con éxito!'
                 : analysisPhase === 'phase1'
                   ? 'Extrayendo texto y metadatos...'
-                  : 'Analizando competencias con IA...'}
+                  : 'Escaneando catálogo de competencias...'}
             </span>
             <span className="text-muted-foreground font-mono text-[11px] font-semibold">
               {progressPercentage}%
